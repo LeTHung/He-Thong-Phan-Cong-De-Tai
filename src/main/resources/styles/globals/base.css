@@ -1,0 +1,96 @@
+.root {
+  -fx-font-family: "Segoe UI", "Inter", "Arial";
+  -fx-background-color: -ut-bg;
+  -fx-text-fill: -ut-text;
+  -fx-font-size: 14px;
+}
+
+/* Nền trang chính */
+.app-root,
+.page-root {
+  -fx-background-color: -ut-bg;
+}
+
+/* ScrollPane trong JavaFX hay tự có nền xám, reset lại cho sạch */
+.scroll-pane,
+.scroll-pane > .viewport {
+  -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+  -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+  -fx-background-color: #cbd5e1;
+  -fx-background-radius: 999;
+}
+
+/* TextField / PasswordField */
+.text-field,
+.password-field {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+  -fx-padding: 10 12 10 12;
+  -fx-text-fill: -ut-text;
+  -fx-prompt-text-fill: -ut-text-soft;
+}
+
+.text-field:focused,
+.password-field:focused {
+  -fx-border-color: -ut-primary;
+  -fx-background-color: -ut-surface;
+  -fx-effect: dropshadow(gaussian, rgba(11, 59, 145, 0.12), 10, 0.25, 0, 0);
+}
+
+/* ComboBox */
+.combo-box-base {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+  -fx-padding: 2 6 2 6;
+}
+
+.combo-box-base:focused {
+  -fx-border-color: -ut-primary;
+}
+
+/* Separator */
+.separator .line {
+  -fx-border-color: -ut-border;
+  -fx-border-width: 1 0 0 0;
+}
+
+/* TableView */
+.table-view {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 14;
+  -fx-background-radius: 14;
+  -fx-effect: -ut-shadow-soft;
+}
+
+.table-view .column-header-background {
+  -fx-background-color: -ut-surface-muted;
+  -fx-background-radius: 14 14 0 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent transparent -ut-border transparent;
+}
+
+.table-row-cell {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: transparent transparent #f1f5f9 transparent;
+}
+
+.table-row-cell:selected {
+  -fx-background-color: -ut-primary-light;
+  -fx-text-background-color: -ut-primary-dark;
+}

@@ -1,0 +1,127 @@
+.student-topic-page {
+  -fx-background-color: -ut-bg;
+}
+
+.topic-hero {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 18;
+  -fx-background-radius: 18;
+  -fx-padding: 28;
+  -fx-effect: -ut-shadow-soft;
+}
+
+.topic-hero-title {
+  -fx-font-size: 30px;
+  -fx-font-weight: 900;
+  -fx-text-fill: -ut-text-strong;
+}
+
+.topic-hero-desc {
+  -fx-font-size: 14px;
+  -fx-text-fill: -ut-text;
+  -fx-wrap-text: true;
+}
+
+.hero-illustration {
+  -fx-background-color: #e5eaf4;
+  -fx-background-radius: 22;
+  -fx-min-width: 120;
+  -fx-min-height: 120;
+  -fx-pref-width: 120;
+  -fx-pref-height: 120;
+  -fx-alignment: CENTER;
+}
+
+.filter-bar {
+  -fx-spacing: 12;
+  -fx-alignment: CENTER_LEFT;
+}
+
+.topic-list {
+  -fx-hgap: 18;
+  -fx-vgap: 18;
+}
+
+.topic-card {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border-strong;
+  -fx-border-radius: 14;
+  -fx-background-radius: 14;
+  -fx-padding: 20;
+  -fx-effect: -ut-shadow-soft;
+  -fx-pref-width: 330;
+  -fx-min-height: 210;
+}
+
+.topic-card:hover {
+  -fx-border-color: #b7c5e8;
+  -fx-effect: -ut-shadow-card;
+}
+
+.topic-card-header {
+  -fx-alignment: CENTER_LEFT;
+  -fx-spacing: 8;
+}
+
+.topic-id {
+  -fx-text-fill: -ut-text-muted;
+  -fx-font-size: 12px;
+  -fx-font-weight: 700;
+}
+
+.topic-title {
+  -fx-font-size: 17px;
+  -fx-font-weight: 800;
+  -fx-text-fill: -ut-text;
+  -fx-wrap-text: true;
+}
+
+.topic-meta {
+  -fx-spacing: 8;
+  -fx-alignment: CENTER_LEFT;
+}
+
+.topic-meta-text {
+  -fx-font-size: 13px;
+  -fx-text-fill: -ut-text-muted;
+}
+
+.topic-actions {
+  -fx-spacing: 12;
+  -fx-padding: 12 0 0 0;
+}
+
+.student-info-card {
+  -fx-background-color: #f7f9ff;
+  -fx-border-color: -ut-border-strong;
+  -fx-border-radius: 14;
+  -fx-background-radius: 14;
+  -fx-padding: 20;
+}
+
+.selected-topic-card {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 16;
+  -fx-background-radius: 16;
+  -fx-padding: 20;
+}
+
+.selected-topic-title {
+  -fx-font-size: 18px;
+  -fx-font-weight: 800;
+  -fx-text-fill: -ut-text;
+}
+
+.current-course-label {
+  -fx-font-size: 12px;
+  -fx-text-fill: -ut-text-muted;
+  -fx-font-weight: 700;
+}
+
+.current-course-value {
+  -fx-font-size: 16px;
+  -fx-text-fill: -ut-primary-dark;
+  -fx-font-weight: 800;
+}

@@ -1,0 +1,12 @@
+target/
+.mvn/apache-maven-*/
+.mvn/wrapper/*.zip
+.idea/
+.vscode/
+*.iml
+*.log
+*.class
+*.jar
+*.war
+*.ear
+db.properties.local

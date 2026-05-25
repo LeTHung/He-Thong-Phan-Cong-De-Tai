@@ -1,0 +1,42 @@
+.login-root {
+  -fx-background-color: linear-gradient(to bottom right, #f6f8fd, #eaf0ff);
+}
+
+.login-card {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 20;
+  -fx-background-radius: 20;
+  -fx-padding: 34;
+  -fx-effect: -ut-shadow-card;
+  -fx-spacing: 18;
+  -fx-pref-width: 420;
+}
+
+.login-title {
+  -fx-font-size: 28px;
+  -fx-font-weight: 900;
+  -fx-text-fill: -ut-text-strong;
+}
+
+.login-subtitle {
+  -fx-font-size: 14px;
+  -fx-text-fill: -ut-text-muted;
+}
+
+.login-logo {
+  -fx-background-color: -ut-primary;
+  -fx-background-radius: 14;
+  -fx-min-width: 52;
+  -fx-min-height: 52;
+  -fx-pref-width: 52;
+  -fx-pref-height: 52;
+  -fx-alignment: CENTER;
+}
+
+.login-error {
+  -fx-background-color: -ut-danger-bg;
+  -fx-text-fill: -ut-danger;
+  -fx-background-radius: 10;
+  -fx-padding: 10 12 10 12;
+}

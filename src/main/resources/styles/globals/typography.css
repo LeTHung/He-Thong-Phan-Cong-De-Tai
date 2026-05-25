@@ -1,0 +1,51 @@
+.h1 {
+  -fx-font-size: 30px;
+  -fx-font-weight: 800;
+  -fx-text-fill: -ut-text-strong;
+}
+
+.h2 {
+  -fx-font-size: 24px;
+  -fx-font-weight: 800;
+  -fx-text-fill: -ut-text-strong;
+}
+
+.h3 {
+  -fx-font-size: 18px;
+  -fx-font-weight: 700;
+  -fx-text-fill: -ut-text;
+}
+
+.title {
+  -fx-font-size: 16px;
+  -fx-font-weight: 700;
+  -fx-text-fill: -ut-text;
+}
+
+.body {
+  -fx-font-size: 14px;
+  -fx-text-fill: -ut-text;
+}
+
+.body-muted {
+  -fx-font-size: 14px;
+  -fx-text-fill: -ut-text-muted;
+}
+
+.caption {
+  -fx-font-size: 12px;
+  -fx-text-fill: -ut-text-muted;
+}
+
+.caption-strong {
+  -fx-font-size: 12px;
+  -fx-font-weight: 700;
+  -fx-text-fill: -ut-text;
+}
+
+.section-label {
+  -fx-font-size: 12px;
+  -fx-font-weight: 800;
+  -fx-text-fill: -ut-text-muted;
+  -fx-letter-spacing: 0.5px;
+}

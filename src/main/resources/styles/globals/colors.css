@@ -1,0 +1,60 @@
+.root {
+  /* Brand */
+  -ut-primary: #0b3b91;
+  -ut-primary-dark: #072a66;
+  -ut-primary-light: #eaf0ff;
+  -ut-primary-soft: #dde8ff;
+
+  /* Background */
+  -ut-bg: #f6f8fd;
+  -ut-bg-soft: #fafbff;
+  -ut-surface: #ffffff;
+  -ut-surface-muted: #f1f4fa;
+
+  /* Text */
+  -ut-text: #111827;
+  -ut-text-strong: #070b2d;
+  -ut-text-muted: #6b7280;
+  -ut-text-soft: #9ca3af;
+  -ut-text-invert: #ffffff;
+
+  /* Border */
+  -ut-border: #e5e7f0;
+  -ut-border-strong: #cbd5e1;
+
+  /* Status */
+  -ut-success: #16a34a;
+  -ut-success-bg: #dcfce7;
+  -ut-success-border: #bbf7d0;
+
+  -ut-danger: #dc2626;
+  -ut-danger-bg: #fee2e2;
+  -ut-danger-border: #fecaca;
+
+  -ut-warning: #d97706;
+  -ut-warning-bg: #fef3c7;
+  -ut-warning-border: #fde68a;
+
+  -ut-info: #2563eb;
+  -ut-info-bg: #dbeafe;
+
+  /* Radius */
+  -ut-radius-xs: 6;
+  -ut-radius-sm: 8;
+  -ut-radius-md: 12;
+  -ut-radius-lg: 16;
+  -ut-radius-xl: 20;
+  -ut-radius-full: 999;
+
+  /* Shadow */
+  -ut-shadow-card: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.12, 0, 4);
+  -ut-shadow-soft: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 12, 0.1, 0, 2);
+  -ut-shadow-button: dropshadow(
+    gaussian,
+    rgba(11, 59, 145, 0.22),
+    12,
+    0.25,
+    0,
+    3
+  );
+}
