@@ -1,47 +1,56 @@
-# DoAnCNPM
+# Hệ Thống Phân Công Đề Tài
 
-Project desktop app JavaFX được dựng theo cấu trúc MVC, có sẵn cấu hình kết nối Microsoft SQL Server và Maven Wrapper để chạy project mà không cần cài Maven global.
+Ứng dụng desktop JavaFX phục vụ đồ án Công nghệ phần mềm. Project được tổ chức theo hướng MVC, kết nối Microsoft SQL Server bằng JDBC và quản lý thư viện bằng Maven Wrapper.
 
-## Công nghệ sử dụng
+## Công Nghệ
 
 - Java 25
 - JavaFX 25.0.3
-- Maven 3.9.16 thông qua `mvnw.cmd`
+- Maven 3.9.16 qua `mvnw.cmd`
 - Microsoft SQL Server
-- JDBC Driver: `mssql-jdbc`
-- JUnit 5 cho kiểm thử
+- Microsoft JDBC Driver for SQL Server
+- JUnit 5
 
-## Cấu trúc thư mục
+## Cấu Trúc Project
 
 ```text
 src/main/java/com/ptit/doancnpm
-  app/            Class khoi dong ung dung JavaFX
-  controller/     Controller xử lý giao diện JavaFX
-  dao/            Lớp truy xuất dữ liệu từ database
-  model/          Các class model/entity
-  service/        Xử lý nghiệp vụ
-  util/           Tiện ích dùng chung, cấu hình DB
+  app/                 Class khởi động ứng dụng
+  controller/          Controller cho màn hình JavaFX
+  model/
+    dao/               Lớp truy xuất dữ liệu
+    entity/            Entity/model nghiệp vụ
+  service/             Xử lý nghiệp vụ
+  util/                Cấu hình và kết nối database
 
 src/main/resources
-  config/         Thông tin cấu hình ứng dụng, database
-  views/          File giao diện FXML
-  styles/         File style JavaFX
+  config/              File cấu hình ứng dụng
+  views/               File giao diện FXML
+  styles/
+    globals/           CSS dùng chung
+    pages/             CSS riêng từng màn hình
 
 sql/
-  schema.sql      Script tạo database và bảng mẫu
+  schema.sql           Script tạo database, bảng và dữ liệu mẫu
 ```
 
-## Cấu hình database
+## Cấu Hình Database
 
-Mở file `src/main/resources/config/db.properties` và sửa lại thông tin SQL Server trên máy:
+File cấu hình nằm tại:
+
+```text
+src/main/resources/config/db.properties
+```
+
+Nội dung mẫu:
 
 ```properties
-db.url=jdbc:sqlserver://localhost:1433;databaseName=DoAnCNPM;encrypt=true;trustServerCertificate=true
+db.url=jdbc:sqlserver://localhost:1433;databaseName=phan_cong_de_tai_db;encrypt=true;trustServerCertificate=true
 db.username=sa
-db.password=your_password
+db.password=123456
 ```
 
-Nếu muốn dùng biến môi trường thay cho file cấu hình, có thể đặt:
+Có thể để trống username/password trong file và truyền bằng biến môi trường:
 
 ```text
 DB_URL
@@ -49,52 +58,60 @@ DB_USERNAME
 DB_PASSWORD
 ```
 
-## Tạo database
+## Tạo Database
 
-Chạy script trong file:
+Chạy script:
 
 ```text
 sql/schema.sql
 ```
 
-Script này sẽ tạo database `phan_cong_de_tai_db`, các bảng nghiệp vụ của đề tài, và thêm dữ liệu mẫu.
+Script sẽ tạo database `phan_cong_de_tai_db`, các bảng nghiệp vụ và dữ liệu mẫu cho hệ thống phân công đề tài.
 
-## Chạy project
+Nếu dùng `sqlcmd`:
 
-Máy không cần cài Maven riêng. Dùng Maven Wrapper có sẵn:
+```powershell
+sqlcmd -S localhost -E -i sql\schema.sql
+```
+
+## Chạy Ứng Dụng
+
+Dùng Maven Wrapper có sẵn, không cần cài Maven global:
 
 ```powershell
 .\mvnw.cmd javafx:run
 ```
 
-Lần chạy đầu tiên Maven sẽ tự tải các thư viện cần thiết như JavaFX, JDBC Driver SQL Server và JUnit.
-
-Nếu chạy bằng nút Run của IDE, hãy chọn main class:
+Nếu chạy bằng nút Run của IDE, chọn main class:
 
 ```text
 com.ptit.doancnpm.app.Launcher
 ```
 
-Không nên chạy trực tiếp `com.ptit.doancnpm.MainApp` bằng lệnh `java` thủ công vì JavaFX cần được IDE/Maven thêm đúng runtime/module path.
+Không chạy trực tiếp `MainApp` bằng lệnh `java` thủ công, vì JavaFX cần được Maven hoặc IDE thêm đúng runtime/module path.
 
-## Kiểm tra compile/test
+## Kiểm Tra Build
 
 ```powershell
 .\mvnw.cmd clean test
 ```
 
-## Lưu ý về JDK
+## Lưu Ý JDK
 
-Project đang dùng Java 25. Trên máy này Maven Wrapper đã được cấu hình để ưu tiên JDK 25 tại:
+Project dùng Java 25. Trên máy hiện tại, Maven Wrapper đã được cấu hình để ưu tiên JDK 25 tại:
 
 ```text
 C:\Program Files\Java\jdk-25.0.3
 ```
 
-Nếu mở terminal từ IDE cũ mà vẫn thấy lỗi Java version, hãy tắt terminal hoặc restart IDE để nhận lại biến môi trường mới.
+Nếu IDE vẫn nhận JDK cũ, hãy tắt terminal trong IDE hoặc restart IDE.
 
-## Điểm bắt đầu phát triển
+## Quy Ước Phát Triển
 
-- Thêm màn hình mới: tạo file FXML trong `src/main/resources/views`, tạo controller trong package `controller`.
-- Thêm bảng/model mới: tạo class trong `model`, DAO trong `dao`, service trong `service`.
-- Kết nối DB: dùng `DatabaseConnection.getConnection()` trong các class DAO.
+- Màn hình mới: thêm FXML trong `src/main/resources/views`, controller trong `controller`.
+- CSS dùng chung: đặt trong `src/main/resources/styles/globals`.
+- CSS riêng màn hình: đặt trong `src/main/resources/styles/pages`.
+- Entity mới: đặt trong `model/entity`.
+- DAO mới: đặt trong `model/dao`.
+- Logic nghiệp vụ: đặt trong `service`.
+- Kết nối database: dùng `DatabaseConnection.getConnection()` trong DAO.
