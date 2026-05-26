@@ -1,47 +1,72 @@
 package com.ptit.doancnpm.model.entity;
 
-import java.time.LocalDateTime;
-
 public class User {
-    private int id;
-    private String username;
-    private String fullName;
+    private int maTaiKhoan;
+    private String tenDangNhap;
+    private String matKhauMaHoa;
+    private UserRole vaiTro;
+    private UserStatus trangThai;
     private String email;
-    private LocalDateTime createdAt;
+    private String soDienThoai;
 
     public User() {
     }
 
-    public User(int id, String username, String fullName, String email, LocalDateTime createdAt) {
-        this.id = id;
-        this.username = username;
-        this.fullName = fullName;
+    public User(
+            int maTaiKhoan,
+            String tenDangNhap,
+            String matKhauMaHoa,
+            UserRole vaiTro,
+            UserStatus trangThai,
+            String email,
+            String soDienThoai) {
+        this.maTaiKhoan = maTaiKhoan;
+        this.tenDangNhap = tenDangNhap;
+        this.matKhauMaHoa = matKhauMaHoa;
+        this.vaiTro = vaiTro;
+        this.trangThai = trangThai;
         this.email = email;
-        this.createdAt = createdAt;
+        this.soDienThoai = soDienThoai;
     }
 
-    public int getId() {
-        return id;
+    public int getMaTaiKhoan() {
+        return maTaiKhoan;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMaTaiKhoan(int maTaiKhoan) {
+        this.maTaiKhoan = maTaiKhoan;
     }
 
-    public String getUsername() {
-        return username;
+    public String getTenDangNhap() {
+        return tenDangNhap;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setTenDangNhap(String tenDangNhap) {
+        this.tenDangNhap = tenDangNhap;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getMatKhauMaHoa() {
+        return matKhauMaHoa;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setMatKhauMaHoa(String matKhauMaHoa) {
+        this.matKhauMaHoa = matKhauMaHoa;
+    }
+
+    public UserRole getVaiTro() {
+        return vaiTro;
+    }
+
+    public void setVaiTro(UserRole vaiTro) {
+        this.vaiTro = vaiTro;
+    }
+
+    public UserStatus getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(UserStatus trangThai) {
+        this.trangThai = trangThai;
     }
 
     public String getEmail() {
@@ -52,11 +77,11 @@ public class User {
         this.email = email;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getSoDienThoai() {
+        return soDienThoai;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setSoDienThoai(String soDienThoai) {
+        this.soDienThoai = soDienThoai;
     }
 }

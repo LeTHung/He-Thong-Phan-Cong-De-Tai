@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.auth.LoginController"
+            styleClass="login-root">
+
+    <center>
+        <VBox alignment="CENTER"
+              spacing="18"
+              prefWidth="460"
+              maxWidth="460"
+              styleClass="login-card">
+
+            <padding>
+                <Insets top="36" right="36" bottom="36" left="36"/>
+            </padding>
+
+            <VBox alignment="CENTER" spacing="8">
+                <Label text="UniTopics" styleClass="login-title"/>
+                <Label text="Hệ thống phân công đề tài cho sinh viên" styleClass="login-subtitle"/>
+            </VBox>
+
+            <VBox spacing="10" maxWidth="Infinity">
+                <Label text="Tên đăng nhập" styleClass="caption-strong"/>
+                <TextField fx:id="txtUsername"
+                           maxWidth="Infinity"
+                           promptText="VD: admin, gv01, N23DCCN023"/>
+            </VBox>
+
+            <VBox spacing="10" maxWidth="Infinity">
+                <Label text="Mật khẩu" styleClass="caption-strong"/>
+                <PasswordField fx:id="txtPassword"
+                               maxWidth="Infinity"
+                               promptText="Nhập mật khẩu"
+                               onAction="#handleLogin"/>
+            </VBox>
+
+            <!-- maxWidth Infinity để khung báo lỗi rộng bằng ô đăng nhập -->
+            <Label fx:id="lblMessage"
+                   maxWidth="Infinity"
+                   wrapText="true"
+                   styleClass="login-error"/>
+
+            <Button fx:id="btnLogin"
+                    text="Đăng nhập"
+                    maxWidth="Infinity"
+                    styleClass="btn-primary"
+                    onAction="#handleLogin"/>
+
+        </VBox>
+    </center>
+</BorderPane>

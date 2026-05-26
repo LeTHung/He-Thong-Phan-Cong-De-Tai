@@ -10,7 +10,8 @@
   -fx-padding: 34;
   -fx-effect: -ut-shadow-card;
   -fx-spacing: 18;
-  -fx-pref-width: 420;
+  -fx-pref-width: 460;
+  -fx-max-width: 460;
 }
 
 .login-title {
@@ -24,19 +25,11 @@
   -fx-text-fill: -ut-text-muted;
 }
 
-.login-logo {
-  -fx-background-color: -ut-primary;
-  -fx-background-radius: 14;
-  -fx-min-width: 52;
-  -fx-min-height: 52;
-  -fx-pref-width: 52;
-  -fx-pref-height: 52;
-  -fx-alignment: CENTER;
-}
-
 .login-error {
   -fx-background-color: -ut-danger-bg;
   -fx-text-fill: -ut-danger;
   -fx-background-radius: 10;
-  -fx-padding: 10 12 10 12;
+  -fx-padding: 12 16 12 16;
+  -fx-alignment: CENTER_LEFT;
+  -fx-max-width: Infinity;
 }
