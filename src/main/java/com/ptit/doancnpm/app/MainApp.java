@@ -1,14 +1,12 @@
 package com.ptit.doancnpm.app;
 
+import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.util.SessionManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -23,21 +21,17 @@ public class MainApp extends Application {
     private static final int WINDOW_WIDTH = 1200;
     private static final int WINDOW_HEIGHT = 800;
 
-    /*
-     * Màn hình đầu tiên khi chạy app.
-     * Nếu sau này bạn có login-view.fxml thì đổi thành:
-     * private static final String START_VIEW = "/views/login-view.fxml";
-     */
-    private static final String START_VIEW = "/views/home-view.fxml";
+    public static final String LOGIN_VIEW = "/views/auth/login-view.fxml";
+    public static final String ADMIN_DASHBOARD_VIEW = "/views/admin/admin-dashboard.fxml";
+    public static final String LECTURER_DASHBOARD_VIEW = "/views/lecturer/lecturer-dashboard.fxml";
+    public static final String STUDENT_DASHBOARD_VIEW = "/views/student/student-dashboard.fxml";
 
     @Override
     public void start(Stage stage) {
         primaryStage = stage;
 
-        Parent root = loadViewOrDefault(START_VIEW);
-
+        Parent root = loadView(LOGIN_VIEW);
         mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
-
         loadStylesheets(mainScene);
 
         primaryStage.setTitle(APP_TITLE);
@@ -48,7 +42,8 @@ public class MainApp extends Application {
     }
 
     /*
-     * Load toàn bộ CSS trực tiếp, không dùng app.css.
+     * Load CSS trực tiếp từng file, không dùng app.css.
+     * Nếu file CSS chưa tồn tại, app vẫn chạy và chỉ in cảnh báo.
      */
     private void loadStylesheets(Scene scene) {
         String[] cssFiles = {
@@ -60,31 +55,56 @@ public class MainApp extends Application {
                 "/styles/globals/topbar.css",
 
                 "/styles/pages/login.css",
-                "/styles/pages/student-topic-registration.css",
-                "/styles/pages/admin-dashboard.css"
+                "/styles/pages/admin-dashboard.css",
+                "/styles/pages/student-topic-registration.css"
         };
 
         for (String cssFile : cssFiles) {
-            URL cssUrl = getClass().getResource(cssFile);
-
+            URL cssUrl = MainApp.class.getResource(cssFile);
             if (cssUrl != null) {
                 scene.getStylesheets().add(cssUrl.toExternalForm());
             } else {
-                System.err.println("Không tìm thấy file CSS: " + cssFile);
+                System.err.println("Không tìm thấy CSS: " + cssFile);
             }
         }
     }
 
-    /*
-     * Load FXML. Nếu chưa có file FXML thì app vẫn chạy bằng màn hình tạm.
-     */
-    private Parent loadViewOrDefault(String fxmlPath) {
+    public static void showLogin() {
+        SessionManager.clear();
+        setRoot(LOGIN_VIEW);
+    }
+
+    public static void showDashboardByRole(UserRole role) {
+        if (role == null) {
+            showError("Không xác định được vai trò người dùng.");
+            showLogin();
+            return;
+        }
+
+        switch (role) {
+            case QUAN_TRI_VIEN -> setRoot(ADMIN_DASHBOARD_VIEW);
+            case GIANG_VIEN -> setRoot(LECTURER_DASHBOARD_VIEW);
+            case SINH_VIEN -> setRoot(STUDENT_DASHBOARD_VIEW);
+            default -> {
+                showError("Vai trò không hợp lệ");
+                showLogin();
+            }
+        }
+    }
+
+    public static void setRoot(String fxmlPath) {
+        Parent root = loadView(fxmlPath);
+        if (mainScene != null && root != null) {
+            mainScene.setRoot(root);
+        }
+    }
+
+    private static Parent loadView(String fxmlPath) {
         try {
-            URL fxmlUrl = getClass().getResource(fxmlPath);
+            URL fxmlUrl = MainApp.class.getResource(fxmlPath);
 
             if (fxmlUrl == null) {
-                System.err.println("Không tìm thấy FXML: " + fxmlPath);
-                return createDefaultView();
+                throw new IOException("Không tìm thấy file FXML: " + fxmlPath);
             }
 
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
@@ -92,64 +112,25 @@ public class MainApp extends Application {
 
         } catch (IOException e) {
             e.printStackTrace();
-            return createDefaultView();
+            showError("Không thể tải màn hình: " + fxmlPath + "\n" + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
-    /*
-     * Hàm dùng để chuyển màn hình từ các Controller.
-     * Ví dụ trong Controller gọi:
-     * MainApp.setRoot("/views/login-view.fxml");
-     */
-    public static void setRoot(String fxmlPath) {
-        try {
-            URL fxmlUrl = MainApp.class.getResource(fxmlPath);
-
-            if (fxmlUrl == null) {
-                System.err.println("Không tìm thấy FXML: " + fxmlPath);
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            Parent root = loader.load();
-
-            mainScene.setRoot(root);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông báo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
-    /*
-     * Màn hình tạm nếu chưa có FXML.
-     */
-    private Parent createDefaultView() {
-        BorderPane root = new BorderPane();
-        root.getStyleClass().add("page-root");
-
-        VBox content = new VBox();
-        content.setAlignment(Pos.CENTER);
-        content.setSpacing(16);
-        content.setPadding(new Insets(40));
-        content.getStyleClass().add("card-large");
-
-        Label title = new Label("UniTopics");
-        title.getStyleClass().add("h1");
-
-        Label subtitle = new Label("Ứng dụng phân công đề tài cho sinh viên");
-        subtitle.getStyleClass().add("body-muted");
-
-        Label note = new Label(
-                "Chưa tìm thấy file FXML khởi động. Hãy tạo /views/home-view.fxml hoặc đổi START_VIEW trong MainApp.java.");
-        note.getStyleClass().add("caption");
-        note.setWrapText(true);
-
-        content.getChildren().addAll(title, subtitle, note);
-
-        root.setCenter(content);
-        BorderPane.setMargin(content, new Insets(60));
-
-        return root;
+    public static void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Lỗi");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static Stage getPrimaryStage() {

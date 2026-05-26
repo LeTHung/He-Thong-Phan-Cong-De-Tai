@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.lecturer.LecturerDashboardController"
+            styleClass="page-root">
+
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+            <HBox styleClass="brand-box">
+                <Label text="UT" styleClass="brand-logo brand-logo-text"/>
+                <Label text="UniTopics" styleClass="brand-name"/>
+            </HBox>
+
+            <Label text="Giảng viên" styleClass="nav-link-active"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox styleClass="content-wrapper" spacing="20">
+            <VBox styleClass="card-large" spacing="14">
+                <Label fx:id="lblWelcome" text="Xin chào Giảng viên" styleClass="h1"/>
+                <Label text="Bạn đã đăng nhập với vai trò Giảng viên. Module này dành cho Cường phát triển quản lý đề tài, mở cổng đăng ký và chốt danh sách." styleClass="body-muted" wrapText="true"/>
+            </VBox>
+
+            <HBox spacing="18">
+                <VBox styleClass="stat-card" prefWidth="260">
+                    <Label text="Trạng thái" styleClass="stat-label"/>
+                    <Label text="Đăng nhập thành công" styleClass="stat-number"/>
+                </VBox>
+
+                <VBox styleClass="stat-card" prefWidth="260">
+                    <Label text="Phân quyền" styleClass="stat-label"/>
+                    <Label text="Giảng viên" styleClass="stat-number"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
