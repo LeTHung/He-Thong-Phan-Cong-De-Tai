@@ -18,6 +18,7 @@ public class LecturerDashboardController {
     @FXML
     private void initialize() {
         User user = SessionManager.getCurrentUser();
+
         if (user == null) {
             MainApp.showLogin();
             return;
@@ -30,11 +31,16 @@ public class LecturerDashboardController {
         }
 
         lblWelcome.setText("Xin chào Giảng viên");
-        lblUserInfo.setText(user.getTenDangNhap() + " - " + user.getVaiTro().getDisplayName());
+        lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
     }
 
     @FXML
     private void handleLogout() {
         MainApp.showLogin();
+    }
+
+    @FXML
+    private void handleNotImplemented() {
+        MainApp.showInfo("Chức năng này thuộc module Giảng viên, Cường sẽ phát triển tiếp.");
     }
 }

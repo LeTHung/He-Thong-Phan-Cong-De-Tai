@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -11,42 +12,89 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.ptit.doancnpm.controller.student.StudentDashboardController"
-            styleClass="page-root">
+            styleClass="student-root">
 
     <top>
-        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
+        <HBox styleClass="student-topbar" alignment="CENTER_LEFT" spacing="18">
             <HBox styleClass="brand-box">
                 <Label text="UT" styleClass="brand-logo brand-logo-text"/>
                 <Label text="UniTopics" styleClass="brand-name"/>
             </HBox>
 
-            <Label text="Sinh viên" styleClass="nav-link-active"/>
+            <Button text="Trang chủ" styleClass="nav-link-active"/>
+            <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleNotImplemented"/>
+            <Button text="Đề tài đã chọn" styleClass="nav-link" onAction="#handleNotImplemented"/>
 
             <Region HBox.hgrow="ALWAYS"/>
-
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
     </top>
 
     <center>
-        <VBox styleClass="content-wrapper" spacing="20">
-            <VBox styleClass="card-large" spacing="14">
-                <Label fx:id="lblWelcome" text="Xin chào Sinh viên" styleClass="h1"/>
-                <Label text="Bạn đã đăng nhập với vai trò Sinh viên. Module này dành cho Quốc phát triển xem danh sách đề tài, đăng ký và hủy đăng ký." styleClass="body-muted" wrapText="true"/>
+        <HBox styleClass="student-content" spacing="22">
+            <VBox spacing="20" HBox.hgrow="ALWAYS">
+                <VBox styleClass="student-hero" spacing="10">
+                    <Label fx:id="lblWelcome" text="Đăng ký đề tài môn học" styleClass="student-hero-title"/>
+                    <Label text="Xem danh sách đề tài, kiểm tra số chỗ còn lại và đăng ký đề tài phù hợp với nhóm của bạn."
+                           styleClass="student-hero-desc"/>
+                    <HBox spacing="10">
+                        <Label text="CNPM_D23CQCN01_N" styleClass="badge badge-info"/>
+                        <Label text="Cổng đăng ký đang mở" styleClass="badge badge-success"/>
+                    </HBox>
+                </VBox>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField promptText="Tìm kiếm đề tài..." HBox.hgrow="ALWAYS"/>
+                    <Button text="Tất cả" styleClass="btn-secondary"/>
+                    <Button text="Còn chỗ" styleClass="btn-outline"/>
+                </HBox>
+
+                <FlowPane hgap="18" vgap="18">
+                    <VBox styleClass="topic-card-modern" spacing="10">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="DT001" styleClass="topic-id"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Đã đăng ký" styleClass="badge badge-success"/>
+                        </HBox>
+                        <Label text="Xây dựng ứng dụng phân công đề tài cho sinh viên" styleClass="topic-card-title" wrapText="true"/>
+                        <Label text="Quản lý lớp học phần, ngân hàng đề tài, đăng ký/hủy đăng ký và xuất danh sách nhóm."
+                               styleClass="topic-card-desc" wrapText="true"/>
+                        <Label text="Số lượng: 3/3" styleClass="body-muted"/>
+                        <Button text="Xem chi tiết" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+                    </VBox>
+
+                    <VBox styleClass="topic-card-modern" spacing="10">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="DT002" styleClass="topic-id"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Còn chỗ" styleClass="badge badge-success"/>
+                        </HBox>
+                        <Label text="Xây dựng ứng dụng quản lý thư viện" styleClass="topic-card-title" wrapText="true"/>
+                        <Label text="Quản lý sách, độc giả, phiếu mượn trả và thống kê sách."
+                               styleClass="topic-card-desc" wrapText="true"/>
+                        <Label text="Số lượng: 0/3" styleClass="body-muted"/>
+                        <Button text="Đăng ký" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+                    </VBox>
+                </FlowPane>
             </VBox>
 
-            <HBox spacing="18">
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Trạng thái" styleClass="stat-label"/>
-                    <Label text="Đăng nhập thành công" styleClass="stat-number"/>
+            <VBox styleClass="student-sidebar" spacing="16">
+                <VBox styleClass="student-info-card" spacing="10">
+                    <Label text="Thông tin sinh viên" styleClass="card-title"/>
+                    <Label text="MSSV: N23DCCN023" styleClass="body-muted"/>
+                    <Label text="Lớp: D23CQCN01-N" styleClass="body-muted"/>
+                    <Label text="Môn: Công nghệ phần mềm" styleClass="body-muted"/>
                 </VBox>
 
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Phân quyền" styleClass="stat-label"/>
-                    <Label text="Sinh viên" styleClass="stat-number"/>
+                <VBox styleClass="selected-topic-card" spacing="10">
+                    <Label text="Đề tài đã đăng ký" styleClass="card-title"/>
+                    <Label text="Xây dựng ứng dụng phân công đề tài cho sinh viên"
+                           styleClass="selected-topic-title" wrapText="true"/>
+                    <Label text="Trạng thái: Đã đăng ký" styleClass="badge badge-success"/>
+                    <Button text="Hủy đăng ký" styleClass="btn-danger" maxWidth="Infinity" onAction="#handleNotImplemented"/>
                 </VBox>
-            </HBox>
-        </VBox>
+            </VBox>
+        </HBox>
     </center>
 </BorderPane>

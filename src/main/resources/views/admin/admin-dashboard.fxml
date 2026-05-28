@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -11,42 +12,83 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.ptit.doancnpm.controller.admin.AdminDashboardController"
-            styleClass="page-root">
+            styleClass="admin-root">
 
-    <top>
-        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
-            <HBox styleClass="brand-box">
-                <Label text="UT" styleClass="brand-logo brand-logo-text"/>
-                <Label text="UniTopics" styleClass="brand-name"/>
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
             </HBox>
 
-            <Label text="Quản trị viên" styleClass="nav-link-active"/>
+            <Label text="TỔNG QUAN" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
 
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
-            <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
-        </HBox>
-    </top>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
 
     <center>
-        <VBox styleClass="content-wrapper" spacing="20">
-            <VBox styleClass="card-large" spacing="14">
-                <Label fx:id="lblWelcome" text="Xin chào Quản trị viên" styleClass="h1"/>
-                <Label text="Bạn đã đăng nhập với vai trò Quản trị viên. Sau bước này Hưng có thể phát triển tiếp quản lý tài khoản, môn học, học kỳ và lớp học phần." styleClass="body-muted" wrapText="true"/>
-            </VBox>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label fx:id="lblWelcome" text="Xin chào Quản trị viên" styleClass="screen-title"/>
+                    <Label text="Quản lý tài khoản, môn học, học kỳ và lớp học phần." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
 
             <HBox spacing="18">
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Trạng thái" styleClass="stat-label"/>
-                    <Label text="Đăng nhập thành công" styleClass="stat-number"/>
+                <VBox styleClass="stat-card-blue" prefWidth="220">
+                    <Label text="Tài khoản" styleClass="stat-label"/>
+                    <Label text="05" styleClass="stat-value"/>
+                    <Label text="Admin, GV, SV" styleClass="stat-note"/>
                 </VBox>
-
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Phân quyền" styleClass="stat-label"/>
-                    <Label text="Quản trị viên" styleClass="stat-number"/>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Sinh viên" styleClass="stat-label"/>
+                    <Label text="03" styleClass="stat-value"/>
+                    <Label text="Dữ liệu mẫu nhóm" styleClass="stat-note"/>
+                </VBox>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Giảng viên" styleClass="stat-label"/>
+                    <Label text="01" styleClass="stat-value"/>
+                    <Label text="Nguyễn Thị Bích Nguyên" styleClass="stat-note"/>
+                </VBox>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Lớp học phần" styleClass="stat-label"/>
+                    <Label text="01" styleClass="stat-value"/>
+                    <Label text="Công nghệ phần mềm" styleClass="stat-note"/>
                 </VBox>
             </HBox>
+
+            <VBox styleClass="main-card" spacing="14">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox>
+                        <Label text="Công việc cần làm tiếp" styleClass="card-title"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Tạo tài khoản" styleClass="btn-primary" onAction="#handleNotImplemented"/>
+                </HBox>
+
+                <TableView prefHeight="260">
+                    <columns>
+                        <TableColumn text="Module" prefWidth="180"/>
+                        <TableColumn text="Người phụ trách" prefWidth="180"/>
+                        <TableColumn text="Trạng thái" prefWidth="180"/>
+                        <TableColumn text="Ghi chú" prefWidth="360"/>
+                    </columns>
+                </TableView>
+            </VBox>
         </VBox>
     </center>
 </BorderPane>

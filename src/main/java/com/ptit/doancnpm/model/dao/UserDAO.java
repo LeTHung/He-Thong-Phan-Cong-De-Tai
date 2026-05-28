@@ -43,8 +43,8 @@ public class UserDAO {
                         resultSet.getString("mat_khau_ma_hoa"),
                         UserRole.fromDatabaseValue(resultSet.getString("vai_tro")),
                         UserStatus.fromDatabaseValue(resultSet.getString("trang_thai")),
-                        null,
-                        null);
+                        resultSet.getString("email"),
+                        resultSet.getString("so_dien_thoai"));
 
                 return Optional.of(user);
             }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="12"
+      styleClass="student-content">
+    <Label text="Thông tin cá nhân" styleClass="student-hero-title"/>
+    <Label text="Màn hình placeholder cho hồ sơ sinh viên." styleClass="body-muted" wrapText="true"/>
+</VBox>
