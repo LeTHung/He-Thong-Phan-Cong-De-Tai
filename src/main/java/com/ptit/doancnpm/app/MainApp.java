@@ -3,11 +3,22 @@ package com.ptit.doancnpm.app;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,36 +27,34 @@ public class MainApp extends Application {
 
     private static Stage primaryStage;
     private static Scene mainScene;
+    private static StackPane contentHost;
+    private static Button maximizeButton;
+    private static double dragOffsetX;
+    private static double dragOffsetY;
 
     private static final String APP_TITLE = "UniTopics - Phân công đề tài sinh viên";
-    private static final int WINDOW_WIDTH = 1200;
-    private static final int WINDOW_HEIGHT = 800;
+    private static final int LOGIN_WINDOW_WIDTH = 540;
+    private static final int LOGIN_WINDOW_HEIGHT = 500;
+    private static final int DASHBOARD_WINDOW_WIDTH = 1280;
+    private static final int DASHBOARD_WINDOW_HEIGHT = 820;
 
     public static final String LOGIN_VIEW = "/views/auth/login-view.fxml";
     public static final String ADMIN_DASHBOARD_VIEW = "/views/admin/admin-dashboard.fxml";
+    public static final String SUBJECT_MANAGEMENT_VIEW = "/views/admin/subject-management.fxml";
+    public static final String SEMESTER_MANAGEMENT_VIEW = "/views/admin/semester-management.fxml";
     public static final String LECTURER_DASHBOARD_VIEW = "/views/lecturer/lecturer-dashboard.fxml";
     public static final String STUDENT_DASHBOARD_VIEW = "/views/student/student-dashboard.fxml";
 
     @Override
     public void start(Stage stage) {
-        primaryStage = stage;
-
-        Parent root = loadView(LOGIN_VIEW);
-        mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
-        loadStylesheets(mainScene);
-
-        primaryStage.setTitle(APP_TITLE);
-        primaryStage.setScene(mainScene);
-        primaryStage.setMinWidth(1000);
-        primaryStage.setMinHeight(650);
-        primaryStage.show();
+        showLoginWindow(stage);
     }
 
     /*
-     * Load CSS trực tiếp từng file, không dùng app.css.
-     * Nếu file CSS chưa tồn tại, app vẫn chạy và chỉ in cảnh báo.
+     * Không dùng app.css.
+     * MainApp import trực tiếp từng file CSS.
      */
-    private void loadStylesheets(Scene scene) {
+    private static void loadStylesheets(Scene scene) {
         String[] cssFiles = {
                 "/styles/globals/colors.css",
                 "/styles/globals/base.css",
@@ -56,6 +65,8 @@ public class MainApp extends Application {
 
                 "/styles/pages/login.css",
                 "/styles/pages/admin-dashboard.css",
+                "/styles/pages/lecturer-dashboard.css",
+                "/styles/pages/student-dashboard.css",
                 "/styles/pages/student-topic-registration.css"
         };
 
@@ -71,7 +82,11 @@ public class MainApp extends Application {
 
     public static void showLogin() {
         SessionManager.clear();
-        setRoot(LOGIN_VIEW);
+        Stage oldStage = primaryStage;
+        showLoginWindow(new Stage());
+        if (oldStage != null) {
+            oldStage.close();
+        }
     }
 
     public static void showDashboardByRole(UserRole role) {
@@ -82,11 +97,11 @@ public class MainApp extends Application {
         }
 
         switch (role) {
-            case QUAN_TRI_VIEN -> setRoot(ADMIN_DASHBOARD_VIEW);
-            case GIANG_VIEN -> setRoot(LECTURER_DASHBOARD_VIEW);
-            case SINH_VIEN -> setRoot(STUDENT_DASHBOARD_VIEW);
+            case QUAN_TRI_VIEN -> showDashboard(ADMIN_DASHBOARD_VIEW);
+            case GIANG_VIEN -> showDashboard(LECTURER_DASHBOARD_VIEW);
+            case SINH_VIEN -> showDashboard(STUDENT_DASHBOARD_VIEW);
             default -> {
-                showError("Vai trò không hợp lệ");
+                showError("Vai trò không hợp lệ: " + role);
                 showLogin();
             }
         }
@@ -94,15 +109,128 @@ public class MainApp extends Application {
 
     public static void setRoot(String fxmlPath) {
         Parent root = loadView(fxmlPath);
-        if (mainScene != null && root != null) {
+        if (contentHost != null && root != null) {
+            contentHost.getChildren().setAll(root);
+        } else if (mainScene != null && root != null) {
             mainScene.setRoot(root);
         }
+    }
+
+    private static BorderPane createWindowShell() {
+        BorderPane shell = new BorderPane();
+        shell.getStyleClass().add("app-window-shell");
+        shell.setTop(createTitleBar());
+        shell.setCenter(contentHost);
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(28);
+        clip.setArcHeight(28);
+        clip.widthProperty().bind(shell.widthProperty());
+        clip.heightProperty().bind(shell.heightProperty());
+        shell.setClip(clip);
+
+        return shell;
+    }
+
+    private static HBox createTitleBar() {
+        Label title = new Label(APP_TITLE);
+        title.getStyleClass().add("window-title");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button minimizeButton = createWindowButton("_");
+        minimizeButton.setOnAction(event -> primaryStage.setIconified(true));
+
+        maximizeButton = createWindowButton("□");
+        maximizeButton.setOnAction(event -> primaryStage.setMaximized(!primaryStage.isMaximized()));
+
+        Button closeButton = createWindowButton("X");
+        closeButton.getStyleClass().add("window-close-button");
+        closeButton.setOnAction(event -> primaryStage.close());
+
+        HBox titleBar = new HBox(title, spacer, minimizeButton, maximizeButton, closeButton);
+        titleBar.getStyleClass().add("window-title-bar");
+        titleBar.setAlignment(Pos.CENTER_LEFT);
+
+        titleBar.setOnMousePressed(event -> {
+            if (!primaryStage.isMaximized()) {
+                dragOffsetX = event.getSceneX();
+                dragOffsetY = event.getSceneY();
+            }
+        });
+        titleBar.setOnMouseDragged(event -> {
+            if (!primaryStage.isMaximized()) {
+                primaryStage.setX(event.getScreenX() - dragOffsetX);
+                primaryStage.setY(event.getScreenY() - dragOffsetY);
+            }
+        });
+        titleBar.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && primaryStage.isResizable()) {
+                primaryStage.setMaximized(!primaryStage.isMaximized());
+            }
+        });
+
+        return titleBar;
+    }
+
+    private static Button createWindowButton(String text) {
+        Button button = new Button(text);
+        button.getStyleClass().add("window-control-button");
+        return button;
+    }
+
+    private static void showDashboard(String fxmlPath) {
+        Parent root = loadView(fxmlPath);
+        Stage oldStage = primaryStage;
+        Stage dashboardStage = new Stage();
+        Scene dashboardScene = new Scene(root, DASHBOARD_WINDOW_WIDTH, DASHBOARD_WINDOW_HEIGHT);
+        loadStylesheets(dashboardScene);
+
+        primaryStage = dashboardStage;
+        mainScene = dashboardScene;
+        contentHost = null;
+        maximizeButton = null;
+
+        primaryStage.setTitle(APP_TITLE);
+        primaryStage.setScene(mainScene);
+        primaryStage.setMinWidth(1100);
+        primaryStage.setMinHeight(700);
+        primaryStage.show();
+
+        if (oldStage != null) {
+            oldStage.close();
+        }
+    }
+
+    private static void showLoginWindow(Stage loginStage) {
+        primaryStage = loginStage;
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
+
+        Parent root = loadView(LOGIN_VIEW);
+        contentHost = new StackPane(root);
+        mainScene = new Scene(createWindowShell(), LOGIN_WINDOW_WIDTH, LOGIN_WINDOW_HEIGHT);
+        mainScene.setFill(Color.TRANSPARENT);
+        loadStylesheets(mainScene);
+
+        primaryStage.setTitle(APP_TITLE);
+        primaryStage.setScene(mainScene);
+        primaryStage.setMaximized(false);
+        primaryStage.setResizable(false);
+        primaryStage.setMinWidth(LOGIN_WINDOW_WIDTH);
+        primaryStage.setMinHeight(LOGIN_WINDOW_HEIGHT);
+        primaryStage.setWidth(LOGIN_WINDOW_WIDTH);
+        primaryStage.setHeight(LOGIN_WINDOW_HEIGHT);
+        if (maximizeButton != null) {
+            maximizeButton.setDisable(true);
+        }
+        primaryStage.centerOnScreen();
+        primaryStage.show();
     }
 
     private static Parent loadView(String fxmlPath) {
         try {
             URL fxmlUrl = MainApp.class.getResource(fxmlPath);
-
             if (fxmlUrl == null) {
                 throw new IOException("Không tìm thấy file FXML: " + fxmlPath);
             }

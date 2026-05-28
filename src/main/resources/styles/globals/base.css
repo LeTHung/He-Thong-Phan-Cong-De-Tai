@@ -5,6 +5,60 @@
   -fx-font-size: 14px;
 }
 
+.app-window-shell {
+  -fx-background-color: transparent;
+  -fx-background-radius: 14;
+  -fx-border-color: transparent;
+  -fx-border-radius: 14;
+  -fx-border-width: 0;
+}
+
+.window-title-bar {
+  -fx-background-color: -ut-surface;
+  -fx-background-radius: 14 14 0 0;
+  -fx-border-color: transparent transparent -ut-border transparent;
+  -fx-padding: 0 8 0 16;
+  -fx-min-height: 42;
+  -fx-pref-height: 42;
+}
+
+.window-title {
+  -fx-font-size: 14px;
+  -fx-font-weight: 700;
+  -fx-text-fill: -ut-text;
+}
+
+.window-control-button {
+  -fx-background-color: transparent;
+  -fx-background-radius: 8;
+  -fx-border-color: transparent;
+  -fx-border-radius: 8;
+  -fx-effect: none;
+  -fx-font-size: 14px;
+  -fx-font-weight: 800;
+  -fx-padding: 0;
+  -fx-min-width: 36;
+  -fx-pref-width: 36;
+  -fx-min-height: 30;
+  -fx-pref-height: 30;
+  -fx-text-fill: -ut-text;
+}
+
+.window-control-button:hover {
+  -fx-background-color: -ut-surface-muted;
+}
+
+.window-control-button:disabled {
+  -fx-background-color: transparent;
+  -fx-text-fill: -ut-text-soft;
+  -fx-opacity: 1;
+}
+
+.window-close-button:hover {
+  -fx-background-color: -ut-danger-bg;
+  -fx-text-fill: -ut-danger;
+}
+
 /* Nền trang chính */
 .app-root,
 .page-root {
@@ -93,4 +147,26 @@
 .table-row-cell:selected {
   -fx-background-color: -ut-primary-light;
   -fx-text-background-color: -ut-primary-dark;
+}
+
+/* ListView */
+.list-view {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 14;
+  -fx-background-radius: 14;
+  -fx-padding: 6;
+}
+
+.list-cell {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent transparent #f1f5f9 transparent;
+  -fx-padding: 12 10 12 10;
+  -fx-text-fill: -ut-text;
+}
+
+.list-cell:selected {
+  -fx-background-color: -ut-primary-light;
+  -fx-text-fill: -ut-primary-dark;
+  -fx-background-radius: 10;
 }

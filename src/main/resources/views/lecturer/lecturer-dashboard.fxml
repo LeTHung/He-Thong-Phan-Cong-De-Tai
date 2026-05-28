@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -11,42 +12,86 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.ptit.doancnpm.controller.lecturer.LecturerDashboardController"
-            styleClass="page-root">
+            styleClass="lecturer-root">
 
-    <top>
-        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="16">
-            <HBox styleClass="brand-box">
-                <Label text="UT" styleClass="brand-logo brand-logo-text"/>
-                <Label text="UniTopics" styleClass="brand-name"/>
+    <left>
+        <VBox styleClass="side-bar lecturer-side" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="GV" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Lecturer Workspace" styleClass="side-subtitle"/>
+                </VBox>
             </HBox>
 
-            <Label text="Giảng viên" styleClass="nav-link-active"/>
+            <Label text="GIẢNG VIÊN" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
 
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
-            <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
-        </HBox>
-    </top>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
 
     <center>
-        <VBox styleClass="content-wrapper" spacing="20">
-            <VBox styleClass="card-large" spacing="14">
-                <Label fx:id="lblWelcome" text="Xin chào Giảng viên" styleClass="h1"/>
-                <Label text="Bạn đã đăng nhập với vai trò Giảng viên. Module này dành cho Cường phát triển quản lý đề tài, mở cổng đăng ký và chốt danh sách." styleClass="body-muted" wrapText="true"/>
-            </VBox>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label fx:id="lblWelcome" text="Xin chào Giảng viên" styleClass="screen-title"/>
+                    <Label text="Quản lý ngân hàng đề tài, mở cổng đăng ký và chốt danh sách." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
 
             <HBox spacing="18">
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Trạng thái" styleClass="stat-label"/>
-                    <Label text="Đăng nhập thành công" styleClass="stat-number"/>
+                <VBox styleClass="stat-card-blue" prefWidth="220">
+                    <Label text="Lớp phụ trách" styleClass="stat-label"/>
+                    <Label text="01" styleClass="stat-value"/>
+                    <Label text="CNPM_D23CQCN01_N" styleClass="stat-note"/>
                 </VBox>
-
-                <VBox styleClass="stat-card" prefWidth="260">
-                    <Label text="Phân quyền" styleClass="stat-label"/>
-                    <Label text="Giảng viên" styleClass="stat-number"/>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Đề tài" styleClass="stat-label"/>
+                    <Label text="04" styleClass="stat-value"/>
+                    <Label text="Đã gán vào lớp" styleClass="stat-note"/>
+                </VBox>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Đã đăng ký" styleClass="stat-label"/>
+                    <Label text="03" styleClass="stat-value"/>
+                    <Label text="Sinh viên trong nhóm" styleClass="stat-note"/>
+                </VBox>
+                <VBox styleClass="stat-card" prefWidth="220">
+                    <Label text="Cổng đăng ký" styleClass="stat-label"/>
+                    <Label text="Đang mở" styleClass="stat-value"/>
+                    <Label text="Dữ liệu mẫu" styleClass="stat-note"/>
                 </VBox>
             </HBox>
+
+            <VBox styleClass="main-card" spacing="14">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox>
+                        <Label text="Danh sách lớp học phần" styleClass="card-title"/>
+                        <Label text="Màn hình khung cho module giảng viên. Cường sẽ gắn dữ liệu thật từ database." styleClass="body-muted"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Tạo đề tài" styleClass="btn-primary" onAction="#handleNotImplemented"/>
+                </HBox>
+
+                <TableView prefHeight="260">
+                    <columns>
+                        <TableColumn text="Mã lớp" prefWidth="180"/>
+                        <TableColumn text="Tên lớp học phần" prefWidth="260"/>
+                        <TableColumn text="Số đề tài" prefWidth="140"/>
+                        <TableColumn text="Trạng thái đăng ký" prefWidth="180"/>
+                        <TableColumn text="Thao tác" prefWidth="220"/>
+                    </columns>
+                </TableView>
+            </VBox>
         </VBox>
     </center>
 </BorderPane>

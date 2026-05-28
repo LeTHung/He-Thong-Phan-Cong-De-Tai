@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.SemesterManagementController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Quản lý học kỳ" styleClass="screen-title"/>
+                    <Label text="Tạo học kỳ, mở học kỳ và đóng học kỳ cho các lớp học phần." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <HBox spacing="18">
+                <VBox styleClass="main-card" spacing="12" HBox.hgrow="ALWAYS">
+                    <Label text="Danh sách học kỳ" styleClass="card-title"/>
+                    <TableView fx:id="tblSemesters" prefHeight="420">
+                        <columns>
+                            <TableColumn fx:id="colCode" text="Mã học kỳ" prefWidth="130"/>
+                            <TableColumn fx:id="colName" text="Tên học kỳ" prefWidth="140"/>
+                            <TableColumn fx:id="colSchoolYear" text="Năm học" prefWidth="120"/>
+                            <TableColumn fx:id="colStartDate" text="Bắt đầu" prefWidth="110"/>
+                            <TableColumn fx:id="colEndDate" text="Kết thúc" prefWidth="110"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="main-card admin-form-panel" spacing="12">
+                    <Label text="Thông tin học kỳ" styleClass="card-title"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Mã học kỳ" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCode" promptText="VD: HK2_2025_2026" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Label text="Tên học kỳ" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtName" promptText="Học kỳ 2" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+
+                        <Label text="Năm học" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <TextField fx:id="txtSchoolYear" promptText="2025-2026" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+
+                        <Label text="Ngày bắt đầu" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                        <DatePicker fx:id="dpStartDate" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+
+                        <Label text="Ngày kết thúc" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+                        <DatePicker fx:id="dpEndDate" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+
+                        <Label text="Trạng thái" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="10"/>
+                        <ComboBox fx:id="cboStatus" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="11"/>
+                    </GridPane>
+
+                    <HBox spacing="10">
+                        <Button text="Thêm" styleClass="btn-primary" onAction="#handleAddSemester"/>
+                        <Button text="Sửa" styleClass="btn-secondary" onAction="#handleUpdateSemester"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <Button text="Nháp" styleClass="btn-outline" onAction="#handleDraftSemester"/>
+                        <Button text="Mở" styleClass="btn-outline" onAction="#handleOpenSemester"/>
+                        <Button text="Đóng" styleClass="btn-warning" onAction="#handleCloseSemester"/>
+                    </HBox>
+                    <Button text="Làm mới" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleClearForm"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

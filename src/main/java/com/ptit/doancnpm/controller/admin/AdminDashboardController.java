@@ -30,12 +30,27 @@ public class AdminDashboardController {
             return;
         }
 
-        lblWelcome.setText("Xin chào Quản trị viên");
-        lblUserInfo.setText(user.getTenDangNhap() + " - " + user.getVaiTro().getDisplayName());
+        lblWelcome.setText("Xin chào, " + user.getTenDangNhap());
+        lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
     }
 
     @FXML
     private void handleLogout() {
         MainApp.showLogin();
+    }
+
+    @FXML
+    private void handleShowSubjects() {
+        MainApp.setRoot(MainApp.SUBJECT_MANAGEMENT_VIEW);
+    }
+
+    @FXML
+    private void handleShowSemesters() {
+        MainApp.setRoot(MainApp.SEMESTER_MANAGEMENT_VIEW);
+    }
+
+    @FXML
+    private void handleNotImplemented() {
+        MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
     }
 }

@@ -17,12 +17,13 @@
     <center>
         <VBox alignment="CENTER"
               spacing="18"
-              prefWidth="460"
-              maxWidth="460"
-              styleClass="login-card">
+              prefWidth="430"
+              maxWidth="430"
+              maxHeight="-Infinity"
+              styleClass="login-panel">
 
             <padding>
-                <Insets top="36" right="36" bottom="36" left="36"/>
+                <Insets top="30" right="30" bottom="30" left="30"/>
             </padding>
 
             <VBox alignment="CENTER" spacing="8">

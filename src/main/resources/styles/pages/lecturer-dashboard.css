@@ -1,0 +1,49 @@
+/* Lecturer-specific color overrides. Shared dashboard layout lives in admin-dashboard.css. */
+
+.lecturer-root {
+  -fx-background-color: #f6f8fd;
+}
+
+.lecturer-root .lecturer-side {
+  -fx-background-color: #123524;
+}
+
+.lecturer-root .side-logo {
+  -fx-background-color: #16a34a;
+}
+
+.lecturer-root .side-menu-active {
+  -fx-background-color: #16a34a;
+  -fx-text-fill: white;
+}
+
+.lecturer-root .side-menu {
+  -fx-text-fill: #d1fae5;
+}
+
+.lecturer-root .side-menu:hover {
+  -fx-background-color: rgba(255, 255, 255, 0.1);
+  -fx-text-fill: white;
+}
+
+.lecturer-root .stat-card-blue {
+  -fx-background-color: linear-gradient(to bottom right, #16a34a, #15803d);
+}
+
+.lecturer-root .stat-card-blue .stat-label,
+.lecturer-root .stat-card-blue .stat-note {
+  -fx-text-fill: #dcfce7;
+}
+
+.lecturer-root .stat-card-blue .stat-value {
+  -fx-text-fill: white;
+}
+
+.lecturer-root .btn-primary {
+  -fx-background-color: #16a34a;
+  -fx-text-fill: white;
+}
+
+.lecturer-root .btn-primary:hover {
+  -fx-background-color: #15803d;
+}

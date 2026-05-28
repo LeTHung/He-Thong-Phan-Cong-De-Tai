@@ -1,34 +1,161 @@
-.dashboard-page {
-  -fx-background-color: -ut-bg;
+/* Admin + shared dashboard layout */
+
+.admin-root,
+.lecturer-root,
+.student-root {
+    -fx-background-color: -ut-bg;
 }
 
-.stat-card {
-  -fx-background-color: -ut-surface;
-  -fx-border-color: -ut-border;
-  -fx-border-radius: 16;
-  -fx-background-radius: 16;
-  -fx-padding: 20;
-  -fx-effect: -ut-shadow-soft;
-  -fx-spacing: 8;
+.side-bar {
+    -fx-background-color: #0B192C;
+    -fx-padding: 24 18 24 18;
 }
 
-.stat-number {
-  -fx-font-size: 28px;
-  -fx-font-weight: 900;
-  -fx-text-fill: -ut-primary-dark;
+.lecturer-side {
+    -fx-background-color: #102A43;
+}
+
+.side-brand {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+    -fx-padding: 0 0 24 0;
+}
+
+.side-logo {
+    -fx-background-color: #2563EB;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-alignment: CENTER;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-pref-width: 42;
+    -fx-pref-height: 42;
+}
+
+.side-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+}
+
+.side-subtitle {
+    -fx-text-fill: #94A3B8;
+    -fx-font-size: 12px;
+}
+
+.side-section {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 12 0 6 0;
+}
+
+.side-menu,
+.side-menu-active,
+.side-logout {
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 12 14 12 14;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.side-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: #CBD5E1;
+}
+
+.side-menu:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: white;
+}
+
+.side-menu-active {
+    -fx-background-color: #2563EB;
+    -fx-text-fill: white;
+}
+
+.side-logout {
+    -fx-background-color: rgba(239, 68, 68, 0.14);
+    -fx-text-fill: #FCA5A5;
+}
+
+.dashboard-content {
+    -fx-padding: 28 34 28 34;
+    -fx-background-color: -ut-bg;
+}
+
+.screen-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.screen-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748B;
+}
+
+.user-pill {
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-padding: 10 16 10 16;
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: 700;
+}
+
+.stat-card,
+.stat-card-blue,
+.main-card {
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 18;
+    -fx-background-radius: 18;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 16, 0.14, 0, 4);
+}
+
+.admin-form-panel {
+    -fx-pref-width: 340;
+    -fx-min-width: 330;
+}
+
+.stat-card-blue {
+    -fx-background-color: linear-gradient(to bottom right, #2563EB, #1D4ED8);
+}
+
+.stat-card-blue .stat-label,
+.stat-card-blue .stat-note {
+    -fx-text-fill: #DBEAFE;
+}
+
+.stat-card-blue .stat-value {
+    -fx-text-fill: white;
 }
 
 .stat-label {
-  -fx-font-size: 13px;
-  -fx-text-fill: -ut-text-muted;
-  -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+    -fx-font-weight: 700;
 }
 
-.management-card {
-  -fx-background-color: -ut-surface;
-  -fx-border-color: -ut-border;
-  -fx-border-radius: 16;
-  -fx-background-radius: 16;
-  -fx-padding: 20;
-  -fx-effect: -ut-shadow-soft;
+.stat-value {
+    -fx-font-size: 30px;
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: 900;
+}
+
+.stat-note {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
 }

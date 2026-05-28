@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="12"
+      styleClass="dashboard-content">
+    <Label text="Mở cổng đăng ký" styleClass="screen-title"/>
+    <Label text="Màn hình placeholder cho tạo và cập nhật đợt đăng ký." styleClass="body-muted" wrapText="true"/>
+</VBox>

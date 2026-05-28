@@ -1,0 +1,78 @@
+/* Student dashboard */
+
+.student-topbar {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #E2E8F0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 36 0 36;
+    -fx-min-height: 68;
+    -fx-pref-height: 68;
+}
+
+.student-content {
+    -fx-padding: 28 36 28 36;
+    -fx-background-color: #F8FAFC;
+}
+
+.student-hero {
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 22;
+    -fx-background-radius: 22;
+    -fx-padding: 28;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 16, 0.14, 0, 4);
+}
+
+.student-hero-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.student-hero-desc {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748B;
+}
+
+.topic-card-modern {
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 18;
+    -fx-background-radius: 18;
+    -fx-padding: 20;
+    -fx-pref-width: 330;
+    -fx-min-height: 230;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 14, 0.12, 0, 3);
+}
+
+.topic-id {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+}
+
+.topic-card-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0F172A;
+}
+
+.topic-card-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+}
+
+.student-sidebar {
+    -fx-pref-width: 320;
+    -fx-min-width: 300;
+}
+
+.student-info-card,
+.selected-topic-card {
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 18;
+    -fx-background-radius: 18;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.06), 14, 0.12, 0, 3);
+}
