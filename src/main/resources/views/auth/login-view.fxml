@@ -34,15 +34,13 @@
             <VBox spacing="10" maxWidth="Infinity">
                 <Label text="Tên đăng nhập" styleClass="caption-strong"/>
                 <TextField fx:id="txtUsername"
-                           maxWidth="Infinity"
-                           promptText="VD: admin, gv01, N23DCCN023"/>
+                           maxWidth="Infinity"/>
             </VBox>
 
             <VBox spacing="10" maxWidth="Infinity">
                 <Label text="Mật khẩu" styleClass="caption-strong"/>
                 <PasswordField fx:id="txtPassword"
                                maxWidth="Infinity"
-                               promptText="Nhập mật khẩu"
                                onAction="#handleLogin"/>
             </VBox>
 

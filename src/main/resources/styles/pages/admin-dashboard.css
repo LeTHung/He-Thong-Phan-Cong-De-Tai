@@ -87,6 +87,11 @@
     -fx-background-color: -ut-bg;
 }
 
+.transparent-scroll,
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
 .screen-title {
     -fx-font-size: 28px;
     -fx-font-weight: 900;

@@ -1,12 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Quản lý tài khoản" styleClass="screen-title"/>
-    <Label text="Màn hình này sẽ được nối với chức năng quản lý tài khoản của Admin." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.AccountManagementController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Quản lý tài khoản" styleClass="screen-title"/>
+                    <Label text="Thêm, sửa, khóa/mở khóa tài khoản và reset mật khẩu demo." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <HBox spacing="18">
+                <VBox styleClass="main-card" spacing="12" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Danh sách tài khoản" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshAccounts"/>
+                    </HBox>
+                    <TableView fx:id="tblAccounts" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="colUsername" text="Tên đăng nhập" prefWidth="130"/>
+                            <TableColumn fx:id="colRole" text="Vai trò" prefWidth="125"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="105"/>
+                            <TableColumn fx:id="colEmail" text="Email" prefWidth="190"/>
+                            <TableColumn fx:id="colPhone" text="Điện thoại" prefWidth="105"/>
+                            <TableColumn fx:id="colLastLogin" text="Lần cuối" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="main-card admin-form-panel" spacing="12">
+                    <Label text="Thông tin tài khoản" styleClass="card-title"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Tên đăng nhập" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtUsername" promptText="VD: N23DCCN023" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Label text="Mật khẩu khi thêm mới" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtPassword" promptText="VD: 123456" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+
+                        <Label text="Vai trò" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <ComboBox fx:id="cboRole" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+
+                        <Label text="Trạng thái" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                        <ComboBox fx:id="cboStatus" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+
+                        <Label text="Email" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+                        <TextField fx:id="txtEmail" promptText="email@ptit.edu.vn" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+
+                        <Label text="Số điện thoại" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="10"/>
+                        <TextField fx:id="txtPhone" promptText="VD: 0900000000" GridPane.columnIndex="0" GridPane.rowIndex="11"/>
+                    </GridPane>
+
+                    <HBox spacing="10">
+                        <Button text="Thêm" styleClass="btn-primary" onAction="#handleAddAccount"/>
+                        <Button text="Sửa" styleClass="btn-secondary" onAction="#handleUpdateAccount"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <Button text="Khóa" styleClass="btn-warning" onAction="#handleLockAccount"/>
+                        <Button text="Mở khóa" styleClass="btn-outline" onAction="#handleUnlockAccount"/>
+                    </HBox>
+                    <Button text="Reset mật khẩu" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleResetPassword"/>
+                    <Button text="Xóa trắng" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleClearForm"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

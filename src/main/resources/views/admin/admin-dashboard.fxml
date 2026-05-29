@@ -26,10 +26,10 @@
 
             <Label text="TỔNG QUAN" styleClass="side-section"/>
             <Button text="Dashboard" styleClass="side-menu-active" maxWidth="Infinity"/>
-            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
             <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
             <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
-            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
             <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
 
             <Region VBox.vgrow="ALWAYS"/>
@@ -51,23 +51,23 @@
             <HBox spacing="18">
                 <VBox styleClass="stat-card-blue" prefWidth="220">
                     <Label text="Tài khoản" styleClass="stat-label"/>
-                    <Label text="05" styleClass="stat-value"/>
-                    <Label text="Admin, GV, SV" styleClass="stat-note"/>
+                    <Label fx:id="lblAccountCount" text="00" styleClass="stat-value"/>
+                    <Label fx:id="lblAccountNote" text="Đang tải" styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
                     <Label text="Sinh viên" styleClass="stat-label"/>
-                    <Label text="03" styleClass="stat-value"/>
-                    <Label text="Dữ liệu mẫu nhóm" styleClass="stat-note"/>
+                    <Label fx:id="lblStudentCount" text="00" styleClass="stat-value"/>
+                    <Label fx:id="lblStudentNote" text="Đang tải" styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
                     <Label text="Giảng viên" styleClass="stat-label"/>
-                    <Label text="01" styleClass="stat-value"/>
-                    <Label text="Nguyễn Thị Bích Nguyên" styleClass="stat-note"/>
+                    <Label fx:id="lblLecturerCount" text="00" styleClass="stat-value"/>
+                    <Label fx:id="lblLecturerNote" text="Đang tải" styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
                     <Label text="Lớp học phần" styleClass="stat-label"/>
-                    <Label text="01" styleClass="stat-value"/>
-                    <Label text="Công nghệ phần mềm" styleClass="stat-note"/>
+                    <Label fx:id="lblCourseSectionCount" text="00" styleClass="stat-value"/>
+                    <Label fx:id="lblCourseSectionNote" text="Đang tải" styleClass="stat-note"/>
                 </VBox>
             </HBox>
 
@@ -77,15 +77,15 @@
                         <Label text="Công việc cần làm tiếp" styleClass="card-title"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="+ Tạo tài khoản" styleClass="btn-primary" onAction="#handleNotImplemented"/>
+                    <Button text="+ Tạo tài khoản" styleClass="btn-primary" onAction="#handleCreateAccount"/>
                 </HBox>
 
-                <TableView prefHeight="260">
+                <TableView fx:id="tblAdminTasks" prefHeight="260">
                     <columns>
-                        <TableColumn text="Module" prefWidth="180"/>
-                        <TableColumn text="Người phụ trách" prefWidth="180"/>
-                        <TableColumn text="Trạng thái" prefWidth="180"/>
-                        <TableColumn text="Ghi chú" prefWidth="360"/>
+                        <TableColumn fx:id="colModule" text="Module" prefWidth="180"/>
+                        <TableColumn fx:id="colOwner" text="Người phụ trách" prefWidth="180"/>
+                        <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="180"/>
+                        <TableColumn fx:id="colNote" text="Ghi chú" prefWidth="360"/>
                     </columns>
                 </TableView>
             </VBox>

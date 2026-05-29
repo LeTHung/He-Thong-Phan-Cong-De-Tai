@@ -83,8 +83,18 @@ public class SubjectManagementController {
     }
 
     @FXML
+    private void handleShowAccounts() {
+        MainApp.setRoot(MainApp.ACCOUNT_MANAGEMENT_VIEW);
+    }
+
+    @FXML
     private void handleShowSemesters() {
         MainApp.setRoot(MainApp.SEMESTER_MANAGEMENT_VIEW);
+    }
+
+    @FXML
+    private void handleShowCourseSections() {
+        MainApp.setRoot(MainApp.COURSE_SECTION_MANAGEMENT_VIEW);
     }
 
     @FXML
@@ -166,7 +176,7 @@ public class SubjectManagementController {
     @FXML
     private void handleClearForm() {
         clearForm();
-        showMessage("Đã làm mới form.");
+        showMessage("Đã xóa trắng dữ liệu đang nhập.");
     }
 
     private void setupTable() {

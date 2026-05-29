@@ -40,8 +40,10 @@ public class MainApp extends Application {
 
     public static final String LOGIN_VIEW = "/views/auth/login-view.fxml";
     public static final String ADMIN_DASHBOARD_VIEW = "/views/admin/admin-dashboard.fxml";
+    public static final String ACCOUNT_MANAGEMENT_VIEW = "/views/admin/account-management.fxml";
     public static final String SUBJECT_MANAGEMENT_VIEW = "/views/admin/subject-management.fxml";
     public static final String SEMESTER_MANAGEMENT_VIEW = "/views/admin/semester-management.fxml";
+    public static final String COURSE_SECTION_MANAGEMENT_VIEW = "/views/admin/course-section-management.fxml";
     public static final String LECTURER_DASHBOARD_VIEW = "/views/lecturer/lecturer-dashboard.fxml";
     public static final String STUDENT_DASHBOARD_VIEW = "/views/student/student-dashboard.fxml";
 
