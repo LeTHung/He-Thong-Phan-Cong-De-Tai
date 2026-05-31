@@ -33,7 +33,8 @@
             <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
             <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
             <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
-            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowStudentImport"/>
+            <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
 
             <Region VBox.vgrow="ALWAYS"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>

@@ -44,8 +44,20 @@ public class MainApp extends Application {
     public static final String SUBJECT_MANAGEMENT_VIEW = "/views/admin/subject-management.fxml";
     public static final String SEMESTER_MANAGEMENT_VIEW = "/views/admin/semester-management.fxml";
     public static final String COURSE_SECTION_MANAGEMENT_VIEW = "/views/admin/course-section-management.fxml";
+    public static final String STUDENT_IMPORT_VIEW = "/views/admin/student-import.fxml";
+    public static final String ADMIN_REPORT_VIEW = "/views/admin/report.fxml";
     public static final String LECTURER_DASHBOARD_VIEW = "/views/lecturer/lecturer-dashboard.fxml";
+    public static final String LECTURER_COURSE_SECTIONS_VIEW = "/views/lecturer/my-course-sections.fxml";
+    public static final String LECTURER_TOPIC_BANK_VIEW = "/views/lecturer/topic-bank.fxml";
+    public static final String LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW = "/views/lecturer/assign-topic-to-class.fxml";
+    public static final String LECTURER_REGISTRATION_PERIOD_VIEW = "/views/lecturer/registration-period.fxml";
+    public static final String LECTURER_REGISTRATION_RESULT_VIEW = "/views/lecturer/registration-result.fxml";
+    public static final String LECTURER_FINAL_REPORT_VIEW = "/views/lecturer/final-report.fxml";
     public static final String STUDENT_DASHBOARD_VIEW = "/views/student/student-dashboard.fxml";
+    public static final String STUDENT_TOPIC_LIST_VIEW = "/views/student/topic-list.fxml";
+    public static final String STUDENT_TOPIC_DETAIL_VIEW = "/views/student/topic-detail.fxml";
+    public static final String STUDENT_MY_REGISTRATION_VIEW = "/views/student/my-registration.fxml";
+    public static final String STUDENT_PROFILE_VIEW = "/views/student/student-profile.fxml";
 
     @Override
     public void start(Stage stage) {

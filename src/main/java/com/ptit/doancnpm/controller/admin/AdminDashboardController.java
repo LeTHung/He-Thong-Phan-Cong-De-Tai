@@ -2,16 +2,12 @@ package com.ptit.doancnpm.controller.admin;
 
 import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.AdminDashboardSummary;
-import com.ptit.doancnpm.model.dto.AdminDashboardTask;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.AdminDashboardService;
 import com.ptit.doancnpm.util.SessionManager;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 
 public class AdminDashboardController {
 
@@ -46,19 +42,7 @@ public class AdminDashboardController {
     private Label lblCourseSectionNote;
 
     @FXML
-    private TableView<AdminDashboardTask> tblAdminTasks;
-
-    @FXML
-    private TableColumn<AdminDashboardTask, String> colModule;
-
-    @FXML
-    private TableColumn<AdminDashboardTask, String> colOwner;
-
-    @FXML
-    private TableColumn<AdminDashboardTask, String> colStatus;
-
-    @FXML
-    private TableColumn<AdminDashboardTask, String> colNote;
+    private Label lblDataStatus;
 
     private final AdminDashboardService adminDashboardService = new AdminDashboardService();
 
@@ -79,7 +63,6 @@ public class AdminDashboardController {
 
         lblWelcome.setText("Xin chào, " + user.getTenDangNhap());
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
-        setupTaskTable();
         loadDashboardData();
     }
 
@@ -114,15 +97,18 @@ public class AdminDashboardController {
     }
 
     @FXML
-    private void handleNotImplemented() {
-        MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
+    private void handleShowStudentImport() {
+        MainApp.setRoot(MainApp.STUDENT_IMPORT_VIEW);
     }
 
-    private void setupTaskTable() {
-        colModule.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getModule()));
-        colOwner.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getOwner()));
-        colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getStatus()));
-        colNote.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getNote()));
+    @FXML
+    private void handleShowReports() {
+        MainApp.setRoot(MainApp.ADMIN_REPORT_VIEW);
+    }
+
+    @FXML
+    private void handleNotImplemented() {
+        MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
     }
 
     private void loadDashboardData() {
@@ -136,11 +122,16 @@ public class AdminDashboardController {
             lblLecturerNote.setText(summary.getActiveLecturers() + " đang công tác");
             lblCourseSectionCount.setText(formatCount(summary.getTotalCourseSections()));
             lblCourseSectionNote.setText(summary.getOpenCourseSections() + " đang mở");
+            lblDataStatus.setText(adminDashboardService.getDemoDataStatus(summary));
         } catch (RuntimeException exception) {
             lblAccountNote.setText(exception.getMessage());
+            lblDataStatus.setText("Không kiểm tra được dữ liệu demo: " + exception.getMessage());
         }
+    }
 
-        tblAdminTasks.getItems().setAll(adminDashboardService.getAdminTasks());
+    @FXML
+    private void handleRefreshDashboard() {
+        loadDashboardData();
     }
 
     private String formatCount(int count) {

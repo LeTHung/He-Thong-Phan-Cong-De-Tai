@@ -92,6 +92,14 @@
     -fx-background-color: transparent;
 }
 
+.form-note-panel {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
+}
+
 .screen-title {
     -fx-font-size: 28px;
     -fx-font-weight: 900;

@@ -1,12 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Báo cáo quản trị" styleClass="screen-title"/>
-    <Label text="Màn hình placeholder cho thống kê và báo cáo của Admin." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.AdminReportController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowStudentImport"/>
+            <Button text="Báo cáo" styleClass="side-menu-active" maxWidth="Infinity"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Báo cáo quản trị" styleClass="screen-title"/>
+                    <Label text="Theo dõi số sinh viên, số đề tài và tình trạng đăng ký theo từng lớp học phần." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshReports"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                <Label text="Thống kê lớp học phần" styleClass="card-title"/>
+                <TableView fx:id="tblReports" prefHeight="470">
+                    <columns>
+                        <TableColumn fx:id="colCode" text="Mã lớp" prefWidth="160"/>
+                        <TableColumn fx:id="colName" text="Tên lớp học phần" prefWidth="280"/>
+                        <TableColumn fx:id="colStudentCount" text="Sinh viên" prefWidth="110"/>
+                        <TableColumn fx:id="colRegisteredCount" text="Đã có đề tài" prefWidth="130"/>
+                        <TableColumn fx:id="colMissingCount" text="Chưa có đề tài" prefWidth="140"/>
+                        <TableColumn fx:id="colTopicCount" text="Số đề tài" prefWidth="110"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

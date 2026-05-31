@@ -110,6 +110,16 @@ public class SemesterManagementController {
     }
 
     @FXML
+    private void handleShowStudentImport() {
+        MainApp.setRoot(MainApp.STUDENT_IMPORT_VIEW);
+    }
+
+    @FXML
+    private void handleShowReports() {
+        MainApp.setRoot(MainApp.ADMIN_REPORT_VIEW);
+    }
+
+    @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
     }

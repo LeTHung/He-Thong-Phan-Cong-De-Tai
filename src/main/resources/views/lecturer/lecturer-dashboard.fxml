@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -26,12 +26,12 @@
 
             <Label text="GIẢNG VIÊN" styleClass="side-section"/>
             <Button text="Dashboard" styleClass="side-menu-active" maxWidth="Infinity"/>
-            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowTopicBank"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAssignTopicToClass"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowRegistrationPeriod"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowRegistrationResult"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowFinalReport"/>
 
             <Region VBox.vgrow="ALWAYS"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
@@ -79,7 +79,7 @@
                         <Label text="Màn hình khung cho module giảng viên. Cường sẽ gắn dữ liệu thật từ database." styleClass="body-muted"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="+ Tạo đề tài" styleClass="btn-primary" onAction="#handleNotImplemented"/>
+                    <Button text="+ Tạo đề tài" styleClass="btn-primary" onAction="#handleShowTopicBank"/>
                 </HBox>
 
                 <TableView prefHeight="260">
@@ -95,3 +95,4 @@
         </VBox>
     </center>
 </BorderPane>
+

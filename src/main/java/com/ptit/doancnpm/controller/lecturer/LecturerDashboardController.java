@@ -40,6 +40,36 @@ public class LecturerDashboardController {
     }
 
     @FXML
+    private void handleShowCourseSections() {
+        MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW);
+    }
+
+    @FXML
+    private void handleShowTopicBank() {
+        MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW);
+    }
+
+    @FXML
+    private void handleShowAssignTopicToClass() {
+        MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW);
+    }
+
+    @FXML
+    private void handleShowRegistrationPeriod() {
+        MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW);
+    }
+
+    @FXML
+    private void handleShowRegistrationResult() {
+        MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW);
+    }
+
+    @FXML
+    private void handleShowFinalReport() {
+        MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW);
+    }
+
+    @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này thuộc module Giảng viên, Cường sẽ phát triển tiếp.");
     }

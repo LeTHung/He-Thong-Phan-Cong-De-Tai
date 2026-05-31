@@ -2,9 +2,6 @@ package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.AdminDashboardDAO;
 import com.ptit.doancnpm.model.dto.AdminDashboardSummary;
-import com.ptit.doancnpm.model.dto.AdminDashboardTask;
-
-import java.util.List;
 
 public class AdminDashboardService {
 
@@ -14,12 +11,19 @@ public class AdminDashboardService {
         return adminDashboardDAO.getSummary();
     }
 
-    public List<AdminDashboardTask> getAdminTasks() {
-        return List.of(
-                new AdminDashboardTask("Tài khoản", "Lê Tiến Hưng", "Đã nối", "Thêm, sửa, khóa/mở khóa và reset mật khẩu demo."),
-                new AdminDashboardTask("Môn học", "Lê Tiến Hưng", "Đã nối", "CRUD môn học và đổi trạng thái sử dụng."),
-                new AdminDashboardTask("Học kỳ", "Lê Tiến Hưng", "Đã nối", "Tạo học kỳ, mở/đóng/nháp học kỳ."),
-                new AdminDashboardTask("Lớp học phần", "Lê Tiến Hưng", "Đã nối", "Tạo lớp, gán môn học, học kỳ và giảng viên."),
-                new AdminDashboardTask("Import sinh viên", "Lê Tiến Hưng", "Ngày 8", "Chưa thuộc phạm vi ngày 1-7."));
+    public String getDemoDataStatus(AdminDashboardSummary summary) {
+        if (summary.getTotalAccounts() < 5) {
+            return "Thiếu tài khoản mẫu. Cần chạy lại sql/schema.sql.";
+        }
+        if (summary.getTotalStudents() < 3) {
+            return "Thiếu dữ liệu 3 sinh viên nhóm.";
+        }
+        if (summary.getTotalLecturers() < 1) {
+            return "Thiếu giảng viên mẫu.";
+        }
+        if (summary.getTotalCourseSections() < 1) {
+            return "Thiếu lớp học phần mẫu.";
+        }
+        return "Dữ liệu demo Admin ổn: tài khoản, sinh viên, giảng viên và lớp học phần đã sẵn sàng.";
     }
 }
