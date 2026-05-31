@@ -22,8 +22,8 @@
             </HBox>
 
             <Button text="Trang chủ" styleClass="nav-link-active"/>
-            <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleNotImplemented"/>
-            <Button text="Đề tài đã chọn" styleClass="nav-link" onAction="#handleNotImplemented"/>
+            <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleShowTopicList"/>
+            <Button text="Đề tài đã chọn" styleClass="nav-link" onAction="#handleShowMyRegistration"/>
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
@@ -61,7 +61,7 @@
                         <Label text="Quản lý lớp học phần, ngân hàng đề tài, đăng ký/hủy đăng ký và xuất danh sách nhóm."
                                styleClass="topic-card-desc" wrapText="true"/>
                         <Label text="Số lượng: 3/3" styleClass="body-muted"/>
-                        <Button text="Xem chi tiết" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+                        <Button text="Xem chi tiết" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleShowTopicDetail"/>
                     </VBox>
 
                     <VBox styleClass="topic-card-modern" spacing="10">
@@ -92,7 +92,7 @@
                     <Label text="Xây dựng ứng dụng phân công đề tài cho sinh viên"
                            styleClass="selected-topic-title" wrapText="true"/>
                     <Label text="Trạng thái: Đã đăng ký" styleClass="badge badge-success"/>
-                    <Button text="Hủy đăng ký" styleClass="btn-danger" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+                    <Button text="Hủy đăng ký" styleClass="btn-danger" maxWidth="Infinity" onAction="#handleShowMyRegistration"/>
                 </VBox>
             </VBox>
         </HBox>

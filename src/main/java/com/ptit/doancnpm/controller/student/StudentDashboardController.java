@@ -40,6 +40,26 @@ public class StudentDashboardController {
     }
 
     @FXML
+    private void handleShowTopicList() {
+        MainApp.setRoot(MainApp.STUDENT_TOPIC_LIST_VIEW);
+    }
+
+    @FXML
+    private void handleShowMyRegistration() {
+        MainApp.setRoot(MainApp.STUDENT_MY_REGISTRATION_VIEW);
+    }
+
+    @FXML
+    private void handleShowTopicDetail() {
+        MainApp.setRoot(MainApp.STUDENT_TOPIC_DETAIL_VIEW);
+    }
+
+    @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
+    }
+
+    @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này thuộc module Sinh viên, Quốc sẽ phát triển tiếp.");
     }

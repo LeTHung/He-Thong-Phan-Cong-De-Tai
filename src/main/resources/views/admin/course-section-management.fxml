@@ -1,12 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Quản lý lớp học phần" styleClass="screen-title"/>
-    <Label text="Màn hình placeholder cho CRUD lớp học phần." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.CourseSectionManagementController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
+            <Button text="Lớp học phần" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowStudentImport"/>
+            <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Quản lý lớp học phần" styleClass="screen-title"/>
+                    <Label text="Tạo lớp học phần, gán môn học, học kỳ và giảng viên phụ trách." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <HBox spacing="18" VBox.vgrow="ALWAYS">
+                <VBox styleClass="main-card" spacing="12" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Danh sách lớp học phần" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshCourseSections"/>
+                    </HBox>
+                    <TableView fx:id="tblCourseSections" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="colCode" text="Mã lớp" prefWidth="140"/>
+                            <TableColumn fx:id="colName" text="Tên lớp học phần" prefWidth="230"/>
+                            <TableColumn fx:id="colSubject" text="Môn học" prefWidth="170"/>
+                            <TableColumn fx:id="colSemester" text="Học kỳ" prefWidth="150"/>
+                            <TableColumn fx:id="colLecturer" text="Giảng viên" prefWidth="180"/>
+                            <TableColumn fx:id="colMaxSize" text="Sĩ số" prefWidth="80"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="110"/>
+                        </columns>
+                    </TableView>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="main-card admin-form-panel" spacing="12" maxHeight="Infinity">
+                    <Label text="Thông tin lớp học phần" styleClass="card-title"/>
+
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent-scroll" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox spacing="12">
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Mã lớp" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="txtCode" promptText="VD: CNPM_D23CQCN01_N" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Label text="Tên lớp học phần" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextField fx:id="txtName" promptText="Công nghệ phần mềm - D23CQCN01-N" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+
+                        <Label text="Môn học" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <ComboBox fx:id="cboSubject" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+
+                        <Label text="Học kỳ" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                        <ComboBox fx:id="cboSemester" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+
+                        <Label text="Giảng viên" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+                        <ComboBox fx:id="cboLecturer" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
+
+                        <Label text="Sĩ số tối đa" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="10"/>
+                        <TextField fx:id="txtMaxSize" promptText="VD: 80" GridPane.columnIndex="0" GridPane.rowIndex="11"/>
+
+                        <Label text="Trạng thái" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="12"/>
+                        <ComboBox fx:id="cboStatus" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="13"/>
+
+                        <Label text="Ghi chú" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="14"/>
+                        <TextArea fx:id="txtNote" prefRowCount="3" wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="15"/>
+                    </GridPane>
+
+                    <HBox spacing="10">
+                        <Button text="Thêm" styleClass="btn-primary" onAction="#handleAddCourseSection"/>
+                        <Button text="Sửa" styleClass="btn-secondary" onAction="#handleUpdateCourseSection"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <Button text="Mở" styleClass="btn-outline" onAction="#handleOpenCourseSection"/>
+                        <Button text="Đóng" styleClass="btn-warning" onAction="#handleCloseCourseSection"/>
+                        <Button text="Lưu trữ" styleClass="btn-outline" onAction="#handleArchiveCourseSection"/>
+                    </HBox>
+                    <Button text="Xóa trắng" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleClearForm"/>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

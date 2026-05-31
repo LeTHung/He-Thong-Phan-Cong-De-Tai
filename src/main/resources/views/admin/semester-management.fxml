@@ -30,11 +30,12 @@
 
             <Label text="QUẢN TRỊ" styleClass="side-section"/>
             <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
-            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
             <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
             <Button text="Học kỳ" styleClass="side-menu-active" maxWidth="Infinity"/>
-            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowStudentImport"/>
+            <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
 
             <Region VBox.vgrow="ALWAYS"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
@@ -55,7 +56,7 @@
             <HBox spacing="18">
                 <VBox styleClass="main-card" spacing="12" HBox.hgrow="ALWAYS">
                     <Label text="Danh sách học kỳ" styleClass="card-title"/>
-                    <TableView fx:id="tblSemesters" prefHeight="420">
+                    <TableView fx:id="tblSemesters" prefHeight="400">
                         <columns>
                             <TableColumn fx:id="colCode" text="Mã học kỳ" prefWidth="130"/>
                             <TableColumn fx:id="colName" text="Tên học kỳ" prefWidth="140"/>
@@ -100,7 +101,7 @@
                         <Button text="Mở" styleClass="btn-outline" onAction="#handleOpenSemester"/>
                         <Button text="Đóng" styleClass="btn-warning" onAction="#handleCloseSemester"/>
                     </HBox>
-                    <Button text="Làm mới" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleClearForm"/>
+                    <Button text="Xóa trắng" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleClearForm"/>
                 </VBox>
             </HBox>
         </VBox>

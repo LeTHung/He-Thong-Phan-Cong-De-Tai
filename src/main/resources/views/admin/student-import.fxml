@@ -1,12 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Import sinh viên" styleClass="screen-title"/>
-    <Label text="Màn hình placeholder cho thêm sinh viên vào lớp học phần." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.StudentImportController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="UT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSemesters"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Import sinh viên" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Sinh viên lớp học phần" styleClass="screen-title"/>
+                    <Label text="Thêm thủ công sinh viên vào lớp học phần và chuẩn bị luồng import Excel." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <HBox spacing="18" VBox.vgrow="ALWAYS">
+                <VBox styleClass="main-card" spacing="12" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Danh sách sinh viên trong lớp" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshStudents"/>
+                    </HBox>
+
+                    <GridPane hgap="10" vgap="8">
+                        <Label text="Lớp học phần" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="cboCourseSection" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    </GridPane>
+
+                    <TableView fx:id="tblStudents" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="colStudentCode" text="Mã sinh viên" prefWidth="130"/>
+                            <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="190"/>
+                            <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>
+                            <TableColumn fx:id="colClassName" text="Lớp sinh hoạt" prefWidth="130"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="110"/>
+                            <TableColumn fx:id="colNote" text="Ghi chú" prefWidth="180"/>
+                        </columns>
+                    </TableView>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+                </VBox>
+
+                <VBox styleClass="main-card admin-form-panel" spacing="12">
+                    <Label text="Thêm sinh viên" styleClass="card-title"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Sinh viên" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="cboStudent" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Label text="Ghi chú" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextArea fx:id="txtNote" prefRowCount="4" wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    </GridPane>
+
+                    <Button text="Thêm vào lớp" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleAddStudent"/>
+                    <Button text="Rút khỏi lớp" styleClass="btn-warning" maxWidth="Infinity" onAction="#handleWithdrawStudent"/>
+
+                    <VBox styleClass="form-note-panel" spacing="8">
+                        <Label text="Import Excel" styleClass="caption-strong"/>
+                        <Label text="Chưa xử lý file ở ngày 8. Màn này đã chuẩn bị luồng quản lý sinh viên lớp để mở rộng import sau." styleClass="body-muted" wrapText="true"/>
+                        <Button text="Chọn file Excel" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleNotImplemented"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
