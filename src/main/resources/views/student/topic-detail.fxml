@@ -1,12 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="student-content">
-    <Label text="Chi tiết đề tài" styleClass="student-hero-title"/>
-    <Label text="Màn hình placeholder cho thông tin chi tiết đề tài." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.student.TopicDetailController"
+            styleClass="student-root">
+
+    <top>
+        <HBox styleClass="student-topbar" alignment="CENTER_LEFT" spacing="18">
+            <HBox styleClass="brand-box">
+                <Label text="UT" styleClass="brand-logo brand-logo-text"/>
+                <Label text="UniTopics" styleClass="brand-name"/>
+            </HBox>
+
+            <Button text="Trang chủ" styleClass="nav-link" onAction="#handleBackDashboard"/>
+            <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleBackToList"/>
+            <Button text="Đề tài đã chọn" styleClass="nav-link" onAction="#handleShowMyRegistration"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox styleClass="student-content" spacing="22">
+            <VBox spacing="18" HBox.hgrow="ALWAYS">
+                <VBox styleClass="student-hero" spacing="10">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label fx:id="lblTopicCode" text="—" styleClass="topic-id"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblStatus" text="" styleClass="badge badge-info"/>
+                    </HBox>
+                    <Label fx:id="lblTopicTitle" text="Chi tiết đề tài" styleClass="student-hero-title" wrapText="true"/>
+                    <Label fx:id="lblClass" text="Lớp học phần: —" styleClass="student-hero-desc"/>
+                </VBox>
+
+                <VBox styleClass="student-info-card" spacing="14" VBox.vgrow="ALWAYS">
+                    <Label text="Mô tả đề tài" styleClass="card-title"/>
+                    <ScrollPane fitToWidth="true" prefHeight="160" styleClass="topic-scroll">
+                        <VBox spacing="6">
+                            <Label fx:id="lblDescription" text="—" styleClass="body-muted" wrapText="true"/>
+                        </VBox>
+                    </ScrollPane>
+
+                    <Label text="Yêu cầu" styleClass="card-title"/>
+                    <ScrollPane fitToWidth="true" prefHeight="120" styleClass="topic-scroll">
+                        <VBox spacing="6">
+                            <Label fx:id="lblRequirement" text="—" styleClass="body-muted" wrapText="true"/>
+                        </VBox>
+                    </ScrollPane>
+
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+                </VBox>
+            </VBox>
+
+            <VBox styleClass="student-sidebar" spacing="16">
+                <VBox styleClass="selected-topic-card" spacing="12">
+                    <Label text="Số chỗ" styleClass="card-title"/>
+                    <GridPane hgap="10" vgap="8">
+                        <Label text="Đã đăng ký:" styleClass="body-muted" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="lblSlots" text="—" styleClass="current-course-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Còn lại:" styleClass="body-muted" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="lblRemaining" text="—" styleClass="current-course-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Hình thức:" styleClass="body-muted" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="lblMode" text="—" styleClass="body-muted" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    </GridPane>
+
+                    <Button fx:id="btnRegister" text="Đăng ký đề tài này" styleClass="btn-primary"
+                            maxWidth="Infinity" onAction="#handleRegister"/>
+                    <Button text="Quay lại danh sách" styleClass="btn-outline"
+                            maxWidth="Infinity" onAction="#handleBackToList"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
