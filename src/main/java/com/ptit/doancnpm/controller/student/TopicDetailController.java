@@ -227,6 +227,11 @@ public class TopicDetailController {
     }
 
     @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
     private void handleLogout() {
         MainApp.showLogin();
     }

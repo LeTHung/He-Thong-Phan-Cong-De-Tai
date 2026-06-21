@@ -354,6 +354,11 @@ public class MyRegistrationController {
     }
 
     @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
     private void handleBackDashboard() {
         MainApp.setRoot(MainApp.STUDENT_DASHBOARD_VIEW);
     }
