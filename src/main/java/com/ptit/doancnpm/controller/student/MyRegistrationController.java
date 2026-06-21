@@ -148,7 +148,8 @@ public class MyRegistrationController {
             RegistrationPeriod current = period.get();
             dangMoDangKy = current.dangMo();
             lblPeriod.setText(current.moTaTrangThai());
-            lblPeriod.getStyleClass().setAll("badge", dangMoDangKy ? "badge-success" : "badge-warning");
+            lblPeriod.getStyleClass().setAll("badge",
+                    dangMoDangKy ? (current.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
         } catch (RuntimeException exception) {
             lblPeriod.setText("");
         }

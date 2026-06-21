@@ -160,7 +160,8 @@ public class TopicListController {
             RegistrationPeriod current = period.get();
             dangMoDangKy = current.dangMo();
             lblPeriod.setText(current.moTaTrangThai());
-            lblPeriod.getStyleClass().setAll("badge", dangMoDangKy ? "badge-success" : "badge-warning");
+            lblPeriod.getStyleClass().setAll("badge",
+                    dangMoDangKy ? (current.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
             btnRegister.setDisable(!dangMoDangKy);
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
