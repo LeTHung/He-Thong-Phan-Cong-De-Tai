@@ -82,6 +82,8 @@
                         </VBox>
                     </ScrollPane>
 
+                    <Button fx:id="btnChange" text="Đổi đề tài" styleClass="btn-secondary"
+                            maxWidth="Infinity" onAction="#handleChange"/>
                     <Button fx:id="btnCancel" text="Hủy đăng ký" styleClass="btn-danger"
                             maxWidth="Infinity" onAction="#handleCancel"/>
                 </VBox>

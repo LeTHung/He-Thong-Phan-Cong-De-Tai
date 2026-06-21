@@ -80,6 +80,50 @@ public class TopicRegistrationService {
         topicRegistrationDAO.registerTopic(maSinhVien, maDeTaiLop);
     }
 
+    /**
+     * Đổi đề tài: hủy đề tài hiện tại rồi đăng ký đề tài mới trong cùng lớp học phần.
+     * Nếu bước đăng ký mới thất bại, cố khôi phục lại đề tài cũ để sinh viên không
+     * bị mất đăng ký, sau đó báo lỗi rõ ràng.
+     */
+    public void changeTopic(int maSinhVien, int maLopHocPhan, int oldMaDeTaiLop, int newMaDeTaiLop) {
+        if (maSinhVien <= 0) {
+            throw new IllegalArgumentException("Không xác định được sinh viên đang đăng nhập.");
+        }
+        if (maLopHocPhan <= 0) {
+            throw new IllegalArgumentException("Không xác định được lớp học phần.");
+        }
+        if (newMaDeTaiLop <= 0) {
+            throw new IllegalArgumentException("Vui lòng chọn đề tài mới để đổi.");
+        }
+        if (newMaDeTaiLop == oldMaDeTaiLop) {
+            throw new IllegalArgumentException("Đề tài mới trùng với đề tài hiện tại.");
+        }
+
+        topicRegistrationDAO.cancelRegistration(maSinhVien, maLopHocPhan, "Đổi sang đề tài khác");
+        try {
+            topicRegistrationDAO.registerTopic(maSinhVien, newMaDeTaiLop);
+        } catch (RuntimeException exception) {
+            if (tryRestore(maSinhVien, oldMaDeTaiLop)) {
+                throw new IllegalStateException("Không đổi được đề tài: " + exception.getMessage()
+                        + " Đề tài cũ đã được giữ lại.");
+            }
+            throw new IllegalStateException("Không đổi được đề tài: " + exception.getMessage()
+                    + " Lưu ý: chưa khôi phục được đề tài cũ, vui lòng đăng ký lại.");
+        }
+    }
+
+    private boolean tryRestore(int maSinhVien, int oldMaDeTaiLop) {
+        if (oldMaDeTaiLop <= 0) {
+            return false;
+        }
+        try {
+            topicRegistrationDAO.registerTopic(maSinhVien, oldMaDeTaiLop);
+            return true;
+        } catch (RuntimeException ignored) {
+            return false;
+        }
+    }
+
     public void cancel(int maSinhVien, int maLopHocPhan, String lyDo) {
         if (maSinhVien <= 0) {
             throw new IllegalArgumentException("Không xác định được sinh viên đang đăng nhập.");

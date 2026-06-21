@@ -4,6 +4,7 @@ import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
+import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
@@ -13,12 +14,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,6 +85,9 @@ public class MyRegistrationController {
 
     @FXML
     private Label lblDetailDescription;
+
+    @FXML
+    private Button btnChange;
 
     @FXML
     private Button btnCancel;
@@ -171,9 +178,11 @@ public class MyRegistrationController {
             if (registrations.isEmpty()) {
                 clearDetail();
                 btnCancel.setDisable(true);
+                btnChange.setDisable(true);
                 showMessage("Bạn chưa đăng ký đề tài nào. Vào \"Danh sách đề tài\" để đăng ký.");
             } else {
                 btnCancel.setDisable(!dangMoDangKy);
+                btnChange.setDisable(!dangMoDangKy);
                 tblRegistrations.getSelectionModel().selectFirst();
                 if (dangMoDangKy) {
                     showMessage("Bạn đã đăng ký " + registrations.size() + " đề tài.");
@@ -186,6 +195,7 @@ public class MyRegistrationController {
             tblRegistrations.getItems().clear();
             clearDetail();
             btnCancel.setDisable(true);
+            btnChange.setDisable(true);
             showMessage(exception.getMessage());
         }
     }
@@ -207,6 +217,59 @@ public class MyRegistrationController {
         lblDetailMode.setText("Hình thức: —");
         lblDetailTime.setText("Thời điểm đăng ký: —");
         lblDetailDescription.setText("—");
+    }
+
+    @FXML
+    private void handleChange() {
+        RegisteredTopic selected = tblRegistrations.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showMessage("Vui lòng chọn đề tài cần đổi.");
+            return;
+        }
+        if (!dangMoDangKy) {
+            showMessage("Cổng đăng ký đã đóng nên không thể đổi đề tài.");
+            return;
+        }
+
+        List<StudentTopicSummary> options = topicRegistrationService.getRegistrableTopics(maTaiKhoan).stream()
+                .filter(topic -> topic.maDeTaiLop() != selected.maDeTaiLop()
+                        && "DANG_MO".equals(topic.trangThai())
+                        && topic.soChoConLai() > 0
+                        && !topic.daDangKy())
+                .toList();
+        if (options.isEmpty()) {
+            showMessage("Không có đề tài nào khác còn chỗ để đổi.");
+            return;
+        }
+
+        LinkedHashMap<String, StudentTopicSummary> labelToTopic = new LinkedHashMap<>();
+        for (StudentTopicSummary topic : options) {
+            labelToTopic.put(
+                    topic.maDeTaiHeThong() + " - " + topic.tenDeTai() + " (còn " + topic.soChoConLai() + " chỗ)",
+                    topic);
+        }
+        List<String> labels = new ArrayList<>(labelToTopic.keySet());
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(labels.get(0), labels);
+        dialog.setTitle("Đổi đề tài");
+        dialog.setHeaderText("Hủy đề tài hiện tại và đăng ký đề tài mới.");
+        dialog.setContentText("Chọn đề tài mới:");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isEmpty()) {
+            return;
+        }
+
+        StudentTopicSummary chosen = labelToTopic.get(result.get());
+        try {
+            topicRegistrationService.changeTopic(
+                    maSinhVien, selected.maLopHocPhan(), selected.maDeTaiLop(), chosen.maDeTaiLop());
+            showMessage("Đã đổi sang đề tài " + chosen.maDeTaiHeThong() + " - " + chosen.tenDeTai() + ".");
+            loadPeriod();
+            loadRegistrations();
+        } catch (RuntimeException exception) {
+            showMessage(exception.getMessage());
+            loadRegistrations();
+        }
     }
 
     @FXML
