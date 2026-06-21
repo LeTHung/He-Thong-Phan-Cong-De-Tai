@@ -64,6 +64,9 @@ public class TopicListController {
     private ComboBox<String> cboSort;
 
     @FXML
+    private ComboBox<String> cboStatus;
+
+    @FXML
     private TableView<StudentTopicSummary> tblTopics;
 
     @FXML
@@ -89,6 +92,8 @@ public class TopicListController {
     private static final String SORT_LEAST_AVAILABLE = "Còn ít chỗ nhất";
     private static final String SORT_NAME = "Tên A → Z";
     private static final String SORT_CODE = "Mã đề tài A → Z";
+
+    private static final String STATUS_ALL = "Tất cả trạng thái";
 
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
@@ -117,6 +122,7 @@ public class TopicListController {
 
         setupTable();
         setupSort();
+        setupStatusFilter();
         loadStudentInfo();
         loadTopics();
     }
@@ -125,6 +131,15 @@ public class TopicListController {
         cboSort.getItems().setAll(
                 SORT_DEFAULT, SORT_MOST_AVAILABLE, SORT_LEAST_AVAILABLE, SORT_NAME, SORT_CODE);
         cboSort.setValue(SORT_DEFAULT);
+    }
+
+    private void setupStatusFilter() {
+        cboStatus.getItems().setAll(
+                STATUS_ALL,
+                trangThaiText("DANG_MO"),
+                trangThaiText("DA_DU"),
+                trangThaiText("DA_DONG"));
+        cboStatus.setValue(STATUS_ALL);
     }
 
     private void setupTable() {
@@ -204,6 +219,8 @@ public class TopicListController {
     private void applyFilter() {
         String keyword = txtSearch.getText() == null ? "" : txtSearch.getText().trim().toLowerCase();
         boolean onlyAvailable = chkOnlyAvailable.isSelected();
+        String status = cboStatus == null ? null : cboStatus.getValue();
+        boolean allStatus = status == null || STATUS_ALL.equals(status);
 
         List<StudentTopicSummary> filtered = allTopics.stream()
                 .filter(topic -> keyword.isEmpty()
@@ -211,6 +228,7 @@ public class TopicListController {
                         || contains(topic.tenDeTai(), keyword))
                 .filter(topic -> !onlyAvailable
                         || (topic.soChoConLai() > 0 && "DANG_MO".equals(topic.trangThai())))
+                .filter(topic -> allStatus || status.equals(trangThaiText(topic.trangThai())))
                 .sorted(currentComparator())
                 .toList();
         tblTopics.getItems().setAll(filtered);
@@ -254,6 +272,7 @@ public class TopicListController {
         txtSearch.clear();
         chkOnlyAvailable.setSelected(false);
         cboSort.setValue(SORT_DEFAULT);
+        cboStatus.setValue(STATUS_ALL);
         loadStudentInfo();
         loadTopics();
     }

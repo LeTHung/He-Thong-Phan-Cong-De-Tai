@@ -50,6 +50,8 @@
                     <TextField fx:id="txtSearch" promptText="Tìm theo mã hoặc tên đề tài..."
                                onAction="#handleSearch" HBox.hgrow="ALWAYS"/>
                     <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" onAction="#handleSearch"/>
+                    <Label text="Trạng thái:" styleClass="body-muted"/>
+                    <ComboBox fx:id="cboStatus" prefWidth="150" onAction="#handleSearch"/>
                     <Label text="Sắp xếp:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboSort" prefWidth="180" onAction="#handleSort"/>
                     <Button text="Tìm" styleClass="btn-secondary" onAction="#handleSearch"/>
