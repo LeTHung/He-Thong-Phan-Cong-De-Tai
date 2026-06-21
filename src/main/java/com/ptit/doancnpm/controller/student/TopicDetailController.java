@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
+import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.TopicDetail;
 import com.ptit.doancnpm.model.entity.User;
@@ -49,6 +50,9 @@ public class TopicDetailController {
     private Label lblMode;
 
     @FXML
+    private Label lblPeriod;
+
+    @FXML
     private Label lblDescription;
 
     @FXML
@@ -62,6 +66,7 @@ public class TopicDetailController {
     private int maTaiKhoan;
     private int maSinhVien;
     private Integer maDeTaiLop;
+    private boolean dangMoDangKy;
 
     @FXML
     private void initialize() {
@@ -117,9 +122,13 @@ public class TopicDetailController {
             lblDescription.setText(nullToDash(detail.moTa()));
             lblRequirement.setText(nullToDash(detail.yeuCau()));
             setStatus(detail.trangThai());
+            loadPeriod(detail.maLopHocPhan());
 
-            btnRegister.setDisable(!detail.conCho());
-            if (!detail.conCho()) {
+            boolean canRegister = detail.conCho() && dangMoDangKy;
+            btnRegister.setDisable(!canRegister);
+            if (!dangMoDangKy) {
+                showMessage("Cổng đăng ký hiện không mở nên không thể đăng ký.");
+            } else if (!detail.conCho()) {
                 showMessage("Đề tài này hiện không nhận đăng ký (đã đủ hoặc đã đóng).");
             } else {
                 showMessage("Đề tài còn " + detail.soChoConLai() + " chỗ. Bạn có thể đăng ký.");
@@ -130,10 +139,33 @@ public class TopicDetailController {
         }
     }
 
+    private void loadPeriod(int maLopHocPhan) {
+        dangMoDangKy = false;
+        try {
+            Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
+            if (period.isEmpty()) {
+                lblPeriod.setText("Chưa mở đợt đăng ký");
+                lblPeriod.getStyleClass().setAll("badge", "badge-info");
+                return;
+            }
+
+            RegistrationPeriod current = period.get();
+            dangMoDangKy = current.dangMo();
+            lblPeriod.setText(current.moTaTrangThai());
+            lblPeriod.getStyleClass().setAll("badge", dangMoDangKy ? "badge-success" : "badge-warning");
+        } catch (RuntimeException exception) {
+            lblPeriod.setText("");
+        }
+    }
+
     @FXML
     private void handleRegister() {
         if (maDeTaiLop == null) {
             showMessage("Chưa chọn đề tài để đăng ký.");
+            return;
+        }
+        if (!dangMoDangKy) {
+            showMessage("Cổng đăng ký hiện không mở nên không thể đăng ký.");
             return;
         }
 

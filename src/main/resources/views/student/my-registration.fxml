@@ -39,6 +39,7 @@
                     <Label text="Đề tài đã chọn" styleClass="student-hero-title"/>
                     <Label text="Danh sách đề tài bạn đã đăng ký. Chọn một dòng để xem chi tiết hoặc hủy đăng ký."
                            styleClass="student-hero-desc" wrapText="true"/>
+                    <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
 
                 <VBox styleClass="student-info-card" spacing="12" VBox.vgrow="ALWAYS">

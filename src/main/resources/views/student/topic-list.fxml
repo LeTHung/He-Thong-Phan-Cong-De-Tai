@@ -39,6 +39,7 @@
                     <Label text="Danh sách đề tài" styleClass="student-hero-title"/>
                     <Label text="Xem các đề tài còn chỗ trong lớp học phần của bạn, chọn một đề tài rồi đăng ký."
                            styleClass="student-hero-desc" wrapText="true"/>
+                    <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
 
                 <HBox spacing="12" alignment="CENTER_LEFT">
@@ -64,7 +65,7 @@
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Button text="Xem chi tiết" styleClass="btn-outline" onAction="#handleViewDetail"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Đăng ký đề tài đã chọn" styleClass="btn-primary" onAction="#handleRegister"/>
+                        <Button fx:id="btnRegister" text="Đăng ký đề tài đã chọn" styleClass="btn-primary" onAction="#handleRegister"/>
                     </HBox>
 
                     <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>

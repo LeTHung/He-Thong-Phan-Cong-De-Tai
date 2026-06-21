@@ -42,6 +42,7 @@
                     </HBox>
                     <Label fx:id="lblTopicTitle" text="Chi tiết đề tài" styleClass="student-hero-title" wrapText="true"/>
                     <Label fx:id="lblClass" text="Lớp học phần: —" styleClass="student-hero-desc"/>
+                    <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
 
                 <VBox styleClass="student-info-card" spacing="14" VBox.vgrow="ALWAYS">

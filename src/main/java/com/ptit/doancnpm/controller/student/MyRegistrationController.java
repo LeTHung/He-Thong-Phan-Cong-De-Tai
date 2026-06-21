@@ -2,6 +2,7 @@ package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
+import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
@@ -35,6 +36,9 @@ public class MyRegistrationController {
 
     @FXML
     private Label lblMessage;
+
+    @FXML
+    private Label lblPeriod;
 
     @FXML
     private TableView<RegisteredTopic> tblRegistrations;
@@ -85,6 +89,8 @@ public class MyRegistrationController {
 
     private int maTaiKhoan;
     private int maSinhVien;
+    private Integer maLopHocPhan;
+    private boolean dangMoDangKy;
 
     @FXML
     private void initialize() {
@@ -106,12 +112,39 @@ public class MyRegistrationController {
         try {
             StudentInfo info = topicRegistrationService.getStudentInfo(maTaiKhoan);
             maSinhVien = info.maSinhVien();
+            maLopHocPhan = info.maLopHocPhan();
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
         }
 
         setupTable();
+        loadPeriod();
         loadRegistrations();
+    }
+
+    private void loadPeriod() {
+        dangMoDangKy = false;
+        if (maLopHocPhan == null) {
+            lblPeriod.setText("Chưa có đợt đăng ký");
+            lblPeriod.getStyleClass().setAll("badge", "badge-info");
+            return;
+        }
+
+        try {
+            Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
+            if (period.isEmpty()) {
+                lblPeriod.setText("Chưa mở đợt đăng ký");
+                lblPeriod.getStyleClass().setAll("badge", "badge-info");
+                return;
+            }
+
+            RegistrationPeriod current = period.get();
+            dangMoDangKy = current.dangMo();
+            lblPeriod.setText(current.moTaTrangThai());
+            lblPeriod.getStyleClass().setAll("badge", dangMoDangKy ? "badge-success" : "badge-warning");
+        } catch (RuntimeException exception) {
+            lblPeriod.setText("");
+        }
     }
 
     private void setupTable() {
@@ -140,9 +173,14 @@ public class MyRegistrationController {
                 btnCancel.setDisable(true);
                 showMessage("Bạn chưa đăng ký đề tài nào. Vào \"Danh sách đề tài\" để đăng ký.");
             } else {
-                btnCancel.setDisable(false);
+                btnCancel.setDisable(!dangMoDangKy);
                 tblRegistrations.getSelectionModel().selectFirst();
-                showMessage("Bạn đã đăng ký " + registrations.size() + " đề tài.");
+                if (dangMoDangKy) {
+                    showMessage("Bạn đã đăng ký " + registrations.size() + " đề tài.");
+                } else {
+                    showMessage("Bạn đã đăng ký " + registrations.size()
+                            + " đề tài. Cổng đăng ký đã đóng nên không thể hủy.");
+                }
             }
         } catch (RuntimeException exception) {
             tblRegistrations.getItems().clear();
@@ -176,6 +214,10 @@ public class MyRegistrationController {
         RegisteredTopic selected = tblRegistrations.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showMessage("Vui lòng chọn đề tài cần hủy đăng ký.");
+            return;
+        }
+        if (!dangMoDangKy) {
+            showMessage("Cổng đăng ký đã đóng nên không thể hủy đăng ký.");
             return;
         }
 

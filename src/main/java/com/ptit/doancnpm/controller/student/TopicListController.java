@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
+import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
@@ -10,6 +11,7 @@ import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -44,6 +46,12 @@ public class TopicListController {
     private Label lblCourseName;
 
     @FXML
+    private Label lblPeriod;
+
+    @FXML
+    private Button btnRegister;
+
+    @FXML
     private TextField txtSearch;
 
     @FXML
@@ -71,6 +79,8 @@ public class TopicListController {
 
     private int maTaiKhoan;
     private int maSinhVien;
+    private Integer maLopHocPhan;
+    private boolean dangMoDangKy;
     private List<StudentTopicSummary> allTopics = List.of();
 
     @FXML
@@ -112,12 +122,42 @@ public class TopicListController {
         try {
             StudentInfo info = topicRegistrationService.getStudentInfo(maTaiKhoan);
             maSinhVien = info.maSinhVien();
+            maLopHocPhan = info.maLopHocPhan();
             lblStudentName.setText(info.hoTen());
             lblStudentCode.setText("MSSV: " + info.maSoSinhVien());
             lblStudentClass.setText("Lớp: " + nullToDash(info.lopSinhHoat()));
-            lblCourseName.setText(info.maLopHocPhan() == null
+            lblCourseName.setText(maLopHocPhan == null
                     ? "Chưa được xếp vào lớp học phần"
                     : "Lớp HP: " + nullToDash(info.tenLopHocPhan()));
+            loadPeriod();
+        } catch (RuntimeException exception) {
+            showMessage(exception.getMessage());
+        }
+    }
+
+    private void loadPeriod() {
+        dangMoDangKy = false;
+        if (maLopHocPhan == null) {
+            lblPeriod.setText("Chưa có đợt đăng ký");
+            lblPeriod.getStyleClass().setAll("badge", "badge-info");
+            btnRegister.setDisable(true);
+            return;
+        }
+
+        try {
+            Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
+            if (period.isEmpty()) {
+                lblPeriod.setText("Chưa mở đợt đăng ký");
+                lblPeriod.getStyleClass().setAll("badge", "badge-info");
+                btnRegister.setDisable(true);
+                return;
+            }
+
+            RegistrationPeriod current = period.get();
+            dangMoDangKy = current.dangMo();
+            lblPeriod.setText(current.moTaTrangThai());
+            lblPeriod.getStyleClass().setAll("badge", dangMoDangKy ? "badge-success" : "badge-warning");
+            btnRegister.setDisable(!dangMoDangKy);
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
         }
@@ -184,6 +224,10 @@ public class TopicListController {
         }
         if (selected.daDangKy()) {
             showMessage("Bạn đã đăng ký đề tài này rồi.");
+            return;
+        }
+        if (!dangMoDangKy) {
+            showMessage("Cổng đăng ký hiện không mở nên không thể đăng ký.");
             return;
         }
 
