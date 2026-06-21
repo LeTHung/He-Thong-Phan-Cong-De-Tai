@@ -16,7 +16,8 @@ public record TopicDetail(
         int soLuongHienTai,
         int soChoConLai,
         String trangThai,
-        String cheDoPhanCong) {
+        String cheDoPhanCong,
+        String tenGiangVien) {
 
     public boolean conCho() {
         return soChoConLai > 0 && "DANG_MO".equals(trangThai);

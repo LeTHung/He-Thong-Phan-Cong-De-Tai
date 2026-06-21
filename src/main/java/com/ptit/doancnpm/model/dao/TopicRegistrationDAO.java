@@ -6,6 +6,7 @@ import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.dto.TopicDetail;
+import com.ptit.doancnpm.model.dto.TopicMember;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.CallableStatement;
@@ -156,8 +157,11 @@ public class TopicRegistrationDAO {
                     v.so_luong_hien_tai,
                     v.so_cho_con_lai,
                     v.trang_thai,
-                    v.che_do_phan_cong
+                    v.che_do_phan_cong,
+                    gv.ho_ten AS ten_giang_vien
                 FROM dbo.vw_de_tai_con_cho v
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = v.ma_lop_hoc_phan
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
                 WHERE v.ma_de_tai_lop = ?
                 """;
 
@@ -183,10 +187,48 @@ public class TopicRegistrationDAO {
                         resultSet.getInt("so_luong_hien_tai"),
                         resultSet.getInt("so_cho_con_lai"),
                         resultSet.getString("trang_thai"),
-                        resultSet.getString("che_do_phan_cong")));
+                        resultSet.getString("che_do_phan_cong"),
+                        resultSet.getString("ten_giang_vien")));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi tải chi tiết đề tài: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Danh sách sinh viên đã đăng ký cùng một đề tài (thành viên nhóm).
+     */
+    public List<TopicMember> findTopicMembers(int maDeTaiLop) {
+        String sql = """
+                SELECT
+                    sv.ma_so_sinh_vien,
+                    sv.ho_ten,
+                    dk.hinh_thuc_phan_cong
+                FROM dbo.dang_ky_de_tai dk
+                JOIN dbo.sinh_vien sv ON sv.ma_sinh_vien = dk.ma_sinh_vien
+                WHERE dk.ma_de_tai_lop = ?
+                ORDER BY sv.ma_so_sinh_vien
+                """;
+
+        List<TopicMember> members = new ArrayList<>();
+
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maDeTaiLop);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    members.add(new TopicMember(
+                            resultSet.getString("ma_so_sinh_vien"),
+                            resultSet.getString("ho_ten"),
+                            resultSet.getString("hinh_thuc_phan_cong")));
+                }
+            }
+
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải danh sách sinh viên cùng đề tài: " + e.getMessage(), e);
         }
     }
 
@@ -286,7 +328,7 @@ public class TopicRegistrationDAO {
                 JOIN dbo.de_tai_lop dtl ON dtl.ma_de_tai_lop = ls.ma_de_tai_lop
                 JOIN dbo.ngan_hang_de_tai ndt ON ndt.ma_de_tai = dtl.ma_de_tai
                 WHERE sv.ma_tai_khoan = ?
-                ORDER BY ls.thoi_diem_thuc_hien DESC
+                ORDER BY ls.thoi_diem_thuc_hien DESC, ls.ma_nhat_ky DESC
                 """;
 
         List<RegistrationHistoryEntry> history = new ArrayList<>();

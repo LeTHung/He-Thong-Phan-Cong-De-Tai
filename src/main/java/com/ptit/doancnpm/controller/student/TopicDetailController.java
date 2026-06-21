@@ -4,6 +4,7 @@ import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.TopicDetail;
+import com.ptit.doancnpm.model.dto.TopicMember;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
@@ -13,7 +14,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -48,6 +51,12 @@ public class TopicDetailController {
 
     @FXML
     private Label lblMode;
+
+    @FXML
+    private Label lblLecturer;
+
+    @FXML
+    private ListView<String> lstMembers;
 
     @FXML
     private Label lblPeriod;
@@ -119,10 +128,12 @@ public class TopicDetailController {
             lblSlots.setText(detail.soLuongHienTai() + "/" + detail.soLuongToiDa());
             lblRemaining.setText(String.valueOf(detail.soChoConLai()));
             lblMode.setText(cheDoText(detail.cheDoPhanCong()));
+            lblLecturer.setText(nullToDash(detail.tenGiangVien()));
             lblDescription.setText(nullToDash(detail.moTa()));
             lblRequirement.setText(nullToDash(detail.yeuCau()));
             setStatus(detail.trangThai());
             loadPeriod(detail.maLopHocPhan());
+            loadMembers(detail.maDeTaiLop());
 
             boolean canRegister = detail.conCho() && dangMoDangKy;
             btnRegister.setDisable(!canRegister);
@@ -136,6 +147,22 @@ public class TopicDetailController {
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
             btnRegister.setDisable(true);
+        }
+    }
+
+    private void loadMembers(int maDeTaiLop) {
+        try {
+            List<TopicMember> members = topicRegistrationService.getTopicMembers(maDeTaiLop);
+            if (members.isEmpty()) {
+                lstMembers.getItems().setAll("Chưa có sinh viên đăng ký đề tài này.");
+                return;
+            }
+            lstMembers.getItems().setAll(members.stream()
+                    .map(member -> member.maSoSinhVien() + " — " + member.hoTen()
+                            + " (" + member.hinhThucText() + ")")
+                    .toList());
+        } catch (RuntimeException exception) {
+            lstMembers.getItems().setAll(exception.getMessage());
         }
     }
 

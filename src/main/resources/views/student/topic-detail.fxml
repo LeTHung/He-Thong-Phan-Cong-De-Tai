@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
@@ -60,6 +61,9 @@
                         </VBox>
                     </ScrollPane>
 
+                    <Label text="Sinh viên đã đăng ký đề tài này" styleClass="card-title"/>
+                    <ListView fx:id="lstMembers" prefHeight="120"/>
+
                     <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
                 </VBox>
             </VBox>
@@ -74,6 +78,8 @@
                         <Label fx:id="lblRemaining" text="—" styleClass="current-course-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                         <Label text="Hình thức:" styleClass="body-muted" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                         <Label fx:id="lblMode" text="—" styleClass="body-muted" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="Giảng viên:" styleClass="body-muted" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="lblLecturer" text="—" styleClass="body-muted" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                     </GridPane>
 
                     <Button fx:id="btnRegister" text="Đăng ký đề tài này" styleClass="btn-primary"

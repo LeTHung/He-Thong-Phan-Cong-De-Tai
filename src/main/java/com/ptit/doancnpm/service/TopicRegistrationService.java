@@ -7,6 +7,7 @@ import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.dto.TopicDetail;
+import com.ptit.doancnpm.model.dto.TopicMember;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,13 @@ public class TopicRegistrationService {
             return Optional.empty();
         }
         return topicRegistrationDAO.findTopicDetail(maDeTaiLop);
+    }
+
+    public List<TopicMember> getTopicMembers(int maDeTaiLop) {
+        if (maDeTaiLop <= 0) {
+            return List.of();
+        }
+        return topicRegistrationDAO.findTopicMembers(maDeTaiLop);
     }
 
     public List<RegisteredTopic> getMyRegistrations(int maTaiKhoan) {
