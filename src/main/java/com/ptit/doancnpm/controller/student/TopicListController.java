@@ -14,11 +14,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +61,9 @@ public class TopicListController {
     private CheckBox chkOnlyAvailable;
 
     @FXML
+    private ComboBox<String> cboSort;
+
+    @FXML
     private TableView<StudentTopicSummary> tblTopics;
 
     @FXML
@@ -78,6 +83,12 @@ public class TopicListController {
 
     @FXML
     private TableColumn<StudentTopicSummary, String> colRegistered;
+
+    private static final String SORT_DEFAULT = "Mặc định";
+    private static final String SORT_MOST_AVAILABLE = "Còn nhiều chỗ nhất";
+    private static final String SORT_LEAST_AVAILABLE = "Còn ít chỗ nhất";
+    private static final String SORT_NAME = "Tên A → Z";
+    private static final String SORT_CODE = "Mã đề tài A → Z";
 
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
@@ -105,8 +116,15 @@ public class TopicListController {
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
 
         setupTable();
+        setupSort();
         loadStudentInfo();
         loadTopics();
+    }
+
+    private void setupSort() {
+        cboSort.getItems().setAll(
+                SORT_DEFAULT, SORT_MOST_AVAILABLE, SORT_LEAST_AVAILABLE, SORT_NAME, SORT_CODE);
+        cboSort.setValue(SORT_DEFAULT);
     }
 
     private void setupTable() {
@@ -193,8 +211,32 @@ public class TopicListController {
                         || contains(topic.tenDeTai(), keyword))
                 .filter(topic -> !onlyAvailable
                         || (topic.soChoConLai() > 0 && "DANG_MO".equals(topic.trangThai())))
+                .sorted(currentComparator())
                 .toList();
         tblTopics.getItems().setAll(filtered);
+    }
+
+    /**
+     * Bộ so sánh tương ứng với lựa chọn sắp xếp hiện tại. "Mặc định" giữ nguyên
+     * thứ tự trả về từ database (sort của Java ổn định nên trả về 0 là đủ).
+     */
+    private Comparator<StudentTopicSummary> currentComparator() {
+        String option = cboSort == null ? null : cboSort.getValue();
+        if (option == null) {
+            return (a, b) -> 0;
+        }
+        Comparator<String> byTextAsc = Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+        return switch (option) {
+            case SORT_MOST_AVAILABLE -> Comparator
+                    .comparingInt(StudentTopicSummary::soChoConLai).reversed()
+                    .thenComparing(StudentTopicSummary::maDeTaiHeThong, byTextAsc);
+            case SORT_LEAST_AVAILABLE -> Comparator
+                    .comparingInt(StudentTopicSummary::soChoConLai)
+                    .thenComparing(StudentTopicSummary::maDeTaiHeThong, byTextAsc);
+            case SORT_NAME -> Comparator.comparing(StudentTopicSummary::tenDeTai, byTextAsc);
+            case SORT_CODE -> Comparator.comparing(StudentTopicSummary::maDeTaiHeThong, byTextAsc);
+            default -> (a, b) -> 0;
+        };
     }
 
     @FXML
@@ -203,9 +245,15 @@ public class TopicListController {
     }
 
     @FXML
+    private void handleSort() {
+        applyFilter();
+    }
+
+    @FXML
     private void handleRefresh() {
         txtSearch.clear();
         chkOnlyAvailable.setSelected(false);
+        cboSort.setValue(SORT_DEFAULT);
         loadStudentInfo();
         loadTopics();
     }
