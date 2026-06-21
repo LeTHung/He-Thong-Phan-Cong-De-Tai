@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.model.dao;
 
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
+import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.dto.TopicDetail;
@@ -261,6 +262,49 @@ public class TopicRegistrationDAO {
             return registrations;
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi tải đề tài đã đăng ký: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Đợt đăng ký của lớp học phần (nếu có). dangMo được tính ngay trong SQL
+     * theo trạng thái và thời điểm hiện tại của máy chủ database.
+     */
+    public Optional<RegistrationPeriod> findRegistrationPeriod(int maLopHocPhan) {
+        String sql = """
+                SELECT
+                    thoi_gian_bat_dau,
+                    thoi_gian_ket_thuc,
+                    trang_thai,
+                    CASE
+                        WHEN trang_thai = N'DANG_MO'
+                             AND SYSDATETIME() >= thoi_gian_bat_dau
+                             AND SYSDATETIME() <= thoi_gian_ket_thuc
+                        THEN 1 ELSE 0
+                    END AS dang_mo
+                FROM dbo.dot_dang_ky
+                WHERE ma_lop_hoc_phan = ?
+                """;
+
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maLopHocPhan);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return Optional.empty();
+                }
+
+                Timestamp batDau = resultSet.getTimestamp("thoi_gian_bat_dau");
+                Timestamp ketThuc = resultSet.getTimestamp("thoi_gian_ket_thuc");
+                return Optional.of(new RegistrationPeriod(
+                        batDau == null ? null : batDau.toLocalDateTime(),
+                        ketThuc == null ? null : ketThuc.toLocalDateTime(),
+                        resultSet.getString("trang_thai"),
+                        resultSet.getInt("dang_mo") == 1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải đợt đăng ký: " + e.getMessage(), e);
         }
     }
 
