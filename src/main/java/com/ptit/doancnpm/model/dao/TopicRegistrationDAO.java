@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.model.dao;
 
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
+import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
@@ -262,6 +263,56 @@ public class TopicRegistrationDAO {
             return registrations;
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi tải đề tài đã đăng ký: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Nhật ký đăng ký / hủy đề tài của sinh viên (theo mã tài khoản đăng nhập),
+     * sắp xếp mới nhất trước.
+     */
+    public List<RegistrationHistoryEntry> findRegistrationHistory(int maTaiKhoan) {
+        String sql = """
+                SELECT
+                    ls.hanh_dong,
+                    lhp.ma_lop,
+                    ndt.ma_de_tai_he_thong,
+                    ndt.ten_de_tai,
+                    ls.hinh_thuc_phan_cong,
+                    ls.ly_do,
+                    ls.thoi_diem_thuc_hien
+                FROM dbo.lich_su_dang_ky ls
+                JOIN dbo.sinh_vien sv ON sv.ma_sinh_vien = ls.ma_sinh_vien
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = ls.ma_lop_hoc_phan
+                JOIN dbo.de_tai_lop dtl ON dtl.ma_de_tai_lop = ls.ma_de_tai_lop
+                JOIN dbo.ngan_hang_de_tai ndt ON ndt.ma_de_tai = dtl.ma_de_tai
+                WHERE sv.ma_tai_khoan = ?
+                ORDER BY ls.thoi_diem_thuc_hien DESC
+                """;
+
+        List<RegistrationHistoryEntry> history = new ArrayList<>();
+
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maTaiKhoan);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Timestamp thoiDiem = resultSet.getTimestamp("thoi_diem_thuc_hien");
+                    history.add(new RegistrationHistoryEntry(
+                            resultSet.getString("hanh_dong"),
+                            resultSet.getString("ma_lop"),
+                            resultSet.getString("ma_de_tai_he_thong"),
+                            resultSet.getString("ten_de_tai"),
+                            resultSet.getString("hinh_thuc_phan_cong"),
+                            resultSet.getString("ly_do"),
+                            thoiDiem == null ? null : thoiDiem.toLocalDateTime()));
+                }
+            }
+
+            return history;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải lịch sử đăng ký: " + e.getMessage(), e);
         }
     }
 

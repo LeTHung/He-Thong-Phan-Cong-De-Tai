@@ -261,6 +261,11 @@ public class TopicListController {
     }
 
     @FXML
+    private void handleShowHistory() {
+        MainApp.setRoot("/views/student/registration-history.fxml");
+    }
+
+    @FXML
     private void handleLogout() {
         MainApp.showLogin();
     }

@@ -25,6 +25,7 @@
             <Button text="Trang chủ" styleClass="nav-link" onAction="#handleBackDashboard"/>
             <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleShowTopicList"/>
             <Button text="Đề tài đã chọn" styleClass="nav-link-active"/>
+            <Button text="Lịch sử" styleClass="nav-link" onAction="#handleShowHistory"/>
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>

@@ -2,6 +2,7 @@ package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.TopicRegistrationDAO;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
+import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
@@ -44,6 +45,10 @@ public class TopicRegistrationService {
 
     public List<RegisteredTopic> getMyRegistrations(int maTaiKhoan) {
         return topicRegistrationDAO.findMyRegistrations(maTaiKhoan);
+    }
+
+    public List<RegistrationHistoryEntry> getRegistrationHistory(int maTaiKhoan) {
+        return topicRegistrationDAO.findRegistrationHistory(maTaiKhoan);
     }
 
     public Optional<RegistrationPeriod> getRegistrationPeriod(int maLopHocPhan) {

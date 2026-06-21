@@ -248,6 +248,11 @@ public class MyRegistrationController {
     }
 
     @FXML
+    private void handleShowHistory() {
+        MainApp.setRoot("/views/student/registration-history.fxml");
+    }
+
+    @FXML
     private void handleBackDashboard() {
         MainApp.setRoot(MainApp.STUDENT_DASHBOARD_VIEW);
     }
