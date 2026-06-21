@@ -47,6 +47,7 @@
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="Đề tài đã đăng ký" styleClass="card-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Xuất CSV" styleClass="btn-outline" onAction="#handleExportCsv"/>
                         <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
                     </HBox>
 
