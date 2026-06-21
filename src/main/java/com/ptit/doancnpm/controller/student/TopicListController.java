@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -53,6 +54,9 @@ public class TopicListController {
 
     @FXML
     private TextField txtSearch;
+
+    @FXML
+    private CheckBox chkOnlyAvailable;
 
     @FXML
     private TableView<StudentTopicSummary> tblTopics;
@@ -180,14 +184,14 @@ public class TopicListController {
 
     private void applyFilter() {
         String keyword = txtSearch.getText() == null ? "" : txtSearch.getText().trim().toLowerCase();
-        if (keyword.isEmpty()) {
-            tblTopics.getItems().setAll(allTopics);
-            return;
-        }
+        boolean onlyAvailable = chkOnlyAvailable.isSelected();
 
         List<StudentTopicSummary> filtered = allTopics.stream()
-                .filter(topic -> contains(topic.maDeTaiHeThong(), keyword)
+                .filter(topic -> keyword.isEmpty()
+                        || contains(topic.maDeTaiHeThong(), keyword)
                         || contains(topic.tenDeTai(), keyword))
+                .filter(topic -> !onlyAvailable
+                        || (topic.soChoConLai() > 0 && "DANG_MO".equals(topic.trangThai())))
                 .toList();
         tblTopics.getItems().setAll(filtered);
     }
@@ -200,6 +204,7 @@ public class TopicListController {
     @FXML
     private void handleRefresh() {
         txtSearch.clear();
+        chkOnlyAvailable.setSelected(false);
         loadStudentInfo();
         loadTopics();
     }
