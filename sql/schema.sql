@@ -1,17 +1,17 @@
 USE [master];
 GO
 
-IF DB_ID(N'phan_cong_de_tai_db') IS NOT NULL
+IF DB_ID(N'PhanCongDeTai') IS NOT NULL
 BEGIN
-    ALTER DATABASE [phan_cong_de_tai_db] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE [phan_cong_de_tai_db];
+    ALTER DATABASE [PhanCongDeTai] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [PhanCongDeTai];
 END
 GO
 
-CREATE DATABASE [phan_cong_de_tai_db];
+CREATE DATABASE [PhanCongDeTai];
 GO
 
-USE [phan_cong_de_tai_db];
+USE [PhanCongDeTai];
 GO
 
 SET ANSI_NULLS ON;
@@ -922,143 +922,4 @@ FROM dbo.lop_hoc_phan lhp
 LEFT JOIN ds_sinh_vien sv ON sv.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
 LEFT JOIN ds_dang_ky dk ON dk.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
 LEFT JOIN ds_de_tai dt ON dt.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan;
-GO
-
-/* ============================================================
-   7. DU LIEU MAU KIEM THU
-   Du lieu mau da doi theo nhom va giang vien cua mon hoc:
-   - GV: Nguyen Thi Bich Nguyen
-   - SV: N23DCCN007 Do Cao Cuong
-   - SV: N23DCCN023 Le Tien Hung
-   - SV: N23DCAT056 Tu Minh Quoc
-   ============================================================ */
-
-INSERT INTO dbo.tai_khoan (ten_dang_nhap, mat_khau_ma_hoa, vai_tro, trang_thai, email)
-VALUES
-(N'admin', N'123456', N'QUAN_TRI_VIEN', N'HOAT_DONG', N'admin@ptit.edu.vn'),
-(N'gv01', N'123456', N'GIANG_VIEN', N'HOAT_DONG', N'ntbnguyen@ptit.edu.vn'),
-(N'N23DCCN007', N'123456', N'SINH_VIEN', N'HOAT_DONG', N'n23dccn007@student.ptit.edu.vn'),
-(N'N23DCCN023', N'123456', N'SINH_VIEN', N'HOAT_DONG', N'n23dccn023@student.ptit.edu.vn'),
-(N'N23DCAT056', N'123456', N'SINH_VIEN', N'HOAT_DONG', N'n23dcat056@student.ptit.edu.vn');
-GO
-
-INSERT INTO dbo.giang_vien (ma_tai_khoan, ma_so_giang_vien, ho_ten, email, khoa_bo_mon, hoc_vi)
-SELECT ma_tai_khoan, N'GV001', N'Nguyễn Thị Bích Nguyên', N'ntbnguyen@ptit.edu.vn', N'Công nghệ phần mềm', N'Thạc sĩ'
-FROM dbo.tai_khoan WHERE ten_dang_nhap = N'gv01';
-GO
-
-INSERT INTO dbo.sinh_vien (ma_tai_khoan, ma_so_sinh_vien, ho_ten, email, lop_sinh_hoat, khoa_hoc, nganh)
-SELECT ma_tai_khoan, N'N23DCCN007', N'Đỗ Cao Cường', N'n23dccn007@student.ptit.edu.vn', N'D23CQCN01-N', N'2023', N'Công nghệ thông tin'
-FROM dbo.tai_khoan WHERE ten_dang_nhap = N'N23DCCN007';
-
-INSERT INTO dbo.sinh_vien (ma_tai_khoan, ma_so_sinh_vien, ho_ten, email, lop_sinh_hoat, khoa_hoc, nganh)
-SELECT ma_tai_khoan, N'N23DCCN023', N'Lê Tiến Hưng', N'n23dccn023@student.ptit.edu.vn', N'D23CQCN01-N', N'2023', N'Công nghệ thông tin'
-FROM dbo.tai_khoan WHERE ten_dang_nhap = N'N23DCCN023';
-
-INSERT INTO dbo.sinh_vien (ma_tai_khoan, ma_so_sinh_vien, ho_ten, email, lop_sinh_hoat, khoa_hoc, nganh)
-SELECT ma_tai_khoan, N'N23DCAT056', N'Từ Minh Quốc', N'n23dcat056@student.ptit.edu.vn', N'D23CQCN01-N', N'2023', N'An toàn thông tin'
-FROM dbo.tai_khoan WHERE ten_dang_nhap = N'N23DCAT056';
-GO
-
-INSERT INTO dbo.mon_hoc (ma_mon_hoc_he_thong, ten_mon_hoc, so_tin_chi, mo_ta)
-VALUES
-(N'CNPM', N'Công nghệ phần mềm', 3, N'Môn học về quy trình phân tích, thiết kế và phát triển phần mềm'),
-(N'CSDL', N'Cơ sở dữ liệu', 3, N'Môn học về thiết kế và truy vấn cơ sở dữ liệu'),
-(N'LTJAVA', N'Lập trình Java', 3, N'Môn học lập trình Java và ứng dụng desktop');
-GO
-
-INSERT INTO dbo.hoc_ky (ma_hoc_ky_he_thong, ten_hoc_ky, nam_hoc, ngay_bat_dau, ngay_ket_thuc, trang_thai)
-VALUES
-(N'HK2_2025_2026', N'Học kỳ 2', N'2025-2026', '2026-01-15', '2026-06-30', N'DANG_MO'),
-(N'HK1_2026_2027', N'Học kỳ 1', N'2026-2027', '2026-09-01', '2027-01-15', N'NHAP');
-GO
-
-DECLARE @ma_mon_hoc INT = (SELECT ma_mon_hoc FROM dbo.mon_hoc WHERE ma_mon_hoc_he_thong = N'CNPM');
-DECLARE @ma_hoc_ky INT = (SELECT ma_hoc_ky FROM dbo.hoc_ky WHERE ma_hoc_ky_he_thong = N'HK2_2025_2026');
-DECLARE @ma_giang_vien INT = (SELECT ma_giang_vien FROM dbo.giang_vien WHERE ma_so_giang_vien = N'GV001');
-
-INSERT INTO dbo.lop_hoc_phan (ma_lop, ten_lop_hoc_phan, ma_mon_hoc, ma_hoc_ky, ma_giang_vien, si_so_toi_da, ghi_chu)
-VALUES (N'CNPM_D23CQCN01_N', N'Công nghệ phần mềm - D23CQCN01-N', @ma_mon_hoc, @ma_hoc_ky, @ma_giang_vien, 80, N'Lớp học phần mẫu cho đồ án');
-GO
-
-DECLARE @ma_lop_hoc_phan INT = (SELECT ma_lop_hoc_phan FROM dbo.lop_hoc_phan WHERE ma_lop = N'CNPM_D23CQCN01_N');
-
-INSERT INTO dbo.sinh_vien_lop (ma_lop_hoc_phan, ma_sinh_vien)
-SELECT @ma_lop_hoc_phan, ma_sinh_vien
-FROM dbo.sinh_vien
-WHERE ma_so_sinh_vien IN (N'N23DCCN007', N'N23DCCN023', N'N23DCAT056');
-GO
-
-DECLARE @ma_gv01 INT = (SELECT ma_giang_vien FROM dbo.giang_vien WHERE ma_so_giang_vien = N'GV001');
-
-INSERT INTO dbo.ngan_hang_de_tai (
-    ma_de_tai_he_thong, ten_de_tai, mo_ta, yeu_cau, so_luong_mac_dinh, ma_giang_vien_tao
-)
-VALUES
-(N'DT001', N'Xây dựng ứng dụng phân công đề tài cho sinh viên',
- N'Quản lý lớp học phần, ngân hàng đề tài, đăng ký/hủy đăng ký và xuất danh sách nhóm.',
- N'Có đăng nhập, phân quyền, database, ràng buộc đăng ký và báo cáo.', 3, @ma_gv01),
-(N'DT002', N'Xây dựng ứng dụng quản lý thư viện',
- N'Quản lý sách, độc giả, phiếu mượn trả và thống kê sách.',
- N'Có CRUD, tìm kiếm, báo cáo và phân quyền.', 3, @ma_gv01),
-(N'DT003', N'Xây dựng ứng dụng quản lý bảo trì xe',
- N'Quản lý xe, lịch bảo trì, nhắc hạn và hồ sơ bảo dưỡng.',
- N'Có CRUD, tìm kiếm, lọc trạng thái và báo cáo.', 2, @ma_gv01),
-(N'DT004', N'Xây dựng ứng dụng quản lý phòng máy',
- N'Quản lý phòng máy, máy tính, lịch sử dụng và bảo trì.',
- N'Có giao diện JavaFX, SQL Server và báo cáo.', 2, @ma_gv01);
-GO
-
-DECLARE @ma_lop INT = (SELECT ma_lop_hoc_phan FROM dbo.lop_hoc_phan WHERE ma_lop = N'CNPM_D23CQCN01_N');
-
-INSERT INTO dbo.de_tai_lop (ma_lop_hoc_phan, ma_de_tai, so_luong_toi_da, che_do_phan_cong)
-SELECT @ma_lop, ma_de_tai, so_luong_mac_dinh, N'SINH_VIEN_TU_DANG_KY'
-FROM dbo.ngan_hang_de_tai
-WHERE ma_de_tai_he_thong IN (N'DT001', N'DT002', N'DT003', N'DT004');
-GO
-
-DECLARE @ma_lop INT = (SELECT ma_lop_hoc_phan FROM dbo.lop_hoc_phan WHERE ma_lop = N'CNPM_D23CQCN01_N');
-DECLARE @ma_gv INT = (SELECT ma_giang_vien FROM dbo.giang_vien WHERE ma_so_giang_vien = N'GV001');
-DECLARE @thoi_gian_bat_dau DATETIME2(0) = DATEADD(DAY, -1, SYSDATETIME());
-DECLARE @thoi_gian_ket_thuc DATETIME2(0) = DATEADD(DAY, 14, SYSDATETIME());
-
-EXEC dbo.sp_mo_cong_dang_ky
-    @ma_lop_hoc_phan = @ma_lop,
-    @ma_giang_vien = @ma_gv,
-    @thoi_gian_bat_dau = @thoi_gian_bat_dau,
-    @thoi_gian_ket_thuc = @thoi_gian_ket_thuc,
-    @ghi_chu = N'Đợt đăng ký mẫu phục vụ kiểm thử';
-GO
-
--- Dang ky mau cho 3 sinh vien trong nhom vao de tai DT001
-DECLARE @ma_sv_cuong INT = (SELECT ma_sinh_vien FROM dbo.sinh_vien WHERE ma_so_sinh_vien = N'N23DCCN007');
-DECLARE @ma_sv_hung INT = (SELECT ma_sinh_vien FROM dbo.sinh_vien WHERE ma_so_sinh_vien = N'N23DCCN023');
-DECLARE @ma_sv_quoc INT = (SELECT ma_sinh_vien FROM dbo.sinh_vien WHERE ma_so_sinh_vien = N'N23DCAT056');
-DECLARE @ma_de_tai_lop_1 INT = (
-    SELECT TOP 1 dtl.ma_de_tai_lop
-    FROM dbo.de_tai_lop dtl
-    JOIN dbo.ngan_hang_de_tai ndt ON ndt.ma_de_tai = dtl.ma_de_tai
-    WHERE ndt.ma_de_tai_he_thong = N'DT001'
-);
-
-EXEC dbo.sp_dang_ky_de_tai @ma_sinh_vien = @ma_sv_cuong, @ma_de_tai_lop = @ma_de_tai_lop_1;
-EXEC dbo.sp_dang_ky_de_tai @ma_sinh_vien = @ma_sv_hung, @ma_de_tai_lop = @ma_de_tai_lop_1;
-EXEC dbo.sp_dang_ky_de_tai @ma_sinh_vien = @ma_sv_quoc, @ma_de_tai_lop = @ma_de_tai_lop_1;
-GO
-
-INSERT INTO dbo.nhat_ky_he_thong (ma_tai_khoan, chuc_nang, hanh_dong, ten_bang_lien_quan, noi_dung)
-SELECT ma_tai_khoan, N'Khởi tạo dữ liệu', N'TAO_DU_LIEU_MAU', N'ALL', N'Tạo dữ liệu mẫu theo nhóm môn Công nghệ phần mềm'
-FROM dbo.tai_khoan
-WHERE ten_dang_nhap = N'admin';
-GO
-
-/* ============================================================
-   8. CAU LENH KIEM TRA NHANH SAU KHI CHAY SCRIPT
-   ============================================================ */
-
-SELECT N'DA TAO DATABASE VA DU LIEU MAU THANH CONG' AS ket_qua;
-SELECT * FROM dbo.vw_thong_ke_lop_hoc_phan;
-SELECT * FROM dbo.vw_de_tai_con_cho ORDER BY ma_de_tai_lop;
-SELECT * FROM dbo.vw_bao_cao_nhom_de_tai ORDER BY ma_lop, ma_de_tai_he_thong, ma_so_sinh_vien;
-SELECT * FROM dbo.vw_sinh_vien_chua_co_de_tai ORDER BY ma_so_sinh_vien;
 GO

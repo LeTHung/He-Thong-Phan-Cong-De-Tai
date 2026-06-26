@@ -45,7 +45,7 @@ src/main/resources/config/db.properties
 Nội dung mẫu:
 
 ```properties
-db.url=jdbc:sqlserver://localhost:1433;databaseName=phan_cong_de_tai_db;encrypt=true;trustServerCertificate=true
+db.url=jdbc:sqlserver://localhost:1433;databaseName=PhanCongDeTai;encrypt=true;trustServerCertificate=true
 db.username=sa
 db.password=123456
 ```
@@ -66,7 +66,7 @@ Chạy script:
 sql/schema.sql
 ```
 
-Script sẽ tạo database `phan_cong_de_tai_db`, các bảng nghiệp vụ và dữ liệu mẫu cho hệ thống phân công đề tài.
+Script sẽ tạo database `PhanCongDeTai`, các bảng nghiệp vụ và dữ liệu mẫu cho hệ thống phân công đề tài.
 
 Nếu dùng `sqlcmd`:
 

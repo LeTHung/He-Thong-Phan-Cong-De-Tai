@@ -21,9 +21,9 @@
     <left>
         <VBox styleClass="side-bar" prefWidth="270" spacing="8">
             <HBox styleClass="side-brand">
-                <Label text="UT" styleClass="side-logo"/>
+                <Label text="PT" styleClass="side-logo"/>
                 <VBox>
-                    <Label text="UniTopics" styleClass="side-title"/>
+                    <Label text="PTIT Topic" styleClass="side-title"/>
                     <Label text="Admin Console" styleClass="side-subtitle"/>
                 </VBox>
             </HBox>

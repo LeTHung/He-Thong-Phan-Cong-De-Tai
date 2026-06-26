@@ -27,7 +27,7 @@
             </padding>
 
             <VBox alignment="CENTER" spacing="8">
-                <Label text="UniTopics" styleClass="login-title"/>
+                <Label text="PTIT Topic" styleClass="login-title"/>
                 <Label text="Hệ thống phân công đề tài cho sinh viên" styleClass="login-subtitle"/>
             </VBox>
 
