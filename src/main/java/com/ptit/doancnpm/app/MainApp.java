@@ -32,7 +32,7 @@ public class MainApp extends Application {
     private static double dragOffsetX;
     private static double dragOffsetY;
 
-    private static final String APP_TITLE = "UniTopics - Phân công đề tài sinh viên";
+    private static final String APP_TITLE = "PTIT Topic - Phân công đề tài sinh viên";
     private static final int LOGIN_WINDOW_WIDTH = 540;
     private static final int LOGIN_WINDOW_HEIGHT = 500;
     private static final int DASHBOARD_WINDOW_WIDTH = 1280;

@@ -30,7 +30,7 @@ public class LoginController {
     private void initialize() {
         clearMessage();
         if (!DatabaseConnection.testConnection()) {
-            showMessage("Không kết nối được SQL Server. Kiểm tra db.properties và database phan_cong_de_tai_db.");
+            showMessage("Không kết nối được SQL Server. Kiểm tra db.properties và database PhanCongDeTai.");
         }
     }
 
