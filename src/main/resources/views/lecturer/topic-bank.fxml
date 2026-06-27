@@ -1,12 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Ngân hàng đề tài" styleClass="screen-title"/>
-    <Label text="Màn hình placeholder cho quản lý đề tài của giảng viên." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.lecturer.TopicBankController"
+            styleClass="lecturer-root">
+
+    <left>
+        <VBox styleClass="side-bar lecturer-side" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="PT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="PTIT Topic" styleClass="side-title"/>
+                    <Label text="Lecturer Workspace" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+            <Label text="GIẢNG VIÊN" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Region VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="18">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Ngân hàng đề tài" styleClass="screen-title"/>
+                    <Label text="Quản lý danh sách đề tài của bạn." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="← Quay lại" styleClass="btn-outline" onAction="#handleBack"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="txtSearch" promptText="Tìm theo tên hoặc mã đề tài..." prefWidth="320"
+                           onAction="#handleSearch"/>
+                <Button text="Tìm kiếm" styleClass="btn-outline" onAction="#handleSearch"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblTotal" text="Tổng: 0 đề tài" styleClass="body-muted"/>
+                <Button text="+ Thêm mới" styleClass="btn-primary" onAction="#handleAdd"/>
+                <Button text="Sửa" styleClass="btn-outline" onAction="#handleEdit"/>
+                <Button text="Xóa" styleClass="btn-danger" onAction="#handleDelete"/>
+            </HBox>
+
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
+                        <TableColumn fx:id="colMaDeTai" text="Mã đề tài" prefWidth="120"/>
+                        <TableColumn fx:id="colTenDeTai" text="Tên đề tài" prefWidth="340"/>
+                        <TableColumn fx:id="colMoTa" text="Mô tả" prefWidth="320"/>
+                        <TableColumn fx:id="colNgayTao" text="Ngày tạo" prefWidth="110"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

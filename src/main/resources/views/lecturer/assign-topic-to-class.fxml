@@ -1,12 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="12"
-      styleClass="dashboard-content">
-    <Label text="Gán đề tài vào lớp" styleClass="screen-title"/>
-    <Label text="Màn hình placeholder cho nghiệp vụ gán đề tài của giảng viên." styleClass="body-muted" wrapText="true"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.lecturer.AssignTopicToClassController"
+            styleClass="lecturer-root">
+
+    <left>
+        <VBox styleClass="side-bar lecturer-side" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="PT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="PTIT Topic" styleClass="side-title"/>
+                    <Label text="Lecturer Workspace" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+            <Label text="GIẢNG VIÊN" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Region VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="18">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Giao đề tài cho lớp" styleClass="screen-title"/>
+                    <Label text="Gán đề tài từ ngân hàng vào lớp học phần." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="← Quay lại" styleClass="btn-outline" onAction="#handleBack"/>
+            </HBox>
+
+            <!-- Form gán đề tài -->
+            <VBox styleClass="main-card" spacing="14">
+                <Label text="Thông tin gán đề tài" styleClass="card-title"/>
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Lớp học phần:"/>
+                        <ComboBox fx:id="cbSection" prefWidth="280"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Đề tài:"/>
+                        <ComboBox fx:id="cbTopic" prefWidth="300"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Số SV tối đa:"/>
+                        <TextField fx:id="txtMaxStudents" prefWidth="100" promptText="VD: 3"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Chế độ:"/>
+                        <ComboBox fx:id="cbMode" prefWidth="220"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text=" "/>
+                        <Button text="Gán đề tài" styleClass="btn-primary" onAction="#handleAssign"/>
+                    </VBox>
+                </HBox>
+                <Label fx:id="lblSectionInfo" text="" styleClass="body-muted"/>
+            </VBox>
+
+            <Separator/>
+
+            <!-- Danh sách đề tài đã gán -->
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Đề tài đã gán vào lớp đã chọn" styleClass="card-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Gỡ đề tài đã chọn" styleClass="btn-danger" onAction="#handleRemove"/>
+                </HBox>
+                <TableView fx:id="tableAssigned" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colMaDeTai" text="Mã đề tài" prefWidth="130"/>
+                        <TableColumn fx:id="colTenDeTai" text="Tên đề tài" prefWidth="300"/>
+                        <TableColumn fx:id="colToiDa" text="Tối đa SV" prefWidth="90"/>
+                        <TableColumn fx:id="colHienTai" text="Đã đăng ký" prefWidth="90"/>
+                        <TableColumn fx:id="colCheDoText" text="Chế độ" prefWidth="180"/>
+                        <TableColumn fx:id="colTrangThai" text="Trạng thái" prefWidth="110"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
