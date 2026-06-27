@@ -92,6 +92,17 @@ public class TopicListController {
     @FXML
     private TableColumn<StudentTopicSummary, String> colRegistered;
 
+    @FXML
+    private Label lblPageInfo;
+
+    @FXML
+    private Button btnPrevPage;
+
+    @FXML
+    private Button btnNextPage;
+
+    private static final int PAGE_SIZE = 8;
+
     private static final String SORT_DEFAULT = "Mặc định";
     private static final String SORT_MOST_AVAILABLE = "Còn nhiều chỗ nhất";
     private static final String SORT_LEAST_AVAILABLE = "Còn ít chỗ nhất";
@@ -109,6 +120,8 @@ public class TopicListController {
     private Integer maLopHocPhan;
     private boolean dangMoDangKy;
     private List<StudentTopicSummary> allTopics = List.of();
+    private List<StudentTopicSummary> filteredTopics = List.of();
+    private int currentPage = 0;
     private Timeline countdown;
 
     @FXML
@@ -273,7 +286,7 @@ public class TopicListController {
         String lecturer = cboLecturer == null ? null : cboLecturer.getValue();
         boolean allLecturers = lecturer == null || LECTURER_ALL.equals(lecturer);
 
-        List<StudentTopicSummary> filtered = allTopics.stream()
+        filteredTopics = allTopics.stream()
                 .filter(topic -> keyword.isEmpty()
                         || contains(topic.maDeTaiHeThong(), keyword)
                         || contains(topic.tenDeTai(), keyword))
@@ -283,7 +296,50 @@ public class TopicListController {
                 .filter(topic -> allLecturers || lecturer.equals(topic.tenGiangVien()))
                 .sorted(currentComparator())
                 .toList();
-        tblTopics.getItems().setAll(filtered);
+        currentPage = 0;
+        renderPage();
+    }
+
+    /**
+     * Tổng số trang theo {@link #PAGE_SIZE}, tối thiểu 1 trang kể cả khi rỗng.
+     */
+    private int totalPages() {
+        return Math.max(1, (int) Math.ceil(filteredTopics.size() / (double) PAGE_SIZE));
+    }
+
+    /**
+     * Hiển thị đúng trang hiện tại của danh sách đã lọc, cập nhật nhãn trang và
+     * trạng thái bật/tắt của hai nút điều hướng.
+     */
+    private void renderPage() {
+        int totalPages = totalPages();
+        currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, filteredTopics.size());
+        List<StudentTopicSummary> pageItems = from >= to ? List.of() : filteredTopics.subList(from, to);
+        tblTopics.getItems().setAll(pageItems);
+
+        lblPageInfo.setText("Trang " + (currentPage + 1) + "/" + totalPages
+                + " • " + filteredTopics.size() + " đề tài");
+        btnPrevPage.setDisable(currentPage <= 0);
+        btnNextPage.setDisable(currentPage >= totalPages - 1);
+    }
+
+    @FXML
+    private void handlePrevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            renderPage();
+        }
+    }
+
+    @FXML
+    private void handleNextPage() {
+        if (currentPage < totalPages() - 1) {
+            currentPage++;
+            renderPage();
+        }
     }
 
     /**

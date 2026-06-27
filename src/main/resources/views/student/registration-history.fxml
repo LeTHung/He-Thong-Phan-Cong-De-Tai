@@ -61,6 +61,12 @@
                     </columns>
                 </TableView>
 
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
+                    <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
+                    <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
+                </HBox>
+
                 <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
             </VBox>
         </VBox>

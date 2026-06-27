@@ -8,6 +8,7 @@ import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -54,9 +55,22 @@ public class RegistrationHistoryController {
     @FXML
     private TableColumn<RegistrationHistoryEntry, String> colReason;
 
+    @FXML
+    private Label lblPageInfo;
+
+    @FXML
+    private Button btnPrevPage;
+
+    @FXML
+    private Button btnNextPage;
+
+    private static final int PAGE_SIZE = 10;
+
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
     private int maTaiKhoan;
+    private List<RegistrationHistoryEntry> allHistory = List.of();
+    private int currentPage = 0;
 
     @FXML
     private void initialize() {
@@ -91,16 +105,56 @@ public class RegistrationHistoryController {
 
     private void loadHistory() {
         try {
-            List<RegistrationHistoryEntry> history = topicRegistrationService.getRegistrationHistory(maTaiKhoan);
-            tblHistory.getItems().setAll(history);
-            if (history.isEmpty()) {
+            allHistory = topicRegistrationService.getRegistrationHistory(maTaiKhoan);
+            currentPage = 0;
+            renderPage();
+            if (allHistory.isEmpty()) {
                 showMessage("Chưa có lịch sử đăng ký nào.");
             } else {
-                showMessage("Có " + history.size() + " lượt thao tác đăng ký / hủy.");
+                showMessage("Có " + allHistory.size() + " lượt thao tác đăng ký / hủy.");
             }
         } catch (RuntimeException exception) {
-            tblHistory.getItems().clear();
+            allHistory = List.of();
+            renderPage();
             showMessage(exception.getMessage());
+        }
+    }
+
+    private int totalPages() {
+        return Math.max(1, (int) Math.ceil(allHistory.size() / (double) PAGE_SIZE));
+    }
+
+    /**
+     * Hiển thị trang hiện tại của lịch sử, cập nhật nhãn trang và trạng thái nút.
+     */
+    private void renderPage() {
+        int totalPages = totalPages();
+        currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, allHistory.size());
+        List<RegistrationHistoryEntry> pageItems = from >= to ? List.of() : allHistory.subList(from, to);
+        tblHistory.getItems().setAll(pageItems);
+
+        lblPageInfo.setText("Trang " + (currentPage + 1) + "/" + totalPages
+                + " • " + allHistory.size() + " lượt");
+        btnPrevPage.setDisable(currentPage <= 0);
+        btnNextPage.setDisable(currentPage >= totalPages - 1);
+    }
+
+    @FXML
+    private void handlePrevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            renderPage();
+        }
+    }
+
+    @FXML
+    private void handleNextPage() {
+        if (currentPage < totalPages() - 1) {
+            currentPage++;
+            renderPage();
         }
     }
 
