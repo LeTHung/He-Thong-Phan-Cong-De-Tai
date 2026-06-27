@@ -21,6 +21,9 @@ public class StudentDashboardDAO {
                     sv.ma_so_sinh_vien,
                     sv.ho_ten,
                     sv.lop_sinh_hoat,
+                    sv.email,
+                    sv.khoa_hoc,
+                    sv.nganh,
                     lhp.ma_lop_hoc_phan,
                     lhp.ma_lop,
                     lhp.ten_lop_hoc_phan
@@ -52,6 +55,9 @@ public class StudentDashboardDAO {
                         resultSet.getString("ma_so_sinh_vien"),
                         resultSet.getString("ho_ten"),
                         resultSet.getString("lop_sinh_hoat"),
+                        resultSet.getString("email"),
+                        resultSet.getString("khoa_hoc"),
+                        resultSet.getString("nganh"),
                         nullableMaLopHocPhan,
                         resultSet.getString("ma_lop"),
                         resultSet.getString("ten_lop_hoc_phan")));
@@ -74,6 +80,7 @@ public class StudentDashboardDAO {
                     v.so_cho_con_lai,
                     v.trang_thai,
                     v.che_do_phan_cong,
+                    gv.ho_ten AS ten_giang_vien,
                     CASE
                         WHEN EXISTS (
                             SELECT 1
@@ -89,6 +96,8 @@ public class StudentDashboardDAO {
                     AND svl.trang_thai = N'DANG_HOC'
                 JOIN dbo.sinh_vien sv
                     ON sv.ma_sinh_vien = svl.ma_sinh_vien
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = v.ma_lop_hoc_phan
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
                 WHERE sv.ma_tai_khoan = ?
                 ORDER BY v.ma_lop, v.ma_de_tai_he_thong
                 """;
@@ -112,6 +121,7 @@ public class StudentDashboardDAO {
                             resultSet.getInt("so_cho_con_lai"),
                             resultSet.getString("trang_thai"),
                             resultSet.getString("che_do_phan_cong"),
+                            resultSet.getString("ten_giang_vien"),
                             resultSet.getInt("da_dang_ky") == 1));
                 }
             }

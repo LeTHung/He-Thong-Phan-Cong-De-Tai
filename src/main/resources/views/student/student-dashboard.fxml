@@ -2,9 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -24,9 +22,12 @@
             <Button text="Trang chủ" styleClass="nav-link-active"/>
             <Button text="Danh sách đề tài" styleClass="nav-link" onAction="#handleShowTopicList"/>
             <Button text="Đề tài đã chọn" styleClass="nav-link" onAction="#handleShowMyRegistration"/>
+            <Button text="Lịch sử" styleClass="nav-link" onAction="#handleShowHistory"/>
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
+            <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
     </top>
@@ -37,62 +38,58 @@
                 <VBox styleClass="student-hero" spacing="10">
                     <Label fx:id="lblWelcome" text="Đăng ký đề tài môn học" styleClass="student-hero-title"/>
                     <Label text="Xem danh sách đề tài, kiểm tra số chỗ còn lại và đăng ký đề tài phù hợp với nhóm của bạn."
-                           styleClass="student-hero-desc"/>
+                           styleClass="student-hero-desc" wrapText="true"/>
                     <HBox spacing="10">
-                        <Label text="CNPM_D23CQCN01_N" styleClass="badge badge-info"/>
-                        <Label text="Cổng đăng ký đang mở" styleClass="badge badge-success"/>
+                        <Label fx:id="lblCourseBadge" text="—" styleClass="badge badge-info"/>
+                        <Label fx:id="lblPeriodBadge" text="—" styleClass="badge badge-info"/>
                     </HBox>
                 </VBox>
 
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <TextField promptText="Tìm kiếm đề tài..." HBox.hgrow="ALWAYS"/>
-                    <Button text="Tất cả" styleClass="btn-secondary"/>
-                    <Button text="Còn chỗ" styleClass="btn-outline"/>
-                </HBox>
+                <VBox styleClass="student-info-card" spacing="14">
+                    <Label text="Tổng quan đăng ký" styleClass="card-title"/>
+                    <HBox spacing="18">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label fx:id="lblStatTotal" text="0" styleClass="current-course-value"/>
+                            <Label text="Đề tài trong lớp" styleClass="body-muted"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label fx:id="lblStatAvailable" text="0" styleClass="current-course-value"/>
+                            <Label text="Đề tài còn chỗ" styleClass="body-muted"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label fx:id="lblStatRegistered" text="0" styleClass="current-course-value"/>
+                            <Label text="Đề tài đã đăng ký" styleClass="body-muted"/>
+                        </VBox>
+                    </HBox>
 
-                <FlowPane hgap="18" vgap="18">
-                    <VBox styleClass="topic-card-modern" spacing="10">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="DT001" styleClass="topic-id"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label text="Đã đăng ký" styleClass="badge badge-success"/>
-                        </HBox>
-                        <Label text="Xây dựng ứng dụng phân công đề tài cho sinh viên" styleClass="topic-card-title" wrapText="true"/>
-                        <Label text="Quản lý lớp học phần, ngân hàng đề tài, đăng ký/hủy đăng ký và xuất danh sách nhóm."
-                               styleClass="topic-card-desc" wrapText="true"/>
-                        <Label text="Số lượng: 3/3" styleClass="body-muted"/>
-                        <Button text="Xem chi tiết" styleClass="btn-outline" maxWidth="Infinity" onAction="#handleShowTopicDetail"/>
-                    </VBox>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
 
-                    <VBox styleClass="topic-card-modern" spacing="10">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="DT002" styleClass="topic-id"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label text="Còn chỗ" styleClass="badge badge-success"/>
-                        </HBox>
-                        <Label text="Xây dựng ứng dụng quản lý thư viện" styleClass="topic-card-title" wrapText="true"/>
-                        <Label text="Quản lý sách, độc giả, phiếu mượn trả và thống kê sách."
-                               styleClass="topic-card-desc" wrapText="true"/>
-                        <Label text="Số lượng: 0/3" styleClass="body-muted"/>
-                        <Button text="Đăng ký" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleNotImplemented"/>
-                    </VBox>
-                </FlowPane>
+                    <HBox spacing="10">
+                        <Button text="Xem danh sách đề tài" styleClass="btn-primary" onAction="#handleShowTopicList"/>
+                        <Button text="Đề tài đã chọn" styleClass="btn-outline" onAction="#handleShowMyRegistration"/>
+                        <Button text="Lịch sử đăng ký" styleClass="btn-outline" onAction="#handleShowHistory"/>
+                    </HBox>
+                </VBox>
             </VBox>
 
             <VBox styleClass="student-sidebar" spacing="16">
                 <VBox styleClass="student-info-card" spacing="10">
                     <Label text="Thông tin sinh viên" styleClass="card-title"/>
-                    <Label text="MSSV: N23DCCN023" styleClass="body-muted"/>
-                    <Label text="Lớp: D23CQCN01-N" styleClass="body-muted"/>
-                    <Label text="Môn: Công nghệ phần mềm" styleClass="body-muted"/>
+                    <Label fx:id="lblStudentName" text="—" styleClass="selected-topic-title" wrapText="true"/>
+                    <Label fx:id="lblStudentCode" text="MSSV: —" styleClass="body-muted"/>
+                    <Label fx:id="lblStudentClass" text="Lớp: —" styleClass="body-muted"/>
+                    <Label fx:id="lblStudentCourse" text="Lớp HP: —" styleClass="body-muted" wrapText="true"/>
+                    <Button text="Xem thông tin cá nhân" styleClass="btn-outline" maxWidth="Infinity"
+                            onAction="#handleShowProfile"/>
                 </VBox>
 
                 <VBox styleClass="selected-topic-card" spacing="10">
                     <Label text="Đề tài đã đăng ký" styleClass="card-title"/>
-                    <Label text="Xây dựng ứng dụng phân công đề tài cho sinh viên"
+                    <Label fx:id="lblRegisteredTopic" text="Chưa đăng ký đề tài nào"
                            styleClass="selected-topic-title" wrapText="true"/>
-                    <Label text="Trạng thái: Đã đăng ký" styleClass="badge badge-success"/>
-                    <Button text="Hủy đăng ký" styleClass="btn-danger" maxWidth="Infinity" onAction="#handleShowMyRegistration"/>
+                    <Label fx:id="lblRegisteredStatus" text="" styleClass="badge badge-info"/>
+                    <Button text="Đề tài đã chọn" styleClass="btn-outline" maxWidth="Infinity"
+                            onAction="#handleShowMyRegistration"/>
                 </VBox>
             </VBox>
         </HBox>

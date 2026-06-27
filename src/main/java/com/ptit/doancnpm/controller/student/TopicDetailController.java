@@ -8,7 +8,9 @@ import com.ptit.doancnpm.model.dto.TopicMember;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
+import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -76,6 +78,7 @@ public class TopicDetailController {
     private int maSinhVien;
     private Integer maDeTaiLop;
     private boolean dangMoDangKy;
+    private Timeline countdown;
 
     @FXML
     private void initialize() {
@@ -114,9 +117,10 @@ public class TopicDetailController {
         }
 
         try {
-            Optional<TopicDetail> result = topicRegistrationService.getTopicDetail(maDeTaiLop);
+            Optional<TopicDetail> result = topicRegistrationService.getTopicDetail(maDeTaiLop, maTaiKhoan);
             if (result.isEmpty()) {
-                lblMessage.setText("Không tìm thấy đề tài đã chọn.");
+                lblTopicTitle.setText("Không có quyền xem đề tài này");
+                lblMessage.setText("Không tìm thấy đề tài trong lớp học phần của bạn.");
                 btnRegister.setDisable(true);
                 return;
             }
@@ -168,6 +172,7 @@ public class TopicDetailController {
 
     private void loadPeriod(int maLopHocPhan) {
         dangMoDangKy = false;
+        stopCountdown();
         try {
             Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
             if (period.isEmpty()) {
@@ -181,8 +186,21 @@ public class TopicDetailController {
             lblPeriod.setText(current.moTaTrangThai());
             lblPeriod.getStyleClass().setAll("badge",
                     dangMoDangKy ? (current.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
+
+            countdown = RegistrationCountdown.start(lblPeriod, current, () -> {
+                dangMoDangKy = false;
+                btnRegister.setDisable(true);
+                showMessage("Đợt đăng ký vừa hết hạn nên không thể đăng ký.");
+            });
         } catch (RuntimeException exception) {
             lblPeriod.setText("");
+        }
+    }
+
+    private void stopCountdown() {
+        if (countdown != null) {
+            countdown.stop();
+            countdown = null;
         }
     }
 
@@ -229,6 +247,11 @@ public class TopicDetailController {
     @FXML
     private void handleShowChangePassword() {
         MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
     }
 
     @FXML

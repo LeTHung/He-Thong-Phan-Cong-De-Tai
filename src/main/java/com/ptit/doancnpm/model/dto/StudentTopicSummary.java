@@ -10,5 +10,6 @@ public record StudentTopicSummary(
         int soChoConLai,
         String trangThai,
         String cheDoPhanCong,
+        String tenGiangVien,
         boolean daDangKy) {
 }

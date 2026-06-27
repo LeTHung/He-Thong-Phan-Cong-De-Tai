@@ -37,11 +37,11 @@ public class TopicRegistrationService {
         return topicRegistrationDAO.findRegistrableTopics(maTaiKhoan);
     }
 
-    public Optional<TopicDetail> getTopicDetail(int maDeTaiLop) {
-        if (maDeTaiLop <= 0) {
+    public Optional<TopicDetail> getTopicDetail(int maDeTaiLop, int maTaiKhoan) {
+        if (maDeTaiLop <= 0 || maTaiKhoan <= 0) {
             return Optional.empty();
         }
-        return topicRegistrationDAO.findTopicDetail(maDeTaiLop);
+        return topicRegistrationDAO.findTopicDetail(maDeTaiLop, maTaiKhoan);
     }
 
     public List<TopicMember> getTopicMembers(int maDeTaiLop) {

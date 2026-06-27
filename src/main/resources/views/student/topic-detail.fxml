@@ -28,6 +28,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
             <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>

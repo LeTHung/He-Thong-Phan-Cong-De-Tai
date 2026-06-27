@@ -29,6 +29,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
             <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
@@ -48,7 +49,6 @@
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="Đề tài đã đăng ký" styleClass="card-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Xuất CSV" styleClass="btn-outline" onAction="#handleExportCsv"/>
                         <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
                     </HBox>
 

@@ -28,6 +28,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
             <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
@@ -45,7 +46,6 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Nhật ký thao tác" styleClass="card-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Xuất CSV" styleClass="btn-outline" onAction="#handleExportCsv"/>
                     <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
                 </HBox>
 
@@ -60,6 +60,12 @@
                         <TableColumn fx:id="colReason" text="Lý do" prefWidth="200"/>
                     </columns>
                 </TableView>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
+                    <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
+                    <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
+                </HBox>
 
                 <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
             </VBox>

@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -31,6 +32,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
             <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
@@ -46,17 +48,18 @@
                     <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
 
-                <HBox spacing="12" alignment="CENTER_LEFT">
+                <FlowPane styleClass="filter-bar" hgap="12" vgap="10" alignment="CENTER_LEFT">
                     <TextField fx:id="txtSearch" promptText="Tìm theo mã hoặc tên đề tài..."
-                               onAction="#handleSearch" HBox.hgrow="ALWAYS"/>
+                               onAction="#handleSearch" prefWidth="240"/>
                     <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" onAction="#handleSearch"/>
                     <Label text="Trạng thái:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboStatus" prefWidth="150" onAction="#handleSearch"/>
+                    <Label text="Giảng viên:" styleClass="body-muted"/>
+                    <ComboBox fx:id="cboLecturer" prefWidth="170" onAction="#handleSearch"/>
                     <Label text="Sắp xếp:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboSort" prefWidth="180" onAction="#handleSort"/>
-                    <Button text="Tìm" styleClass="btn-secondary" onAction="#handleSearch"/>
                     <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
-                </HBox>
+                </FlowPane>
 
                 <VBox styleClass="student-info-card" spacing="12" VBox.vgrow="ALWAYS">
                     <Label text="Đề tài trong lớp học phần" styleClass="card-title"/>
@@ -75,6 +78,12 @@
                         <Button text="Xem chi tiết" styleClass="btn-outline" onAction="#handleViewDetail"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button fx:id="btnRegister" text="Đăng ký đề tài đã chọn" styleClass="btn-primary" onAction="#handleRegister"/>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
+                        <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
+                        <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
                     </HBox>
 
                     <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
