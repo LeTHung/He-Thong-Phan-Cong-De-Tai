@@ -36,18 +36,24 @@ sql/
 
 ## Cấu Hình Database
 
-File cấu hình nằm tại:
+Sao chép file mẫu:
+
+```text
+src/main/resources/config/database.example.properties
+```
+
+thành file cấu hình cục bộ:
 
 ```text
 src/main/resources/config/db.properties
 ```
 
-Nội dung mẫu:
+Sau đó cập nhật thông tin SQL Server của máy đang chạy. Ví dụ:
 
 ```properties
 db.url=jdbc:sqlserver://localhost:1433;databaseName=PhanCongDeTai;encrypt=true;trustServerCertificate=true
 db.username=sa
-db.password=123456
+db.password=YOUR_SQL_SERVER_PASSWORD
 ```
 
 Có thể để trống username/password trong file và truyền bằng biến môi trường:
