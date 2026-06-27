@@ -1,8 +1,13 @@
 package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
+import com.ptit.doancnpm.model.dto.RegisteredTopic;
+import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.StudentDashboardData;
+import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.StudentDashboardService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -14,6 +19,44 @@ public class StudentDashboardController {
 
     @FXML
     private Label lblWelcome;
+
+    @FXML
+    private Label lblCourseBadge;
+
+    @FXML
+    private Label lblPeriodBadge;
+
+    @FXML
+    private Label lblStatTotal;
+
+    @FXML
+    private Label lblStatAvailable;
+
+    @FXML
+    private Label lblStatRegistered;
+
+    @FXML
+    private Label lblMessage;
+
+    @FXML
+    private Label lblStudentName;
+
+    @FXML
+    private Label lblStudentCode;
+
+    @FXML
+    private Label lblStudentClass;
+
+    @FXML
+    private Label lblStudentCourse;
+
+    @FXML
+    private Label lblRegisteredTopic;
+
+    @FXML
+    private Label lblRegisteredStatus;
+
+    private final StudentDashboardService studentDashboardService = new StudentDashboardService();
 
     @FXML
     private void initialize() {
@@ -30,8 +73,85 @@ public class StudentDashboardController {
             return;
         }
 
-        lblWelcome.setText("Chào mừng bạn đến với cổng đăng ký đề tài");
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
+        loadDashboard(user.getMaTaiKhoan());
+    }
+
+    private void loadDashboard(int maTaiKhoan) {
+        try {
+            StudentDashboardData data = studentDashboardService.getDashboardData(maTaiKhoan);
+            StudentInfo info = data.studentInfo();
+
+            lblWelcome.setText("Chào " + nullToDash(info.hoTen()) + ", chào mừng đến cổng đăng ký đề tài");
+
+            lblStudentName.setText(nullToDash(info.hoTen()));
+            lblStudentCode.setText("MSSV: " + nullToDash(info.maSoSinhVien()));
+            lblStudentClass.setText("Lớp: " + nullToDash(info.lopSinhHoat()));
+            lblStudentCourse.setText(info.maLopHocPhan() == null
+                    ? "Chưa được xếp vào lớp học phần"
+                    : "Lớp HP: " + nullToDash(info.tenLopHocPhan()));
+
+            showCourseBadge(info);
+            showPeriodBadge(info, data.registrationPeriod());
+
+            lblStatTotal.setText(String.valueOf(data.soDeTai()));
+            lblStatAvailable.setText(String.valueOf(data.soDeTaiConCho()));
+            lblStatRegistered.setText(String.valueOf(data.soDeTaiDaDangKy()));
+
+            showRegisteredTopic(data.deTaiDaDangKyMoiNhat());
+
+            if (info.maLopHocPhan() == null) {
+                lblMessage.setText("Bạn chưa được xếp vào lớp học phần nào nên chưa thể đăng ký đề tài.");
+            } else if (data.soDeTaiDaDangKy() > 0) {
+                lblMessage.setText("Bạn đã đăng ký đề tài. Vào \"Đề tài đã chọn\" để xem hoặc thay đổi.");
+            } else {
+                lblMessage.setText("Có " + data.soDeTai() + " đề tài trong lớp, "
+                        + data.soDeTaiConCho() + " đề tài còn chỗ. Vào \"Danh sách đề tài\" để đăng ký.");
+            }
+        } catch (RuntimeException exception) {
+            lblMessage.setText(exception.getMessage());
+        }
+    }
+
+    private void showCourseBadge(StudentInfo info) {
+        if (info.maLop() == null || info.maLop().isBlank()) {
+            lblCourseBadge.setText("Chưa có lớp học phần");
+        } else {
+            lblCourseBadge.setText(info.maLop());
+        }
+        lblCourseBadge.getStyleClass().setAll("badge", "badge-info");
+    }
+
+    private void showPeriodBadge(StudentInfo info, RegistrationPeriod period) {
+        if (info.maLopHocPhan() == null) {
+            lblPeriodBadge.setText("Chưa có đợt đăng ký");
+            lblPeriodBadge.getStyleClass().setAll("badge", "badge-warning");
+            return;
+        }
+        if (period == null) {
+            lblPeriodBadge.setText("Chưa mở đợt đăng ký");
+            lblPeriodBadge.getStyleClass().setAll("badge", "badge-info");
+            return;
+        }
+        lblPeriodBadge.setText(period.moTaTrangThai());
+        lblPeriodBadge.getStyleClass().setAll("badge",
+                period.dangMo() ? (period.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
+    }
+
+    private void showRegisteredTopic(RegisteredTopic topic) {
+        if (topic == null) {
+            lblRegisteredTopic.setText("Chưa đăng ký đề tài nào");
+            lblRegisteredStatus.setText("Chưa đăng ký");
+            lblRegisteredStatus.getStyleClass().setAll("badge", "badge-info");
+            return;
+        }
+        lblRegisteredTopic.setText(nullToDash(topic.maDeTaiHeThong()) + " — " + nullToDash(topic.tenDeTai()));
+        lblRegisteredStatus.setText("Đã đăng ký");
+        lblRegisteredStatus.getStyleClass().setAll("badge", "badge-success");
+    }
+
+    private String nullToDash(String value) {
+        return value == null || value.isBlank() ? "—" : value;
     }
 
     @FXML
@@ -50,8 +170,8 @@ public class StudentDashboardController {
     }
 
     @FXML
-    private void handleShowTopicDetail() {
-        MainApp.setRoot(MainApp.STUDENT_TOPIC_DETAIL_VIEW);
+    private void handleShowHistory() {
+        MainApp.setRoot("/views/student/registration-history.fxml");
     }
 
     @FXML
@@ -60,7 +180,7 @@ public class StudentDashboardController {
     }
 
     @FXML
-    private void handleNotImplemented() {
-        MainApp.showInfo("Chức năng này thuộc module Sinh viên, Quốc sẽ phát triển tiếp.");
+    private void handleShowChangePassword() {
+        MainApp.setRoot("/views/student/change-password.fxml");
     }
 }
