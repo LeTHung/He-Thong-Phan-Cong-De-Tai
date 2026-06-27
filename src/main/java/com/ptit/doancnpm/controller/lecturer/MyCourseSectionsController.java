@@ -11,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.List;
 
@@ -35,15 +34,17 @@ public class MyCourseSectionsController {
             return;
         }
 
-        colMaLop.setCellValueFactory(new PropertyValueFactory<>("maLop"));
-        colTenLop.setCellValueFactory(new PropertyValueFactory<>("tenLopHocPhan"));
-        colMonHoc.setCellValueFactory(new PropertyValueFactory<>("tenMonHoc"));
-        colHocKy.setCellValueFactory(cd -> {
-            LecturerCourseSectionSummary s = cd.getValue();
-            return new javafx.beans.property.SimpleStringProperty(
-                    s.tenHocKy() + " " + s.namHoc());
-        });
-        colSoSV.setCellValueFactory(new PropertyValueFactory<>("tongSoSinhVien"));
+        colMaLop.setCellValueFactory(cd ->
+                new javafx.beans.property.SimpleStringProperty(cd.getValue().maLop()));
+        colTenLop.setCellValueFactory(cd ->
+                new javafx.beans.property.SimpleStringProperty(cd.getValue().tenLopHocPhan()));
+        colMonHoc.setCellValueFactory(cd ->
+                new javafx.beans.property.SimpleStringProperty(cd.getValue().tenMonHoc()));
+        colHocKy.setCellValueFactory(cd -> new javafx.beans.property.SimpleStringProperty(
+                cd.getValue().tenHocKy() + " " + cd.getValue().namHoc()));
+        colSoSV.setCellValueFactory(cd ->
+                new javafx.beans.property.SimpleIntegerProperty(cd.getValue().tongSoSinhVien()).asObject());
+        tableView.setPlaceholder(new Label("Bạn chưa được phân công lớp học phần nào."));
 
         loadData(user.getMaTaiKhoan());
     }
@@ -58,7 +59,10 @@ public class MyCourseSectionsController {
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
-    }
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavTopicBank() { MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW); }
+    @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
+    @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
+    @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
+    @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
 }

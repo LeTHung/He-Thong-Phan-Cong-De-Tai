@@ -27,12 +27,12 @@
             </HBox>
             <Label text="GIẢNG VIÊN" styleClass="side-section"/>
             <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavCourseSections"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavTopicBank"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavAssignTopic"/>
             <Button text="Mở cổng đăng ký" styleClass="side-menu-active" maxWidth="Infinity"/>
-            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationResult"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
@@ -94,8 +94,13 @@
                         <Button fx:id="btnOpen" text="Mở cổng đăng ký" styleClass="btn-primary"
                                 onAction="#handleOpen"/>
                     </VBox>
+                    <VBox spacing="4">
+                        <Label text=" "/>
+                        <Button fx:id="btnClose" text="Đóng cổng sớm" disable="true"
+                                styleClass="btn-danger" onAction="#handleClosePeriod"/>
+                    </VBox>
                 </HBox>
-                <Label text="Nếu đã có đợt đăng ký, thao tác này sẽ CẬP NHẬT thời gian và chuyển về trạng thái ĐANG MỞ."
+                <Label text="Mở cổng sẽ cập nhật thời gian nếu đợt đăng ký đã tồn tại. Đóng cổng sớm sẽ ngừng nhận đăng ký ngay lập tức."
                        styleClass="body-muted" wrapText="true"/>
             </VBox>
         </VBox>

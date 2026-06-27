@@ -86,13 +86,13 @@ public class TopicBankDAO {
         }
     }
 
-    public void update(int maDeTai, String maDeTaiHeThong, String tenDeTai,
+    public void update(int maDeTai, int maGiangVien, String maDeTaiHeThong, String tenDeTai,
                        String moTa, String yeuCau, int soLuongMacDinh) {
         String sql = """
                 UPDATE dbo.ngan_hang_de_tai
                 SET ma_de_tai_he_thong = ?, ten_de_tai = ?, mo_ta = ?, yeu_cau = ?,
                     so_luong_mac_dinh = ?, thoi_diem_cap_nhat = SYSDATETIME()
-                WHERE ma_de_tai = ?
+                WHERE ma_de_tai = ? AND ma_giang_vien_tao = ?
                 """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -102,31 +102,46 @@ public class TopicBankDAO {
             stmt.setString(4, yeuCau);
             stmt.setInt(5, soLuongMacDinh);
             stmt.setInt(6, maDeTai);
+            stmt.setInt(7, maGiangVien);
             int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw new RuntimeException("Không tìm thấy đề tài cần cập nhật.");
+                throw new RuntimeException("Không tìm thấy đề tài hoặc bạn không có quyền sửa đề tài này.");
             }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi cập nhật đề tài: " + e.getMessage(), e);
         }
     }
 
-    /** Xóa mềm: chuyển trạng thái sang NGUNG_SU_DUNG */
-    public void softDelete(int maDeTai) {
+    /** Xóa mềm đề tài thuộc chính giảng viên đang đăng nhập. */
+    public void softDelete(int maDeTai, int maGiangVien) {
         String sql = """
                 UPDATE dbo.ngan_hang_de_tai
                 SET trang_thai = N'NGUNG_SU_DUNG', thoi_diem_cap_nhat = SYSDATETIME()
-                WHERE ma_de_tai = ?
+                WHERE ma_de_tai = ? AND ma_giang_vien_tao = ?
                 """;
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, maDeTai);
+            stmt.setInt(2, maGiangVien);
             int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw new RuntimeException("Không tìm thấy đề tài cần xóa.");
+                throw new RuntimeException("Không tìm thấy đề tài hoặc bạn không có quyền xóa đề tài này.");
             }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi xóa đề tài: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean isAssignedToClass(int maDeTai) {
+        String sql = "SELECT COUNT(1) FROM dbo.de_tai_lop WHERE ma_de_tai = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, maDeTai);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra đề tài: " + e.getMessage(), e);
         }
     }
 

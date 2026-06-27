@@ -58,6 +58,7 @@ public class FinalReportController {
         setupTable();
         loadSections(user.getMaTaiKhoan());
         cbSection.setOnAction(e -> onSectionSelected());
+        tableReport.setPlaceholder(new Label("Chọn lớp học phần và chốt danh sách để xem báo cáo."));
     }
 
     private void setupTable() {
@@ -115,11 +116,19 @@ public class FinalReportController {
         LecturerCourseSectionSummary section = cbSection.getValue();
         if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
 
-        // Guard: không chốt khi cổng đăng ký còn mở
         try {
+            if (!finalReportDAO.hasPeriodForLop(section.maLopHocPhan())) {
+                MainApp.showError("Không thể chốt vì lớp chưa có đợt đăng ký.\n"
+                        + "Vui lòng mở cổng đăng ký trước.");
+                return;
+            }
+            if (!finalReportDAO.hasRegistrationStarted(section.maLopHocPhan())) {
+                MainApp.showError("Không thể chốt vì đợt đăng ký chưa đến giờ bắt đầu.");
+                return;
+            }
             if (finalReportDAO.isRegistrationOpen(section.maLopHocPhan())) {
                 MainApp.showError("Không thể chốt danh sách khi cổng đăng ký vẫn đang mở.\n"
-                        + "Vui lòng đợi đến khi hết thời gian đăng ký.");
+                        + "Vui lòng đóng cổng hoặc đợi đến khi hết thời gian đăng ký.");
                 return;
             }
         } catch (Exception e) {
@@ -168,7 +177,10 @@ public class FinalReportController {
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
-    }
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavCourseSections() { MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW); }
+    @FXML private void handleNavTopicBank() { MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW); }
+    @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
+    @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
+    @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
 }

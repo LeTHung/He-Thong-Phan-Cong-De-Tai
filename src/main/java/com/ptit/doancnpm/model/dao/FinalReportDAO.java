@@ -61,6 +61,37 @@ public class FinalReportDAO {
         }
     }
 
+    public boolean hasPeriodForLop(int maLopHocPhan) {
+        String sql = "SELECT COUNT(1) FROM dbo.dot_dang_ky WHERE ma_lop_hoc_phan = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, maLopHocPhan);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra đợt đăng ký: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean hasRegistrationStarted(int maLopHocPhan) {
+        String sql = """
+                SELECT COUNT(1)
+                FROM dbo.dot_dang_ky
+                WHERE ma_lop_hoc_phan = ?
+                  AND SYSDATETIME() >= thoi_gian_bat_dau
+                """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, maLopHocPhan);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra thời gian đăng ký: " + e.getMessage(), e);
+        }
+    }
+
     /** Kiểm tra lớp đã chốt danh sách chưa (trang_thai = DA_DONG) */
     public boolean isFinalized(int maLopHocPhan) {
         String sql = "SELECT trang_thai FROM dbo.lop_hoc_phan WHERE ma_lop_hoc_phan = ?";

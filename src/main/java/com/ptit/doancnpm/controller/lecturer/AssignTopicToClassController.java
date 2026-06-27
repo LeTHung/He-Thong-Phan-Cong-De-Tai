@@ -65,6 +65,7 @@ public class AssignTopicToClassController {
         loadTopics();
 
         cbSection.setOnAction(e -> onSectionSelected());
+        tableAssigned.setPlaceholder(new Label("Chọn lớp học phần để xem danh sách đề tài đã gán."));
     }
 
     private void setupTable() {
@@ -125,6 +126,10 @@ public class AssignTopicToClassController {
         String mode = cbMode.getValue();
 
         if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
+        if (!"DANG_MO".equals(section.trangThai())) {
+            MainApp.showError("Không thể gán đề tài vào lớp học phần đã đóng hoặc lưu trữ.");
+            return;
+        }
         if (topic == null) { MainApp.showError("Vui lòng chọn đề tài."); return; }
         if (maxStr.isEmpty()) { MainApp.showError("Vui lòng nhập số sinh viên tối đa."); return; }
         if (mode == null) { MainApp.showError("Vui lòng chọn chế độ phân công."); return; }
@@ -153,6 +158,12 @@ public class AssignTopicToClassController {
 
     @FXML
     private void handleRemove() {
+        LecturerCourseSectionSummary section = cbSection.getValue();
+        if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
+        if (!"DANG_MO".equals(section.trangThai())) {
+            MainApp.showError("Không thể gỡ đề tài khỏi lớp học phần đã đóng hoặc lưu trữ.");
+            return;
+        }
         AssignedTopicRow selected = tableAssigned.getSelectionModel().getSelectedItem();
         if (selected == null) { MainApp.showInfo("Vui lòng chọn một đề tài để gỡ."); return; }
 
@@ -164,15 +175,17 @@ public class AssignTopicToClassController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 assignDAO.removeAssignment(selected.getMaDeTaiLop());
-                LecturerCourseSectionSummary section = cbSection.getValue();
-                if (section != null) loadAssigned(section.maLopHocPhan());
+                loadAssigned(section.maLopHocPhan());
             } catch (Exception e) {
                 MainApp.showError("Lỗi gỡ đề tài: " + e.getMessage());
             }
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
-    }
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavCourseSections() { MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW); }
+    @FXML private void handleNavTopicBank() { MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW); }
+    @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
+    @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
+    @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
 }

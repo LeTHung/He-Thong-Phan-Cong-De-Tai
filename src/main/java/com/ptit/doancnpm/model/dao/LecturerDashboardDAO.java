@@ -76,4 +76,60 @@ public class LecturerDashboardDAO {
             throw new RuntimeException("Lỗi tải danh sách lớp học phần của giảng viên: " + e.getMessage(), e);
         }
     }
+
+    public int getTotalRegisteredStudents(int maTaiKhoan) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM dbo.dang_ky_de_tai dk
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = dk.ma_lop_hoc_phan
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
+                WHERE gv.ma_tai_khoan = ?
+                """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, maTaiKhoan);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải thống kê sinh viên đã đăng ký: " + e.getMessage(), e);
+        }
+    }
+
+    public String getRegistrationGateStatus(int maTaiKhoan) {
+        String sql = """
+                SELECT TOP 1
+                    CASE
+                        WHEN ddk.trang_thai = N'DANG_MO'
+                             AND SYSDATETIME() BETWEEN ddk.thoi_gian_bat_dau AND ddk.thoi_gian_ket_thuc
+                        THEN N'DANG_MO'
+                        WHEN ddk.trang_thai = N'DANG_MO'
+                             AND SYSDATETIME() < ddk.thoi_gian_bat_dau
+                        THEN N'CHO_MO'
+                        ELSE N'DA_DONG'
+                    END AS status
+                FROM dbo.dot_dang_ky ddk
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = ddk.ma_lop_hoc_phan
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
+                WHERE gv.ma_tai_khoan = ?
+                ORDER BY CASE
+                    WHEN ddk.trang_thai = N'DANG_MO'
+                         AND SYSDATETIME() BETWEEN ddk.thoi_gian_bat_dau AND ddk.thoi_gian_ket_thuc
+                    THEN 0
+                    WHEN ddk.trang_thai = N'DANG_MO'
+                         AND SYSDATETIME() < ddk.thoi_gian_bat_dau
+                    THEN 1
+                    ELSE 2
+                END
+                """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, maTaiKhoan);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getString("status") : null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra trạng thái cổng đăng ký: " + e.getMessage(), e);
+        }
+    }
 }

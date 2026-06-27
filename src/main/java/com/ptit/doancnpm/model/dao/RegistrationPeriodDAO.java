@@ -36,16 +36,22 @@ public class RegistrationPeriodDAO {
     }
 
     /** Đóng đợt đăng ký (chuyển trạng thái sang DA_DONG) */
-    public void closePeriod(int maLopHocPhan) {
+    public void closePeriod(int maLopHocPhan, int maGiangVien) {
         String sql = """
-                UPDATE dbo.dot_dang_ky
-                SET trang_thai = N'DA_DONG', thoi_diem_cap_nhat = SYSDATETIME()
-                WHERE ma_lop_hoc_phan = ?
+                UPDATE ddk
+                SET ddk.trang_thai = N'DA_DONG', ddk.thoi_diem_cap_nhat = SYSDATETIME()
+                FROM dbo.dot_dang_ky ddk
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = ddk.ma_lop_hoc_phan
+                WHERE ddk.ma_lop_hoc_phan = ?
+                  AND lhp.ma_giang_vien = ?
                 """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, maLopHocPhan);
-            stmt.executeUpdate();
+            stmt.setInt(2, maGiangVien);
+            if (stmt.executeUpdate() == 0) {
+                throw new RuntimeException("Không tìm thấy đợt đăng ký hoặc bạn không phụ trách lớp này.");
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi đóng đợt đăng ký: " + e.getMessage(), e);
         }

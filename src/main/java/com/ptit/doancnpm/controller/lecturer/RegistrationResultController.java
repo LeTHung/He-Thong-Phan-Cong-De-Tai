@@ -57,6 +57,8 @@ public class RegistrationResultController {
         setupUnregisteredTable();
         loadSections(user.getMaTaiKhoan());
         cbSection.setOnAction(e -> handleRefresh());
+        tableRegistered.setPlaceholder(new Label("Chưa có sinh viên nào đăng ký đề tài."));
+        tableUnregistered.setPlaceholder(new Label("Tất cả sinh viên đã có đề tài."));
     }
 
     private void setupRegisteredTable() {
@@ -109,7 +111,10 @@ public class RegistrationResultController {
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
-    }
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavCourseSections() { MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW); }
+    @FXML private void handleNavTopicBank() { MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW); }
+    @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
+    @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
+    @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
 }

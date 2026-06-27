@@ -32,6 +32,7 @@ public class RegistrationPeriodController {
     @FXML private DatePicker dpEnd;
     @FXML private TextField txtEndTime;
     @FXML private Button btnOpen;
+    @FXML private Button btnClose;
 
     private final LecturerDashboardDAO dashboardDAO = new LecturerDashboardDAO();
     private final RegistrationPeriodDAO periodDAO = new RegistrationPeriodDAO();
@@ -92,16 +93,24 @@ public class RegistrationPeriodController {
                 lblStatus.setTextFill(Color.GRAY);
                 lblCurrentPeriodInfo.setText("—");
                 btnOpen.setDisable(false);
+                btnClose.setDisable(true);
             } else {
                 RegistrationPeriod p = opt.get();
+                LocalDateTime now = LocalDateTime.now();
                 if (p.dangMo()) {
                     lblStatus.setText("Đang mở");
                     lblStatus.setTextFill(Color.GREEN);
                 } else if ("DA_DONG".equals(p.trangThai())) {
                     lblStatus.setText("Đã đóng");
                     lblStatus.setTextFill(Color.RED);
+                } else if (p.thoiGianBatDau() != null && now.isBefore(p.thoiGianBatDau())) {
+                    lblStatus.setText("Chờ giờ mở");
+                    lblStatus.setTextFill(Color.DARKGOLDENROD);
+                } else if (p.thoiGianKetThuc() != null && now.isAfter(p.thoiGianKetThuc())) {
+                    lblStatus.setText("Đã hết hạn");
+                    lblStatus.setTextFill(Color.RED);
                 } else {
-                    lblStatus.setText("Nhập / Chờ");
+                    lblStatus.setText("Chưa mở");
                     lblStatus.setTextFill(Color.DARKGOLDENROD);
                 }
                 String info = "";
@@ -109,6 +118,15 @@ public class RegistrationPeriodController {
                 if (p.thoiGianKetThuc() != null) info += "  →  Đến: " + DISPLAY_FMT.format(p.thoiGianKetThuc());
                 lblCurrentPeriodInfo.setText(info.isBlank() ? "—" : info);
                 btnOpen.setDisable("DA_DONG".equals(p.trangThai()));
+                btnClose.setDisable(!p.dangMo());
+            }
+
+            LecturerCourseSectionSummary selected = cbSection.getValue();
+            if (selected != null && !"DANG_MO".equals(selected.trangThai())) {
+                lblStatus.setText("Lớp học phần đã đóng");
+                lblStatus.setTextFill(Color.RED);
+                btnOpen.setDisable(true);
+                btnClose.setDisable(true);
             }
         } catch (Exception e) {
             MainApp.showError("Lỗi tải thông tin đợt đăng ký: " + e.getMessage());
@@ -119,6 +137,10 @@ public class RegistrationPeriodController {
     private void handleOpen() {
         LecturerCourseSectionSummary section = cbSection.getValue();
         if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
+        if (!"DANG_MO".equals(section.trangThai())) {
+            MainApp.showError("Không thể mở cổng cho lớp học phần đã đóng hoặc lưu trữ.");
+            return;
+        }
 
         LocalDate dStart = dpStart.getValue();
         LocalDate dEnd = dpEnd.getValue();
@@ -149,6 +171,10 @@ public class RegistrationPeriodController {
             MainApp.showError("Thời gian kết thúc phải sau thời gian bắt đầu.");
             return;
         }
+        if (!ketThuc.isAfter(LocalDateTime.now())) {
+            MainApp.showError("Thời gian kết thúc phải lớn hơn thời điểm hiện tại.");
+            return;
+        }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận mở cổng đăng ký");
@@ -167,7 +193,32 @@ public class RegistrationPeriodController {
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
+    @FXML
+    private void handleClosePeriod() {
+        LecturerCourseSectionSummary section = cbSection.getValue();
+        if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận đóng cổng đăng ký");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Đóng cổng đăng ký sớm cho lớp \"" + section.maLop()
+                + "\"?\nSinh viên sẽ không thể đăng ký thêm sau khi đóng.");
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                periodDAO.closePeriod(section.maLopHocPhan(), maGiangVien);
+                refreshStatus(section.maLopHocPhan());
+                MainApp.showInfo("Đã đóng cổng đăng ký cho lớp \"" + section.maLop() + "\".");
+            } catch (Exception e) {
+                MainApp.showError("Lỗi đóng cổng đăng ký: " + e.getMessage());
+            }
+        }
     }
+
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavCourseSections() { MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW); }
+    @FXML private void handleNavTopicBank() { MainApp.setRoot(MainApp.LECTURER_TOPIC_BANK_VIEW); }
+    @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
+    @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
+    @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
 }

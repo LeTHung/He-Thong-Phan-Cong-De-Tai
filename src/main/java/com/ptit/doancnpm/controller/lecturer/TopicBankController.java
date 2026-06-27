@@ -50,6 +50,7 @@ public class TopicBankController {
 
         setupColumns();
         loadData();
+        tableView.setPlaceholder(new Label("Bạn chưa có đề tài nào. Nhấn \"+ Thêm mới\" để tạo đề tài."));
     }
 
     private void setupColumns() {
@@ -113,6 +114,17 @@ public class TopicBankController {
             return;
         }
 
+        try {
+            if (dao.isAssignedToClass(selected.getMaDeTai())) {
+                MainApp.showError("Không thể xóa đề tài \"" + selected.getTenDeTai()
+                        + "\" vì đang được gán vào một hoặc nhiều lớp học phần.");
+                return;
+            }
+        } catch (Exception e) {
+            MainApp.showError("Lỗi kiểm tra đề tài: " + e.getMessage());
+            return;
+        }
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận xóa");
         confirm.setHeaderText(null);
@@ -120,8 +132,9 @@ public class TopicBankController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                dao.softDelete(selected.getMaDeTai());
+                dao.softDelete(selected.getMaDeTai(), maGiangVien);
                 loadData();
+                MainApp.showInfo("Đã xóa đề tài \"" + selected.getTenDeTai() + "\".");
             } catch (Exception e) {
                 MainApp.showError("Lỗi xóa đề tài: " + e.getMessage());
             }
@@ -168,7 +181,7 @@ public class TopicBankController {
 
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            String ma = txtMa.getText().trim();
+            String ma = txtMa.getText().trim().toUpperCase();
             String ten = txtTen.getText().trim();
             String moTa = txtMoTa.getText().trim();
             String yeuCau = txtYeuCau.getText().trim();
@@ -176,6 +189,14 @@ public class TopicBankController {
 
             if (ma.isEmpty() || ten.isEmpty()) {
                 MainApp.showError("Mã đề tài và tên đề tài không được để trống.");
+                return;
+            }
+            if (ma.length() > 50) {
+                MainApp.showError("Mã đề tài không được vượt quá 50 ký tự.");
+                return;
+            }
+            if (ten.length() > 255) {
+                MainApp.showError("Tên đề tài không được vượt quá 255 ký tự.");
                 return;
             }
             int soLuong;
@@ -194,11 +215,13 @@ public class TopicBankController {
                     return;
                 }
                 if (isEdit) {
-                    dao.update(existing.getMaDeTai(), ma, ten, moTa.isEmpty() ? null : moTa,
+                    dao.update(existing.getMaDeTai(), maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
                             yeuCau.isEmpty() ? null : yeuCau, soLuong);
+                    MainApp.showInfo("Đã cập nhật đề tài thành công.");
                 } else {
                     dao.insert(maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
                             yeuCau.isEmpty() ? null : yeuCau, soLuong);
+                    MainApp.showInfo("Đã thêm đề tài mới thành công.");
                 }
                 loadData();
             } catch (Exception e) {
@@ -207,7 +230,10 @@ public class TopicBankController {
         }
     }
 
-    @FXML private void handleBack() {
-        MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW);
-    }
+    @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
+    @FXML private void handleNavCourseSections() { MainApp.setRoot(MainApp.LECTURER_COURSE_SECTIONS_VIEW); }
+    @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
+    @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
+    @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
+    @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
 }

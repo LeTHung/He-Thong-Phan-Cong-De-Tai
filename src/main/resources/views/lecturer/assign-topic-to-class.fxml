@@ -28,12 +28,12 @@
             </HBox>
             <Label text="GIẢNG VIÊN" styleClass="side-section"/>
             <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavCourseSections"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavTopicBank"/>
             <Button text="Gán đề tài vào lớp" styleClass="side-menu-active" maxWidth="Infinity"/>
-            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
-            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationPeriod"/>
+            <Button text="Kết quả đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationResult"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>

@@ -52,23 +52,23 @@
             <HBox spacing="18">
                 <VBox styleClass="stat-card-blue" prefWidth="220">
                     <Label text="Lớp phụ trách" styleClass="stat-label"/>
-                    <Label text="01" styleClass="stat-value"/>
-                    <Label text="CNPM_D23CQCN01_N" styleClass="stat-note"/>
+                    <Label fx:id="lblStatSections" text="—" styleClass="stat-value"/>
+                    <Label fx:id="lblStatSectionNote" text="Đang tải..." styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
-                    <Label text="Đề tài" styleClass="stat-label"/>
-                    <Label text="04" styleClass="stat-value"/>
-                    <Label text="Đã gán vào lớp" styleClass="stat-note"/>
+                    <Label text="Đề tài đã gán" styleClass="stat-label"/>
+                    <Label fx:id="lblStatTopics" text="—" styleClass="stat-value"/>
+                    <Label text="Tổng các lớp" styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
                     <Label text="Đã đăng ký" styleClass="stat-label"/>
-                    <Label text="03" styleClass="stat-value"/>
-                    <Label text="Sinh viên trong nhóm" styleClass="stat-note"/>
+                    <Label fx:id="lblStatRegistered" text="—" styleClass="stat-value"/>
+                    <Label text="Sinh viên có đề tài" styleClass="stat-note"/>
                 </VBox>
                 <VBox styleClass="stat-card" prefWidth="220">
                     <Label text="Cổng đăng ký" styleClass="stat-label"/>
-                    <Label text="Đang mở" styleClass="stat-value"/>
-                    <Label text="Dữ liệu mẫu" styleClass="stat-note"/>
+                    <Label fx:id="lblStatGate" text="—" styleClass="stat-value"/>
+                    <Label text="Trạng thái hiện tại" styleClass="stat-note"/>
                 </VBox>
             </HBox>
 
@@ -76,19 +76,18 @@
                 <HBox alignment="CENTER_LEFT">
                     <VBox>
                         <Label text="Danh sách lớp học phần" styleClass="card-title"/>
-                        <Label text="Màn hình khung cho module giảng viên. Cường sẽ gắn dữ liệu thật từ database." styleClass="body-muted"/>
+                        <Label text="Các lớp học phần bạn đang phụ trách trong học kỳ." styleClass="body-muted"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button text="+ Tạo đề tài" styleClass="btn-primary" onAction="#handleShowTopicBank"/>
                 </HBox>
 
-                <TableView prefHeight="260">
+                <TableView fx:id="tableSections" prefHeight="260">
                     <columns>
-                        <TableColumn text="Mã lớp" prefWidth="180"/>
-                        <TableColumn text="Tên lớp học phần" prefWidth="260"/>
-                        <TableColumn text="Số đề tài" prefWidth="140"/>
-                        <TableColumn text="Trạng thái đăng ký" prefWidth="180"/>
-                        <TableColumn text="Thao tác" prefWidth="220"/>
+                        <TableColumn fx:id="colDashMaLop" text="Mã lớp" prefWidth="180"/>
+                        <TableColumn fx:id="colDashTenLop" text="Tên lớp học phần" prefWidth="340"/>
+                        <TableColumn fx:id="colDashSoDeTai" text="Số đề tài" prefWidth="100"/>
+                        <TableColumn fx:id="colDashTrangThai" text="Trạng thái" prefWidth="160"/>
                     </columns>
                 </TableView>
             </VBox>
