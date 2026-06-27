@@ -31,6 +31,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblUserInfo" styleClass="user-chip-name"/>
+            <Button text="Thông tin cá nhân" styleClass="nav-link" onAction="#handleShowProfile"/>
             <Button text="Đổi mật khẩu" styleClass="nav-link" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="btn-outline" onAction="#handleLogout"/>
         </HBox>
@@ -52,6 +53,8 @@
                     <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" onAction="#handleSearch"/>
                     <Label text="Trạng thái:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboStatus" prefWidth="150" onAction="#handleSearch"/>
+                    <Label text="Giảng viên:" styleClass="body-muted"/>
+                    <ComboBox fx:id="cboLecturer" prefWidth="170" onAction="#handleSearch"/>
                     <Label text="Sắp xếp:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboSort" prefWidth="180" onAction="#handleSort"/>
                     <Button text="Tìm" styleClass="btn-secondary" onAction="#handleSearch"/>

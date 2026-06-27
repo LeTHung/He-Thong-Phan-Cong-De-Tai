@@ -67,6 +67,9 @@ public class TopicListController {
     private ComboBox<String> cboStatus;
 
     @FXML
+    private ComboBox<String> cboLecturer;
+
+    @FXML
     private TableView<StudentTopicSummary> tblTopics;
 
     @FXML
@@ -94,6 +97,8 @@ public class TopicListController {
     private static final String SORT_CODE = "Mã đề tài A → Z";
 
     private static final String STATUS_ALL = "Tất cả trạng thái";
+
+    private static final String LECTURER_ALL = "Tất cả giảng viên";
 
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
@@ -123,6 +128,7 @@ public class TopicListController {
         setupTable();
         setupSort();
         setupStatusFilter();
+        setupLecturerFilter();
         loadStudentInfo();
         loadTopics();
     }
@@ -140,6 +146,31 @@ public class TopicListController {
                 trangThaiText("DA_DU"),
                 trangThaiText("DA_DONG"));
         cboStatus.setValue(STATUS_ALL);
+    }
+
+    private void setupLecturerFilter() {
+        cboLecturer.getItems().setAll(LECTURER_ALL);
+        cboLecturer.setValue(LECTURER_ALL);
+    }
+
+    /**
+     * Cập nhật danh sách giảng viên trong bộ lọc theo các đề tài đang có, giữ lại
+     * lựa chọn hiện tại nếu giảng viên đó vẫn còn trong danh sách.
+     */
+    private void refreshLecturerOptions() {
+        String current = cboLecturer.getValue();
+        List<String> lecturers = allTopics.stream()
+                .map(StudentTopicSummary::tenGiangVien)
+                .filter(name -> name != null && !name.isBlank())
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+
+        List<String> options = new java.util.ArrayList<>();
+        options.add(LECTURER_ALL);
+        options.addAll(lecturers);
+        cboLecturer.getItems().setAll(options);
+        cboLecturer.setValue(options.contains(current) ? current : LECTURER_ALL);
     }
 
     private void setupTable() {
@@ -204,6 +235,7 @@ public class TopicListController {
     private void loadTopics() {
         try {
             allTopics = topicRegistrationService.getRegistrableTopics(maTaiKhoan);
+            refreshLecturerOptions();
             applyFilter();
             if (allTopics.isEmpty()) {
                 showMessage("Chưa có đề tài nào trong lớp học phần của bạn.");
@@ -221,6 +253,8 @@ public class TopicListController {
         boolean onlyAvailable = chkOnlyAvailable.isSelected();
         String status = cboStatus == null ? null : cboStatus.getValue();
         boolean allStatus = status == null || STATUS_ALL.equals(status);
+        String lecturer = cboLecturer == null ? null : cboLecturer.getValue();
+        boolean allLecturers = lecturer == null || LECTURER_ALL.equals(lecturer);
 
         List<StudentTopicSummary> filtered = allTopics.stream()
                 .filter(topic -> keyword.isEmpty()
@@ -229,6 +263,7 @@ public class TopicListController {
                 .filter(topic -> !onlyAvailable
                         || (topic.soChoConLai() > 0 && "DANG_MO".equals(topic.trangThai())))
                 .filter(topic -> allStatus || status.equals(trangThaiText(topic.trangThai())))
+                .filter(topic -> allLecturers || lecturer.equals(topic.tenGiangVien()))
                 .sorted(currentComparator())
                 .toList();
         tblTopics.getItems().setAll(filtered);
@@ -273,6 +308,7 @@ public class TopicListController {
         chkOnlyAvailable.setSelected(false);
         cboSort.setValue(SORT_DEFAULT);
         cboStatus.setValue(STATUS_ALL);
+        cboLecturer.setValue(LECTURER_ALL);
         loadStudentInfo();
         loadTopics();
     }
@@ -336,6 +372,11 @@ public class TopicListController {
     @FXML
     private void handleShowChangePassword() {
         MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
     }
 
     @FXML

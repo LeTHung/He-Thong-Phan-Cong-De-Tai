@@ -8,7 +8,6 @@ import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
-import com.ptit.doancnpm.util.CsvExporter;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -21,8 +20,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -310,40 +307,6 @@ public class MyRegistrationController {
     }
 
     @FXML
-    private void handleExportCsv() {
-        List<RegisteredTopic> data = tblRegistrations.getItems();
-        if (data == null || data.isEmpty()) {
-            showMessage("Không có đề tài nào để xuất.");
-            return;
-        }
-
-        File file = CsvExporter.chooseSaveFile(MainApp.getPrimaryStage(), "de-tai-da-chon.csv");
-        if (file == null) {
-            return;
-        }
-
-        List<String> headers = List.of(
-                "Mã ĐT", "Tên đề tài", "Lớp HP", "Môn học", "Giảng viên", "Hình thức", "Thời điểm đăng ký");
-        List<List<String>> rows = data.stream()
-                .map(topic -> List.of(
-                        ns(topic.maDeTaiHeThong()),
-                        ns(topic.tenDeTai()),
-                        ns(topic.maLop()),
-                        ns(topic.tenMonHoc()),
-                        ns(topic.tenGiangVien()),
-                        topic.hinhThucPhanCongText(),
-                        formatTime(topic)))
-                .toList();
-
-        try {
-            CsvExporter.write(file, headers, rows);
-            showMessage("Đã xuất " + rows.size() + " đề tài ra " + file.getName());
-        } catch (IOException exception) {
-            showMessage("Lỗi xuất CSV: " + exception.getMessage());
-        }
-    }
-
-    @FXML
     private void handleShowTopicList() {
         MainApp.setRoot(MainApp.STUDENT_TOPIC_LIST_VIEW);
     }
@@ -356,6 +319,11 @@ public class MyRegistrationController {
     @FXML
     private void handleShowChangePassword() {
         MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
     }
 
     @FXML
@@ -391,10 +359,6 @@ public class MyRegistrationController {
 
     private String nullToDash(String value) {
         return value == null || value.isBlank() ? "—" : value;
-    }
-
-    private String ns(String value) {
-        return value == null ? "" : value;
     }
 
     private void showMessage(String message) {

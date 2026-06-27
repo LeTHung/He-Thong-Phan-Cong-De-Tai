@@ -5,7 +5,6 @@ import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
-import com.ptit.doancnpm.util.CsvExporter;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -13,8 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -113,40 +110,6 @@ public class RegistrationHistoryController {
     }
 
     @FXML
-    private void handleExportCsv() {
-        List<RegistrationHistoryEntry> data = tblHistory.getItems();
-        if (data == null || data.isEmpty()) {
-            showMessage("Không có lịch sử để xuất.");
-            return;
-        }
-
-        File file = CsvExporter.chooseSaveFile(MainApp.getPrimaryStage(), "lich-su-dang-ky.csv");
-        if (file == null) {
-            return;
-        }
-
-        List<String> headers = List.of(
-                "Thời điểm", "Hành động", "Mã ĐT", "Tên đề tài", "Lớp HP", "Hình thức", "Lý do");
-        List<List<String>> rows = data.stream()
-                .map(entry -> List.of(
-                        formatTime(entry),
-                        entry.hanhDongText(),
-                        ns(entry.maDeTaiHeThong()),
-                        ns(entry.tenDeTai()),
-                        ns(entry.maLop()),
-                        entry.hinhThucText(),
-                        ns(entry.lyDo())))
-                .toList();
-
-        try {
-            CsvExporter.write(file, headers, rows);
-            showMessage("Đã xuất " + rows.size() + " dòng ra " + file.getName());
-        } catch (IOException exception) {
-            showMessage("Lỗi xuất CSV: " + exception.getMessage());
-        }
-    }
-
-    @FXML
     private void handleShowTopicList() {
         MainApp.setRoot(MainApp.STUDENT_TOPIC_LIST_VIEW);
     }
@@ -167,6 +130,11 @@ public class RegistrationHistoryController {
     }
 
     @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
+    }
+
+    @FXML
     private void handleLogout() {
         MainApp.showLogin();
     }
@@ -177,10 +145,6 @@ public class RegistrationHistoryController {
 
     private String nullToDash(String value) {
         return value == null || value.isBlank() ? "—" : value;
-    }
-
-    private String ns(String value) {
-        return value == null ? "" : value;
     }
 
     private void showMessage(String message) {
