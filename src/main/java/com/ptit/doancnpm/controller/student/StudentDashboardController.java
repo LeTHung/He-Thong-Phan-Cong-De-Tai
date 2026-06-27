@@ -8,7 +8,9 @@ import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.StudentDashboardService;
+import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
@@ -57,6 +59,8 @@ public class StudentDashboardController {
     private Label lblRegisteredStatus;
 
     private final StudentDashboardService studentDashboardService = new StudentDashboardService();
+
+    private Timeline countdown;
 
     @FXML
     private void initialize() {
@@ -136,6 +140,12 @@ public class StudentDashboardController {
         lblPeriodBadge.setText(period.moTaTrangThai());
         lblPeriodBadge.getStyleClass().setAll("badge",
                 period.dangMo() ? (period.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
+
+        if (countdown != null) {
+            countdown.stop();
+        }
+        countdown = RegistrationCountdown.start(lblPeriodBadge, period,
+                () -> lblMessage.setText("Đợt đăng ký đã hết hạn."));
     }
 
     private void showRegisteredTopic(RegisteredTopic topic) {

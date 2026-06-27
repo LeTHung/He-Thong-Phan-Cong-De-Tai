@@ -8,7 +8,9 @@ import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
+import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -98,6 +100,7 @@ public class MyRegistrationController {
     private int maSinhVien;
     private Integer maLopHocPhan;
     private boolean dangMoDangKy;
+    private Timeline countdown;
 
     @FXML
     private void initialize() {
@@ -131,6 +134,7 @@ public class MyRegistrationController {
 
     private void loadPeriod() {
         dangMoDangKy = false;
+        stopCountdown();
         if (maLopHocPhan == null) {
             lblPeriod.setText("Chưa có đợt đăng ký");
             lblPeriod.getStyleClass().setAll("badge", "badge-info");
@@ -150,8 +154,22 @@ public class MyRegistrationController {
             lblPeriod.setText(current.moTaTrangThai());
             lblPeriod.getStyleClass().setAll("badge",
                     dangMoDangKy ? (current.sapHetHan() ? "badge-warning" : "badge-success") : "badge-warning");
+
+            countdown = RegistrationCountdown.start(lblPeriod, current, () -> {
+                dangMoDangKy = false;
+                btnCancel.setDisable(true);
+                btnChange.setDisable(true);
+                showMessage("Đợt đăng ký vừa hết hạn nên không thể hủy hoặc đổi đề tài.");
+            });
         } catch (RuntimeException exception) {
             lblPeriod.setText("");
+        }
+    }
+
+    private void stopCountdown() {
+        if (countdown != null) {
+            countdown.stop();
+            countdown = null;
         }
     }
 
