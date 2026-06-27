@@ -36,6 +36,9 @@ public class TopicRegistrationDAO {
                     sv.ma_so_sinh_vien,
                     sv.ho_ten,
                     sv.lop_sinh_hoat,
+                    sv.email,
+                    sv.khoa_hoc,
+                    sv.nganh,
                     lhp.ma_lop_hoc_phan,
                     lhp.ma_lop,
                     lhp.ten_lop_hoc_phan
@@ -67,6 +70,9 @@ public class TopicRegistrationDAO {
                         resultSet.getString("ma_so_sinh_vien"),
                         resultSet.getString("ho_ten"),
                         resultSet.getString("lop_sinh_hoat"),
+                        resultSet.getString("email"),
+                        resultSet.getString("khoa_hoc"),
+                        resultSet.getString("nganh"),
                         nullableMaLopHocPhan,
                         resultSet.getString("ma_lop"),
                         resultSet.getString("ten_lop_hoc_phan")));
@@ -92,6 +98,7 @@ public class TopicRegistrationDAO {
                     v.so_cho_con_lai,
                     v.trang_thai,
                     v.che_do_phan_cong,
+                    gv.ho_ten AS ten_giang_vien,
                     CASE
                         WHEN EXISTS (
                             SELECT 1
@@ -107,6 +114,8 @@ public class TopicRegistrationDAO {
                     AND svl.trang_thai = N'DANG_HOC'
                 JOIN dbo.sinh_vien sv
                     ON sv.ma_sinh_vien = svl.ma_sinh_vien
+                JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = v.ma_lop_hoc_phan
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
                 WHERE sv.ma_tai_khoan = ?
                 ORDER BY v.ma_lop, v.ma_de_tai_he_thong
                 """;
@@ -130,6 +139,7 @@ public class TopicRegistrationDAO {
                             resultSet.getInt("so_cho_con_lai"),
                             resultSet.getString("trang_thai"),
                             resultSet.getString("che_do_phan_cong"),
+                            resultSet.getString("ten_giang_vien"),
                             resultSet.getInt("da_dang_ky") == 1));
                 }
             }
@@ -141,9 +151,11 @@ public class TopicRegistrationDAO {
     }
 
     /**
-     * Chi tiết một đề tài theo mã đề tài lớp.
+     * Chi tiết một đề tài theo mã đề tài lớp, giới hạn trong các lớp học phần mà
+     * sinh viên đang theo học. Yêu cầu thêm mã tài khoản để sinh viên không thể
+     * xem chi tiết đề tài của lớp khác dù có truyền mã đề tài lớp lạ.
      */
-    public Optional<TopicDetail> findTopicDetail(int maDeTaiLop) {
+    public Optional<TopicDetail> findTopicDetail(int maDeTaiLop, int maTaiKhoan) {
         String sql = """
                 SELECT
                     v.ma_de_tai_lop,
@@ -162,13 +174,19 @@ public class TopicRegistrationDAO {
                 FROM dbo.vw_de_tai_con_cho v
                 JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = v.ma_lop_hoc_phan
                 JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
+                JOIN dbo.sinh_vien_lop svl
+                    ON svl.ma_lop_hoc_phan = v.ma_lop_hoc_phan
+                    AND svl.trang_thai = N'DANG_HOC'
+                JOIN dbo.sinh_vien sv ON sv.ma_sinh_vien = svl.ma_sinh_vien
                 WHERE v.ma_de_tai_lop = ?
+                  AND sv.ma_tai_khoan = ?
                 """;
 
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, maDeTaiLop);
+            statement.setInt(2, maTaiKhoan);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (!resultSet.next()) {

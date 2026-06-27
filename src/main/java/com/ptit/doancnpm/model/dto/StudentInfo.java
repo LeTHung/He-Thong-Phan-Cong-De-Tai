@@ -5,6 +5,9 @@ public record StudentInfo(
         String maSoSinhVien,
         String hoTen,
         String lopSinhHoat,
+        String email,
+        String khoaHoc,
+        String nganh,
         Integer maLopHocPhan,
         String maLop,
         String tenLopHocPhan) {

@@ -114,9 +114,10 @@ public class TopicDetailController {
         }
 
         try {
-            Optional<TopicDetail> result = topicRegistrationService.getTopicDetail(maDeTaiLop);
+            Optional<TopicDetail> result = topicRegistrationService.getTopicDetail(maDeTaiLop, maTaiKhoan);
             if (result.isEmpty()) {
-                lblMessage.setText("Không tìm thấy đề tài đã chọn.");
+                lblTopicTitle.setText("Không có quyền xem đề tài này");
+                lblMessage.setText("Không tìm thấy đề tài trong lớp học phần của bạn.");
                 btnRegister.setDisable(true);
                 return;
             }
@@ -229,6 +230,11 @@ public class TopicDetailController {
     @FXML
     private void handleShowChangePassword() {
         MainApp.setRoot("/views/student/change-password.fxml");
+    }
+
+    @FXML
+    private void handleShowProfile() {
+        MainApp.setRoot(MainApp.STUDENT_PROFILE_VIEW);
     }
 
     @FXML
