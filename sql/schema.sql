@@ -149,6 +149,7 @@ CREATE TABLE dbo.sinh_vien_lop (
     ma_lop_hoc_phan      INT NOT NULL,
     ma_sinh_vien         INT NOT NULL,
     ngay_tham_gia        DATE NOT NULL CONSTRAINT DF_sinh_vien_lop_ngay_tham_gia DEFAULT CONVERT(DATE, SYSDATETIME()),
+    thoi_diem_tham_gia   DATETIME2(0) NOT NULL CONSTRAINT DF_sinh_vien_lop_thoi_diem_tham_gia DEFAULT SYSDATETIME(),
     trang_thai           NVARCHAR(20) NOT NULL CONSTRAINT DF_sinh_vien_lop_trang_thai DEFAULT N'DANG_HOC',
     ghi_chu              NVARCHAR(500) NULL,
 
@@ -560,6 +561,20 @@ BEGIN
     )
         THROW 50002, 'Giang vien khong phu trach lop hoc phan nay.', 1;
 
+    IF EXISTS (
+        SELECT 1 FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND trang_thai <> N'DANG_MO'
+    )
+        THROW 50004, 'Lop hoc phan da dong hoac luu tru.', 1;
+
+    IF EXISTS (
+        SELECT 1 FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND che_do_phan_cong = N'GIANG_VIEN_PHAN_CONG'
+    )
+        THROW 50005, 'Lop hoc phan nay dang o che do Giang vien phan cong. Khong can mo cong dang ky.', 1;
+
     IF NOT EXISTS (
         SELECT 1 FROM dbo.de_tai_lop
         WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
@@ -853,7 +868,7 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE dbo.sp_phan_cong_tu_dong
+CREATE OR ALTER PROCEDURE dbo.sp_phan_cong_tu_dong
     @ma_giang_vien INT,
     @ma_lop_hoc_phan INT,
     @so_da_phan_cong INT OUTPUT
@@ -963,7 +978,7 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE dbo.sp_chot_danh_sach
+CREATE OR ALTER PROCEDURE dbo.sp_chot_danh_sach
     @ma_giang_vien INT,
     @ma_lop_hoc_phan INT
 AS
@@ -977,6 +992,20 @@ BEGIN
           AND ma_giang_vien = @ma_giang_vien
     )
         THROW 50401, 'Giang vien khong phu trach lop hoc phan nay.', 1;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.sinh_vien_lop svl
+        WHERE svl.ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND svl.trang_thai = N'DANG_HOC'
+          AND NOT EXISTS (
+              SELECT 1
+              FROM dbo.dang_ky_de_tai dk
+              WHERE dk.ma_lop_hoc_phan = svl.ma_lop_hoc_phan
+                AND dk.ma_sinh_vien = svl.ma_sinh_vien
+          )
+    )
+        THROW 50402, 'Con sinh vien chua co de tai, khong the chot danh sach.', 1;
 
     BEGIN TRANSACTION;
 
@@ -1122,4 +1151,144 @@ FROM dbo.lop_hoc_phan lhp
 LEFT JOIN ds_sinh_vien sv ON sv.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
 LEFT JOIN ds_dang_ky dk ON dk.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
 LEFT JOIN ds_de_tai dt ON dt.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan;
+GO
+
+/* ============================================================
+   8. TU DONG DONG BO CAC LUONG NGHIEP VU LIEN QUAN
+   ============================================================ */
+
+/* Rút sinh viên khỏi lớp thì hủy đề tài và trả lại chỗ trống. */
+CREATE TRIGGER dbo.trg_rut_sv_huy_dang_ky
+ON dbo.sinh_vien_lop
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN deleted d
+          ON d.ma_lop_hoc_phan = i.ma_lop_hoc_phan
+         AND d.ma_sinh_vien = i.ma_sinh_vien
+        WHERE i.trang_thai = N'DA_RUT'
+          AND d.trang_thai <> N'DA_RUT'
+    )
+        RETURN;
+
+    INSERT INTO dbo.lich_su_dang_ky (
+        ma_dang_ky, ma_lop_hoc_phan, ma_sinh_vien, ma_de_tai_lop,
+        hanh_dong, hinh_thuc_phan_cong, ly_do, nguoi_thuc_hien
+    )
+    SELECT
+        dk.ma_dang_ky, dk.ma_lop_hoc_phan, dk.ma_sinh_vien, dk.ma_de_tai_lop,
+        N'HUY_DANG_KY', dk.hinh_thuc_phan_cong,
+        N'Sinh viên bị rút khỏi lớp học phần - hủy đề tài tự động', NULL
+    FROM dbo.dang_ky_de_tai dk
+    JOIN inserted i
+      ON i.ma_lop_hoc_phan = dk.ma_lop_hoc_phan
+     AND i.ma_sinh_vien = dk.ma_sinh_vien
+    JOIN deleted d
+      ON d.ma_lop_hoc_phan = i.ma_lop_hoc_phan
+     AND d.ma_sinh_vien = i.ma_sinh_vien
+    WHERE i.trang_thai = N'DA_RUT'
+      AND d.trang_thai <> N'DA_RUT';
+
+    DELETE dk
+    FROM dbo.dang_ky_de_tai dk
+    JOIN inserted i
+      ON i.ma_lop_hoc_phan = dk.ma_lop_hoc_phan
+     AND i.ma_sinh_vien = dk.ma_sinh_vien
+    JOIN deleted d
+      ON d.ma_lop_hoc_phan = i.ma_lop_hoc_phan
+     AND d.ma_sinh_vien = i.ma_sinh_vien
+    WHERE i.trang_thai = N'DA_RUT'
+      AND d.trang_thai <> N'DA_RUT';
+END;
+GO
+
+/* Khóa tài khoản giảng viên thì đóng mọi cổng đăng ký đang mở do họ tạo. */
+CREATE TRIGGER dbo.trg_khoa_tai_khoan_dong_cong_dk
+ON dbo.tai_khoan
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN deleted d ON d.ma_tai_khoan = i.ma_tai_khoan
+        JOIN dbo.giang_vien gv ON gv.ma_tai_khoan = i.ma_tai_khoan
+        WHERE i.trang_thai = N'BI_KHOA'
+          AND d.trang_thai <> N'BI_KHOA'
+    )
+        RETURN;
+
+    UPDATE ddk
+    SET ddk.trang_thai = N'DA_DONG',
+        ddk.thoi_diem_cap_nhat = SYSDATETIME()
+    FROM dbo.dot_dang_ky ddk
+    JOIN dbo.giang_vien gv ON gv.ma_giang_vien = ddk.ma_giang_vien_tao
+    JOIN inserted i ON i.ma_tai_khoan = gv.ma_tai_khoan
+    JOIN deleted d ON d.ma_tai_khoan = i.ma_tai_khoan
+    WHERE ddk.trang_thai = N'DANG_MO'
+      AND i.trang_thai = N'BI_KHOA'
+      AND d.trang_thai <> N'BI_KHOA';
+
+    INSERT INTO dbo.nhat_ky_he_thong (
+        ma_tai_khoan, chuc_nang, hanh_dong, ten_bang_lien_quan, noi_dung
+    )
+    SELECT
+        i.ma_tai_khoan, N'Quản lý tài khoản',
+        N'KHÓA TÀI KHOẢN - ĐÓNG CỔNG ĐĂNG KÝ', N'dot_dang_ky',
+        N'Tài khoản giảng viên bị khóa; các cổng đăng ký đang mở đã được đóng tự động.'
+    FROM inserted i
+    JOIN deleted d ON d.ma_tai_khoan = i.ma_tai_khoan
+    JOIN dbo.giang_vien gv ON gv.ma_tai_khoan = i.ma_tai_khoan
+    WHERE i.trang_thai = N'BI_KHOA'
+      AND d.trang_thai <> N'BI_KHOA';
+END;
+GO
+
+/* Đóng học kỳ thì đóng các cổng đăng ký thuộc học kỳ đó. */
+CREATE TRIGGER dbo.trg_hoc_ky_dong_dong_cong_dk
+ON dbo.hoc_ky
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN deleted d ON d.ma_hoc_ky = i.ma_hoc_ky
+        WHERE i.trang_thai = N'DA_DONG'
+          AND d.trang_thai <> N'DA_DONG'
+    )
+        RETURN;
+
+    UPDATE ddk
+    SET ddk.trang_thai = N'DA_DONG',
+        ddk.thoi_diem_cap_nhat = SYSDATETIME()
+    FROM dbo.dot_dang_ky ddk
+    JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = ddk.ma_lop_hoc_phan
+    JOIN inserted i ON i.ma_hoc_ky = lhp.ma_hoc_ky
+    JOIN deleted d ON d.ma_hoc_ky = i.ma_hoc_ky
+    WHERE ddk.trang_thai = N'DANG_MO'
+      AND i.trang_thai = N'DA_DONG'
+      AND d.trang_thai <> N'DA_DONG';
+
+    INSERT INTO dbo.nhat_ky_he_thong (
+        ma_tai_khoan, chuc_nang, hanh_dong, ten_bang_lien_quan, noi_dung
+    )
+    SELECT
+        NULL, N'Quản lý học kỳ', N'ĐÓNG HỌC KỲ - ĐÓNG CỔNG ĐĂNG KÝ',
+        N'dot_dang_ky',
+        N'Học kỳ ' + i.ten_hoc_ky + N' đã đóng; các cổng đăng ký thuộc học kỳ đã được đóng tự động.'
+    FROM inserted i
+    JOIN deleted d ON d.ma_hoc_ky = i.ma_hoc_ky
+    WHERE i.trang_thai = N'DA_DONG'
+      AND d.trang_thai <> N'DA_DONG';
+END;
 GO

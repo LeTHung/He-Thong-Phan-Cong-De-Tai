@@ -53,7 +53,7 @@ public class ChangePasswordService {
             throw new IllegalArgumentException("Mật khẩu mới phải khác mật khẩu hiện tại.");
         }
 
-        String matKhauMaHoaMoi = PasswordUtil.sha256(moi);
+        String matKhauMaHoaMoi = PasswordUtil.hash(moi);
         changePasswordDAO.updatePassword(user.getMaTaiKhoan(), matKhauMaHoaMoi);
         user.setMatKhauMaHoa(matKhauMaHoaMoi);
     }

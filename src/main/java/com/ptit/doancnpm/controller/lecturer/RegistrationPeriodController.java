@@ -11,6 +11,7 @@ import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.service.RegistrationPeriodService;
 import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -39,6 +40,7 @@ public class RegistrationPeriodController {
     @FXML private Button btnClose;
 
     @FXML private TableView<AssignedTopicRow> tableTopicStatus;
+    @FXML private TableColumn<AssignedTopicRow, Void> colStt;
     @FXML private TableColumn<AssignedTopicRow, String>  colTpMaDeTai;
     @FXML private TableColumn<AssignedTopicRow, String>  colTpTenDeTai;
     @FXML private TableColumn<AssignedTopicRow, Integer> colTpDaDangKy;
@@ -78,6 +80,7 @@ public class RegistrationPeriodController {
     }
 
     private void setupTopicTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colTpMaDeTai.setCellValueFactory(cd ->
                 new SimpleStringProperty(cd.getValue().getMaDeTaiHeThong()));
         colTpTenDeTai.setCellValueFactory(cd ->
@@ -167,6 +170,12 @@ public class RegistrationPeriodController {
                 lblStatus.setTextFill(Color.RED);
                 btnOpen.setDisable(true);
                 btnClose.setDisable(true);
+            } else if (selected != null && "GIANG_VIEN_PHAN_CONG".equals(selected.cheDoPhanCong())) {
+                lblStatus.setText("Giảng viên phân công trực tiếp");
+                lblStatus.setTextFill(Color.DARKGOLDENROD);
+                lblCurrentPeriodInfo.setText("Không cần mở cổng đăng ký");
+                btnOpen.setDisable(true);
+                btnClose.setDisable(true);
             }
         } catch (Exception e) {
             MainApp.showError("Lỗi tải thông tin đợt đăng ký: " + e.getMessage());
@@ -179,6 +188,11 @@ public class RegistrationPeriodController {
         if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
         if (!"DANG_MO".equals(section.trangThai())) {
             MainApp.showError("Không thể mở cổng cho lớp học phần đã đóng hoặc lưu trữ.");
+            return;
+        }
+        if ("GIANG_VIEN_PHAN_CONG".equals(section.cheDoPhanCong())) {
+            MainApp.showError("Lớp này đang ở chế độ Giảng viên phân công.\n"
+                    + "Không cần mở cổng đăng ký; hãy phân công trực tiếp tại màn hình Kết quả & Phân công.");
             return;
         }
 
@@ -274,4 +288,6 @@ public class RegistrationPeriodController {
     @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
     @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
     @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
+    @FXML private void handleShowChangePassword() { MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW); }
+    @FXML private void handleLogout() { MainApp.showLogin(); }
 }

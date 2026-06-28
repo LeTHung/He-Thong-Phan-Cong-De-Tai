@@ -37,6 +37,8 @@
             <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity"
                     onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
 
@@ -53,11 +55,15 @@
 
             <HBox alignment="CENTER_LEFT">
                 <Label fx:id="lblTotalSections" text="Tổng: 0 lớp học phần" styleClass="body-muted"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Double click vào lớp để xem sinh viên &amp; kết quả" styleClass="body-muted"/>
+                <Button text="Xem sinh viên &amp; kết quả" styleClass="btn-primary" onAction="#handleViewStudents"/>
             </HBox>
 
             <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
                 <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
                     <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                         <TableColumn fx:id="colMaLop" text="Mã lớp" prefWidth="120"/>
                         <TableColumn fx:id="colTenLop" text="Tên lớp học phần" prefWidth="250"/>
                         <TableColumn fx:id="colMonHoc" text="Môn học" prefWidth="200"/>

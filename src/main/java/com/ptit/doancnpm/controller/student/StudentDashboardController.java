@@ -7,33 +7,28 @@ import com.ptit.doancnpm.model.dto.StudentCourseSection;
 import com.ptit.doancnpm.model.dto.StudentDashboardData;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
-import com.ptit.doancnpm.model.dto.TopicNotification;
+import com.ptit.doancnpm.model.dto.StudentNotification;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.NotificationService;
 import com.ptit.doancnpm.service.StudentDashboardService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,12 +80,13 @@ public class StudentDashboardController {
     private Label lblRegisteredStatus;
 
     @FXML
-    private Button btnNotifBell;
-
-    @FXML
     private Label lblNotifCount;
 
-    private static final DateTimeFormatter NOTIF_TIME = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    @FXML
+    private ListView<StudentNotification> notifList;
+
+    @FXML
+    private Button notifMarkBtn;
 
     private final StudentDashboardService studentDashboardService = new StudentDashboardService();
     private final NotificationService notificationService = new NotificationService();
@@ -99,11 +95,6 @@ public class StudentDashboardController {
     private List<StudentTopicSummary> allTopics = List.of();
     private List<RegisteredTopic> allRegistrations = List.of();
     private LocalDateTime notifLastSeen;
-
-    // Popup thông báo gắn vào nút chuông (xây dựng trong code, không qua FXML).
-    private final ListView<TopicNotification> notifList = new ListView<>();
-    private ContextMenu notifMenu;
-    private Button notifMarkBtn;
 
     private Timeline countdown;
 
@@ -145,12 +136,10 @@ public class StudentDashboardController {
     }
 
     private void setupNotifications() {
-        notifList.setPrefSize(400, 300);
-        notifList.setMaxHeight(360);
-        notifList.setPlaceholder(new Label("Chưa có đề tài mới nào."));
+        notifList.setPlaceholder(new Label("Bạn chưa có thông báo mới."));
         notifList.setCellFactory(list -> new ListCell<>() {
             @Override
-            protected void updateItem(TopicNotification item, boolean empty) {
+            protected void updateItem(StudentNotification item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -159,105 +148,101 @@ public class StudentDashboardController {
                 }
 
                 boolean unread = notificationService.isUnread(item, notifLastSeen);
-                Label title = new Label((unread ? "● " : "")
-                        + nullToDash(item.maDeTaiHeThong()) + " — " + nullToDash(item.tenDeTai()));
+                Label title = new Label((unread ? "● " : "") + notificationTitle(item));
                 title.getStyleClass().add(unread ? "notif-title-unread" : "notif-title");
                 title.setWrapText(true);
+                title.setMaxWidth(260);
 
-                Label meta = new Label("Lớp " + nullToDash(item.maLop())
-                        + " • GV " + nullToDash(item.tenGiangVien())
-                        + " • " + formatNotifTime(item.thoiDiemTao()));
+                Label meta = new Label(notificationMessage(item));
                 meta.getStyleClass().add("body-muted");
                 meta.setWrapText(true);
+                meta.setMaxWidth(260);
 
                 VBox box = new VBox(2, title, meta);
+                box.setMaxWidth(270);
+                setPrefWidth(0);
                 setText(null);
                 setGraphic(box);
             }
         });
 
-        // Nhấn đúp vào một thông báo để mở chi tiết đề tài.
+        // Nhấn đúp vào thông báo để mở danh sách đề tài của sinh viên.
         notifList.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                TopicNotification selected = notifList.getSelectionModel().getSelectedItem();
+                StudentNotification selected = notifList.getSelectionModel().getSelectedItem();
                 if (selected != null) {
-                    notifMenu.hide();
-                    StudentTopicContext.setSelectedTopic(selected.maDeTaiLop());
-                    MainApp.setRoot(MainApp.STUDENT_TOPIC_DETAIL_VIEW);
+                    MainApp.setRoot(MainApp.STUDENT_TOPIC_LIST_VIEW);
                 }
             }
         });
-
-        Label title = new Label("Thông báo đề tài mới");
-        title.getStyleClass().add("card-title");
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        notifMarkBtn = new Button("Đánh dấu đã đọc");
-        notifMarkBtn.getStyleClass().add("btn-outline");
-        notifMarkBtn.setOnAction(event -> handleMarkNotificationsRead());
-
-        HBox header = new HBox(10, title, spacer, notifMarkBtn);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label hint = new Label("Giảng viên thêm đề tài mới vào lớp của bạn sẽ hiện ở đây. Nhấn đúp để xem chi tiết.");
-        hint.getStyleClass().add("body-muted");
-        hint.setWrapText(true);
-
-        VBox panel = new VBox(10, header, hint, notifList);
-        panel.getStyleClass().add("notif-popup");
-        panel.setPrefWidth(420);
-
-        CustomMenuItem item = new CustomMenuItem(panel);
-        item.setHideOnClick(false);
-        notifMenu = new ContextMenu(item);
-        notifMenu.getStyleClass().add("notif-menu");
-    }
-
-    @FXML
-    private void handleToggleNotifications() {
-        if (notifMenu.isShowing()) {
-            notifMenu.hide();
-        } else {
-            notifMenu.show(btnNotifBell, Side.BOTTOM, 0, 6);
-        }
     }
 
     private void loadNotifications() {
         try {
-            List<TopicNotification> topics = notificationService.getRecentTopics(maTaiKhoan);
+            List<StudentNotification> notifications = notificationService.getNotifications(maTaiKhoan);
             notifLastSeen = notificationService.getLastSeen(maTaiKhoan);
-            notifList.getItems().setAll(topics);
-            updateNotifBell(notificationService.countUnread(topics, notifLastSeen));
+            notifList.getItems().setAll(notifications);
+            updateNotificationCard(notificationService.countUnread(notifications, notifLastSeen));
         } catch (RuntimeException exception) {
             notifList.getItems().clear();
-            updateNotifBell(0);
+            updateNotificationCard(0);
         }
     }
 
-    /** Cập nhật con số nhỏ trên nút chuông theo số thông báo chưa đọc. */
-    private void updateNotifBell(long unread) {
+    /** Cập nhật trạng thái chưa đọc trên card thông báo bên phải. */
+    private void updateNotificationCard(long unread) {
+        lblNotifCount.getStyleClass().removeAll(
+                "notification-count-chip-unread", "notification-count-chip-read");
         if (unread > 0) {
-            lblNotifCount.setText(unread > 9 ? "9+" : String.valueOf(unread));
-            lblNotifCount.setVisible(true);
-            lblNotifCount.setManaged(true);
+            lblNotifCount.setText((unread > 9 ? "9+" : String.valueOf(unread)) + " mới");
+            lblNotifCount.getStyleClass().add("notification-count-chip-unread");
             notifMarkBtn.setDisable(false);
         } else {
-            lblNotifCount.setText("");
-            lblNotifCount.setVisible(false);
-            lblNotifCount.setManaged(false);
+            lblNotifCount.setText("Đã đọc");
+            lblNotifCount.getStyleClass().add("notification-count-chip-read");
             notifMarkBtn.setDisable(true);
         }
     }
 
+    @FXML
     private void handleMarkNotificationsRead() {
         notificationService.markAllRead(maTaiKhoan);
         notifLastSeen = LocalDateTime.now();
         notifList.refresh();
-        updateNotifBell(0);
+        updateNotificationCard(0);
     }
 
     private String formatNotifTime(LocalDateTime time) {
-        return time == null ? "—" : NOTIF_TIME.format(time);
+        return time == null ? "—" : DateTimeFormatters.DATE_TIME.format(time);
+    }
+
+    private String notificationTitle(StudentNotification notification) {
+        if (notification.type() == StudentNotification.Type.ADDED_TO_CLASS) {
+            return "Bạn đã được thêm vào lớp " + TextFormat.orDash(notification.maLop());
+        }
+        return remainingTimeText(notification.registrationDeadline()) + " để đăng ký đề tài";
+    }
+
+    private String notificationMessage(StudentNotification notification) {
+        if (notification.type() == StudentNotification.Type.ADDED_TO_CLASS) {
+            return "GV " + TextFormat.orDash(notification.tenGiangVien())
+                    + " • " + formatNotifTime(notification.eventTime());
+        }
+        return "Lớp " + TextFormat.orDash(notification.maLop())
+                + " • đóng lúc " + formatNotifTime(notification.registrationDeadline())
+                + " • nhấn đúp để xem đề tài";
+    }
+
+    private String remainingTimeText(LocalDateTime deadline) {
+        if (deadline == null || !deadline.isAfter(LocalDateTime.now())) {
+            return "Đã hết hạn";
+        }
+        long hours = Math.max(1, (Duration.between(LocalDateTime.now(), deadline).toMinutes() + 59) / 60);
+        if (hours >= 24) {
+            long days = (hours + 23) / 24;
+            return "Còn " + days + " ngày";
+        }
+        return "Còn " + hours + " giờ";
     }
 
     private void loadDashboard(int maTaiKhoan) {
@@ -267,10 +252,10 @@ public class StudentDashboardController {
             allTopics = data.topics();
             allRegistrations = data.registeredTopics();
 
-            lblWelcome.setText("Chào " + nullToDash(info.hoTen()) + "!");
-            lblStudentName.setText(nullToDash(info.hoTen()));
-            lblStudentCode.setText("MSSV: " + nullToDash(info.maSoSinhVien()));
-            lblStudentClass.setText("Lớp: " + nullToDash(info.lopSinhHoat()));
+            lblWelcome.setText("Chào " + TextFormat.orDash(info.hoTen()) + "!");
+            lblStudentName.setText(TextFormat.orDash(info.hoTen()));
+            lblStudentCode.setText("MSSV: " + TextFormat.orDash(info.maSoSinhVien()));
+            lblStudentClass.setText("Lớp: " + TextFormat.orDash(info.lopSinhHoat()));
 
             List<StudentCourseSection> sections = data.courseSections();
             cboClass.getItems().setAll(sections);
@@ -316,7 +301,7 @@ public class StudentDashboardController {
             return;
         }
 
-        lblStudentCourse.setText("Lớp HP: " + nullToDash(section.tenLopHocPhan()));
+        lblStudentCourse.setText("Lớp HP: " + TextFormat.orDash(section.tenLopHocPhan()));
         showCourseBadge(section);
 
         List<StudentTopicSummary> topics = topicsOf(section);
@@ -388,7 +373,7 @@ public class StudentDashboardController {
             lblRegisteredStatus.getStyleClass().setAll("badge", "badge-info");
             return;
         }
-        lblRegisteredTopic.setText(nullToDash(topic.maDeTaiHeThong()) + " — " + nullToDash(topic.tenDeTai()));
+        lblRegisteredTopic.setText(TextFormat.orDash(topic.maDeTaiHeThong()) + " — " + TextFormat.orDash(topic.tenDeTai()));
         lblRegisteredStatus.setText("Đã đăng ký");
         lblRegisteredStatus.getStyleClass().setAll("badge", "badge-success");
     }
@@ -400,9 +385,6 @@ public class StudentDashboardController {
         }
     }
 
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
-    }
 
     @FXML
     private void handleLogout() {
@@ -421,7 +403,7 @@ public class StudentDashboardController {
 
     @FXML
     private void handleShowHistory() {
-        MainApp.setRoot("/views/student/registration-history.fxml");
+        MainApp.setRoot(MainApp.STUDENT_REGISTRATION_HISTORY_VIEW);
     }
 
     @FXML
@@ -431,6 +413,6 @@ public class StudentDashboardController {
 
     @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 }

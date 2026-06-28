@@ -10,6 +10,7 @@ import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -130,13 +131,13 @@ public class TopicDetailController {
             currentDetail = detail;
             lblTopicCode.setText(detail.maDeTaiHeThong());
             lblTopicTitle.setText(detail.tenDeTai());
-            lblClass.setText("Lớp học phần: " + nullToDash(detail.maLop()));
+            lblClass.setText("Lớp học phần: " + TextFormat.orDash(detail.maLop()));
             lblSlots.setText(detail.soLuongHienTai() + "/" + detail.soLuongToiDa());
             lblRemaining.setText(String.valueOf(detail.soChoConLai()));
             lblMode.setText(cheDoText(detail.cheDoPhanCong()));
-            lblLecturer.setText(nullToDash(detail.tenGiangVien()));
-            lblDescription.setText(nullToDash(detail.moTa()));
-            lblRequirement.setText(nullToDash(detail.yeuCau()));
+            lblLecturer.setText(TextFormat.orDash(detail.tenGiangVien()));
+            lblDescription.setText(TextFormat.orDash(detail.moTa()));
+            lblRequirement.setText(TextFormat.orDash(detail.yeuCau()));
             setStatus(detail.trangThai());
             loadPeriod(detail.maLopHocPhan());
             loadMembers(detail.maDeTaiLop());
@@ -255,8 +256,13 @@ public class TopicDetailController {
     }
 
     @FXML
+    private void handleShowHistory() {
+        MainApp.setRoot(MainApp.STUDENT_REGISTRATION_HISTORY_VIEW);
+    }
+
+    @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -286,7 +292,7 @@ public class TopicDetailController {
                 style = "badge badge-info";
             }
             default -> {
-                text = nullToDash(trangThai);
+                text = TextFormat.orDash(trangThai);
                 style = "badge badge-info";
             }
         }
@@ -311,10 +317,6 @@ public class TopicDetailController {
             case "GIANG_VIEN_PHAN_CONG" -> "Giảng viên phân công";
             default -> cheDo;
         };
-    }
-
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
     }
 
     private void showMessage(String message) {

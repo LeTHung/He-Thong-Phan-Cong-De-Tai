@@ -5,8 +5,10 @@ import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.SessionManager;
 import com.ptit.doancnpm.util.TableCells;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -14,7 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -22,9 +23,6 @@ import java.util.List;
  * của mình (đọc từ bảng lich_su_dang_ky). Chỉ xem, không sửa.
  */
 public class RegistrationHistoryController {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     private Label lblUserInfo;
@@ -34,6 +32,9 @@ public class RegistrationHistoryController {
 
     @FXML
     private TableView<RegistrationHistoryEntry> tblHistory;
+
+    @FXML
+    private TableColumn<RegistrationHistoryEntry, Void> colStt;
 
     @FXML
     private TableColumn<RegistrationHistoryEntry, String> colTime;
@@ -95,13 +96,14 @@ public class RegistrationHistoryController {
     }
 
     private void setupTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colTime.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatTime(data.getValue())));
         colAction.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().hanhDongText()));
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maDeTaiHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().tenDeTai()));
         colClass.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maLop()));
         colMode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().hinhThucText()));
-        colReason.setCellValueFactory(data -> new ReadOnlyStringWrapper(nullToDash(data.getValue().lyDo())));
+        colReason.setCellValueFactory(data -> new ReadOnlyStringWrapper(TextFormat.orDash(data.getValue().lyDo())));
 
         // Hiển thị đầy đủ chữ (xuống dòng) thay vì cắt bớt "..." ở các cột dài.
         colName.setCellFactory(TableCells.wrapping());
@@ -186,7 +188,7 @@ public class RegistrationHistoryController {
 
     @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -200,11 +202,7 @@ public class RegistrationHistoryController {
     }
 
     private String formatTime(RegistrationHistoryEntry entry) {
-        return entry.thoiDiemThucHien() == null ? "—" : DATE_TIME_FORMATTER.format(entry.thoiDiemThucHien());
-    }
-
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
+        return entry.thoiDiemThucHien() == null ? "—" : DateTimeFormatters.DATE_TIME.format(entry.thoiDiemThucHien());
     }
 
     private void showMessage(String message) {

@@ -19,31 +19,64 @@ public class FinalReportDAO {
      * @return số sinh viên được hệ thống tự động phân công
      */
     public int finalizeRegistration(int maGiangVien, int maLopHocPhan) {
-        int soTuDong = 0;
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                int soTuDong;
+                try (CallableStatement stmt = conn.prepareCall(
+                        "{call dbo.sp_phan_cong_tu_dong(?, ?, ?)}")) {
+                    stmt.setInt(1, maGiangVien);
+                    stmt.setInt(2, maLopHocPhan);
+                    stmt.registerOutParameter(3, Types.INTEGER);
+                    stmt.execute();
+                    soTuDong = stmt.getInt(3);
+                }
 
-        // Bước 1: phân công tự động sinh viên còn chưa có đề tài
-        try (Connection conn = DatabaseConnection.getConnection();
-             CallableStatement stmt = conn.prepareCall("{call dbo.sp_phan_cong_tu_dong(?, ?, ?)}")) {
-            stmt.setInt(1, maGiangVien);
-            stmt.setInt(2, maLopHocPhan);
-            stmt.registerOutParameter(3, Types.INTEGER);
-            stmt.execute();
-            soTuDong = stmt.getInt(3);
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi phân công tự động trước khi chốt: " + e.getMessage(), e);
-        }
+                int unassignedStudents = countUnassignedStudents(conn, maLopHocPhan);
+                if (unassignedStudents > 0) {
+                    throw new IllegalStateException(
+                            "Còn " + unassignedStudents + " sinh viên chưa có đề tài. "
+                                    + "Hãy tăng số lượng đề tài/chỗ trống trước khi chốt.");
+                }
 
-        // Bước 2: chốt — đóng đợt ĐK, khóa đề tài và lớp học phần
-        try (Connection conn = DatabaseConnection.getConnection();
-             CallableStatement stmt = conn.prepareCall("{call dbo.sp_chot_danh_sach(?, ?)}")) {
-            stmt.setInt(1, maGiangVien);
-            stmt.setInt(2, maLopHocPhan);
-            stmt.execute();
+                try (CallableStatement stmt = conn.prepareCall(
+                        "{call dbo.sp_chot_danh_sach(?, ?)}")) {
+                    stmt.setInt(1, maGiangVien);
+                    stmt.setInt(2, maLopHocPhan);
+                    stmt.execute();
+                }
+
+                conn.commit();
+                return soTuDong;
+            } catch (SQLException | RuntimeException exception) {
+                DatabaseConnection.rollbackQuietly(conn);
+                throw exception;
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi chốt danh sách: " + e.getMessage(), e);
         }
+    }
 
-        return soTuDong;
+    private int countUnassignedStudents(Connection connection, int courseSectionId) throws SQLException {
+        String sql = """
+                SELECT COUNT(*)
+                FROM dbo.sinh_vien_lop svl
+                WHERE svl.ma_lop_hoc_phan = ?
+                  AND svl.trang_thai = N'DANG_HOC'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM dbo.dang_ky_de_tai dk
+                      WHERE dk.ma_lop_hoc_phan = svl.ma_lop_hoc_phan
+                        AND dk.ma_sinh_vien = svl.ma_sinh_vien
+                  )
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, courseSectionId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getInt(1);
+            }
+        }
     }
 
     /** Lấy báo cáo kết quả cuối (dùng view vw_bao_cao_nhom_de_tai) */

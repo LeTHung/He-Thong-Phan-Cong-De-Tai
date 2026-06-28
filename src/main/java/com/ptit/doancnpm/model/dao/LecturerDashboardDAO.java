@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.model.dao;
 
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
+import com.ptit.doancnpm.model.dto.LecturerClassStudentRow;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.Connection;
@@ -11,6 +12,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LecturerDashboardDAO {
+
+    public List<LecturerClassStudentRow> findClassStudents(
+            int maTaiKhoan, int maLopHocPhan) {
+        String sql = """
+                SELECT
+                    sv.ma_sinh_vien,
+                    sv.ma_so_sinh_vien,
+                    sv.ho_ten,
+                    sv.email,
+                    sv.lop_sinh_hoat,
+                    ndt.ma_de_tai_he_thong,
+                    ndt.ten_de_tai,
+                    dk.hinh_thuc_phan_cong
+                FROM dbo.lop_hoc_phan lhp
+                JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
+                JOIN dbo.sinh_vien_lop svl
+                  ON svl.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
+                 AND svl.trang_thai = N'DANG_HOC'
+                JOIN dbo.sinh_vien sv ON sv.ma_sinh_vien = svl.ma_sinh_vien
+                LEFT JOIN dbo.dang_ky_de_tai dk
+                  ON dk.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
+                 AND dk.ma_sinh_vien = sv.ma_sinh_vien
+                LEFT JOIN dbo.de_tai_lop dtl ON dtl.ma_de_tai_lop = dk.ma_de_tai_lop
+                LEFT JOIN dbo.ngan_hang_de_tai ndt ON ndt.ma_de_tai = dtl.ma_de_tai
+                WHERE gv.ma_tai_khoan = ?
+                  AND lhp.ma_lop_hoc_phan = ?
+                ORDER BY sv.ma_so_sinh_vien
+                """;
+
+        List<LecturerClassStudentRow> students = new ArrayList<>();
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maTaiKhoan);
+            statement.setInt(2, maLopHocPhan);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    students.add(new LecturerClassStudentRow(
+                            resultSet.getInt("ma_sinh_vien"),
+                            resultSet.getString("ma_so_sinh_vien"),
+                            resultSet.getString("ho_ten"),
+                            resultSet.getString("email"),
+                            resultSet.getString("lop_sinh_hoat"),
+                            resultSet.getString("ma_de_tai_he_thong"),
+                            resultSet.getString("ten_de_tai"),
+                            resultSet.getString("hinh_thuc_phan_cong")));
+                }
+            }
+            return students;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải sinh viên của lớp: " + e.getMessage(), e);
+        }
+    }
 
     public String findLecturerNameByAccountId(int maTaiKhoan) {
         String sql = "SELECT ho_ten FROM dbo.giang_vien WHERE ma_tai_khoan = ?";

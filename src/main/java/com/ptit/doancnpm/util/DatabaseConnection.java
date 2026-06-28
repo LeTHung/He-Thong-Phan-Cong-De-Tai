@@ -21,4 +21,13 @@ public final class DatabaseConnection {
             return false;
         }
     }
+
+    /** Rollback một giao dịch lỗi mà không che mất exception gốc đang được throw lại. */
+    public static void rollbackQuietly(Connection connection) {
+        try {
+            connection.rollback();
+        } catch (SQLException ignored) {
+            // Giữ nguyên lỗi gốc.
+        }
+    }
 }

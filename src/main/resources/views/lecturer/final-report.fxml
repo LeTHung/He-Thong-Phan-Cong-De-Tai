@@ -34,6 +34,8 @@
             <Button text="Kết quả &amp; phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationResult"/>
             <Button text="Chốt danh sách" styleClass="side-menu-active" maxWidth="Infinity"/>
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
 
@@ -93,6 +95,7 @@
                 </HBox>
                 <TableView fx:id="tableReport" VBox.vgrow="ALWAYS">
                     <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                         <TableColumn fx:id="colMaSV" text="Mã SV" prefWidth="120"/>
                         <TableColumn fx:id="colTenSV" text="Họ tên" prefWidth="200"/>
                         <TableColumn fx:id="colLopSH" text="Lớp SH" prefWidth="120"/>

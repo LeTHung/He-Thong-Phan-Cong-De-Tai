@@ -5,8 +5,9 @@ import com.ptit.doancnpm.model.entity.Topic;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicBankService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.SessionManager;
-import javafx.beans.property.SimpleIntegerProperty;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -21,7 +22,7 @@ public class TopicBankController {
 
     @FXML private TextField txtSearch;
     @FXML private TableView<Topic> tableView;
-    @FXML private TableColumn<Topic, Integer> colStt;
+    @FXML private TableColumn<Topic, Void> colStt;
     @FXML private TableColumn<Topic, String> colMaDeTai;
     @FXML private TableColumn<Topic, String> colTenDeTai;
     @FXML private TableColumn<Topic, String> colMoTa;
@@ -54,8 +55,7 @@ public class TopicBankController {
     }
 
     private void setupColumns() {
-        colStt.setCellValueFactory(cd ->
-                new SimpleIntegerProperty(tableView.getItems().indexOf(cd.getValue()) + 1).asObject());
+        colStt.setCellFactory(TableCells.indexColumn());
         colMaDeTai.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getMaDeTaiHeThong()));
         colTenDeTai.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTenDeTai()));
         colMoTa.setCellValueFactory(cd -> {
@@ -65,8 +65,7 @@ public class TopicBankController {
         colNgayTao.setCellValueFactory(cd -> new SimpleStringProperty(
                 cd.getValue().getThoiDiemTao() == null
                         ? ""
-                        : java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                                .format(cd.getValue().getThoiDiemTao())));
+                        : DateTimeFormatters.DATE_ONLY.format(cd.getValue().getThoiDiemTao())));
     }
 
     private void loadData() {
@@ -229,4 +228,6 @@ public class TopicBankController {
     @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
     @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
     @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
+    @FXML private void handleShowChangePassword() { MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW); }
+    @FXML private void handleLogout() { MainApp.showLogin(); }
 }

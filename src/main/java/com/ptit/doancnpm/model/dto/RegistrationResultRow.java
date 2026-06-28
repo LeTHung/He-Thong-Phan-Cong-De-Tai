@@ -1,14 +1,13 @@
 package com.ptit.doancnpm.model.dto;
 
+import com.ptit.doancnpm.util.DateTimeFormatters;
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Một dòng kết quả đăng ký đề tài của sinh viên trong lớp học phần.
  */
 public class RegistrationResultRow {
-
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final String maSoSinhVien;
     private final String tenSinhVien;
@@ -39,7 +38,7 @@ public class RegistrationResultRow {
     public LocalDateTime getThoiGianDangKy() { return thoiGianDangKy; }
 
     public String getThoiGianDangKyText() {
-        return thoiGianDangKy == null ? "" : FMT.format(thoiGianDangKy);
+        return thoiGianDangKy == null ? "" : DateTimeFormatters.DATE_TIME.format(thoiGianDangKy);
     }
 
     public String getHinhThucPhanCongText() {

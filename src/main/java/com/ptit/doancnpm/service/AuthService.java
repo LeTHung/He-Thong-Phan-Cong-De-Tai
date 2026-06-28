@@ -32,6 +32,12 @@ public class AuthService {
             throw new IllegalArgumentException("Mật khẩu không đúng.");
         }
 
+        if (PasswordUtil.needsRehash(user.getMatKhauMaHoa())) {
+            String upgradedPassword = PasswordUtil.hash(cleanPassword);
+            userDAO.updatePasswordHash(user.getMaTaiKhoan(), upgradedPassword);
+            user.setMatKhauMaHoa(upgradedPassword);
+        }
+
         userDAO.updateLastLogin(user.getMaTaiKhoan());
         SessionManager.setCurrentUser(user);
 

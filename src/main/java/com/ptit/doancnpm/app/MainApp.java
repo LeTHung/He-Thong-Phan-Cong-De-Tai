@@ -58,6 +58,8 @@ public class MainApp extends Application {
     public static final String STUDENT_TOPIC_DETAIL_VIEW = "/views/student/topic-detail.fxml";
     public static final String STUDENT_MY_REGISTRATION_VIEW = "/views/student/my-registration.fxml";
     public static final String STUDENT_PROFILE_VIEW = "/views/student/student-profile.fxml";
+    public static final String STUDENT_REGISTRATION_HISTORY_VIEW = "/views/student/registration-history.fxml";
+    public static final String CHANGE_PASSWORD_VIEW = "/views/student/change-password.fxml";
 
     @Override
     public void start(Stage stage) {

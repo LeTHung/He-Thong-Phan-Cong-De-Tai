@@ -36,6 +36,8 @@
             <Button text="Kết quả &amp; phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationResult"/>
             <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
 
@@ -111,6 +113,7 @@
                 <Label text="Tình trạng đề tài trong lớp" styleClass="card-title"/>
                 <TableView fx:id="tableTopicStatus" VBox.vgrow="ALWAYS">
                     <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                         <TableColumn fx:id="colTpMaDeTai"   text="Mã đề tài"  prefWidth="120"/>
                         <TableColumn fx:id="colTpTenDeTai"  text="Tên đề tài" prefWidth="340"/>
                         <TableColumn fx:id="colTpDaDangKy"  text="Đã ĐK"      prefWidth="70"/>

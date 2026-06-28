@@ -32,6 +32,7 @@
             <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
 
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>

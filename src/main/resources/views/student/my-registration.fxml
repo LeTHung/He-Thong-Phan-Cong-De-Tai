@@ -54,6 +54,7 @@
 
                     <TableView fx:id="tblRegistrations" prefHeight="320" VBox.vgrow="ALWAYS">
                         <columns>
+                            <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                             <TableColumn fx:id="colCode" text="Mã ĐT" prefWidth="80"/>
                             <TableColumn fx:id="colName" text="Tên đề tài" prefWidth="240"/>
                             <TableColumn fx:id="colClass" text="Lớp HP" prefWidth="180" minWidth="180"/>

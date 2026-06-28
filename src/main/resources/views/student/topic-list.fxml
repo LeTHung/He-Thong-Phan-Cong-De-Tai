@@ -8,7 +8,6 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -48,23 +47,25 @@
                     <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
 
-                <FlowPane styleClass="filter-bar" hgap="12" vgap="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="txtSearch" promptText="Tìm theo mã hoặc tên đề tài..."
-                               onAction="#handleSearch" prefWidth="240"/>
-                    <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" onAction="#handleSearch"/>
-                    <Label text="Trạng thái:" styleClass="body-muted"/>
-                    <ComboBox fx:id="cboStatus" prefWidth="180" onAction="#handleSearch"/>
-                    <Label text="Lớp học phần:" styleClass="body-muted"/>
-                    <ComboBox fx:id="cboClass" prefWidth="220" onAction="#handleClassFilter"/>
-                    <Label text="Sắp xếp:" styleClass="body-muted"/>
-                    <ComboBox fx:id="cboSort" prefWidth="180" onAction="#handleSort"/>
-                    <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
-                </FlowPane>
-
-                <VBox styleClass="student-info-card" spacing="12" VBox.vgrow="ALWAYS">
+                <VBox styleClass="student-info-card topic-table-card" spacing="12" VBox.vgrow="ALWAYS">
                     <Label text="Đề tài trong lớp học phần" styleClass="card-title"/>
-                    <TableView fx:id="tblTopics" prefHeight="380" VBox.vgrow="ALWAYS">
+
+                    <HBox styleClass="filter-bar topic-filter-bar" spacing="12" alignment="CENTER_LEFT">
+                        <TextField fx:id="txtSearch" promptText="Tìm theo mã hoặc tên đề tài..."
+                                   onAction="#handleSearch" prefWidth="260" minWidth="190"
+                                   maxWidth="360" HBox.hgrow="ALWAYS"/>
+                        <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" minWidth="120"
+                                  onAction="#handleSearch"/>
+                        <ComboBox fx:id="cboClass" prefWidth="240" minWidth="200"
+                                  maxWidth="260" onAction="#handleClassFilter"/>
+                        <ComboBox fx:id="cboSort" prefWidth="180" minWidth="160"
+                                  maxWidth="200" onAction="#handleSort"/>
+                    </HBox>
+
+                    <TableView fx:id="tblTopics" prefHeight="420" minHeight="360" maxHeight="440"
+                               VBox.vgrow="ALWAYS">
                         <columns>
+                            <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                             <TableColumn fx:id="colCode" text="Mã ĐT" prefWidth="90"/>
                             <TableColumn fx:id="colName" text="Tên đề tài" prefWidth="300"/>
                             <TableColumn fx:id="colSlots" text="Số lượng" prefWidth="90"/>
@@ -79,12 +80,6 @@
                         <Button text="Xem chi tiết" styleClass="btn-outline" onAction="#handleViewDetail"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button fx:id="btnRegister" text="Đăng ký đề tài đã chọn" styleClass="btn-primary" onAction="#handleRegister"/>
-                    </HBox>
-
-                    <HBox spacing="10" alignment="CENTER_RIGHT">
-                        <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
-                        <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
-                        <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
                     </HBox>
 
                     <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>

@@ -7,7 +7,11 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.CourseSectionService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -23,6 +27,8 @@ import java.util.List;
 
 public class CourseSectionManagementController {
 
+    private static final String ALL_STATUSES = "Tất cả trạng thái";
+
     @FXML
     private Label lblUserInfo;
 
@@ -31,6 +37,9 @@ public class CourseSectionManagementController {
 
     @FXML
     private TableView<CourseSectionSummary> tblCourseSections;
+
+    @FXML
+    private TableColumn<CourseSectionSummary, Void> colStt;
 
     @FXML
     private TableColumn<CourseSectionSummary, String> colCode;
@@ -65,7 +74,16 @@ public class CourseSectionManagementController {
     @FXML
     private Button btnArchive;
 
+    @FXML
+    private TextField txtSearch;
+
+    @FXML
+    private ComboBox<String> cboStatusFilter;
+
     private final CourseSectionService courseSectionService = new CourseSectionService();
+    private final ObservableList<CourseSectionSummary> allCourseSections = FXCollections.observableArrayList();
+    private final FilteredList<CourseSectionSummary> filteredCourseSections =
+            new FilteredList<>(allCourseSections, section -> true);
 
     @FXML
     private void initialize() {
@@ -83,6 +101,7 @@ public class CourseSectionManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
+        setupFilters();
         loadCourseSections();
     }
 
@@ -119,6 +138,11 @@ public class CourseSectionManagementController {
     @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
+    }
+
+    @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -199,8 +223,16 @@ public class CourseSectionManagementController {
         showMessage("Đã làm mới danh sách lớp học phần.");
     }
 
+    @FXML
+    private void handleClearFilters() {
+        txtSearch.clear();
+        cboStatusFilter.setValue(ALL_STATUSES);
+    }
+
     private void setupTable() {
+        tblCourseSections.setItems(filteredCourseSections);
         tblCourseSections.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colStt.setCellFactory(TableCells.indexColumn());
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaLop()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenLopHocPhan()));
         colSubject.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenMonHoc()));
@@ -226,12 +258,33 @@ public class CourseSectionManagementController {
         });
     }
 
+    private void setupFilters() {
+        cboStatusFilter.getItems().setAll(ALL_STATUSES, "Đang mở", "Đã đóng", "Lưu trữ");
+        cboStatusFilter.setValue(ALL_STATUSES);
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        cboStatusFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+    }
+
+    private void applyFilters() {
+        String status = cboStatusFilter.getValue();
+        filteredCourseSections.setPredicate(section ->
+                AdminFilterSupport.contains(
+                        txtSearch.getText(),
+                        section.getMaLop(),
+                        section.getTenLopHocPhan(),
+                        section.getTenMonHoc(),
+                        section.getHocKyText(),
+                        section.getTenGiangVien(),
+                        section.getGhiChu())
+                        && (ALL_STATUSES.equals(status) || section.getTrangThaiText().equals(status)));
+    }
+
     private void loadCourseSections() {
         try {
             List<CourseSectionSummary> sections = courseSectionService.getAllCourseSections();
-            tblCourseSections.getItems().setAll(sections);
+            allCourseSections.setAll(sections);
         } catch (RuntimeException exception) {
-            tblCourseSections.getItems().clear();
+            allCourseSections.clear();
             showMessage(exception.getMessage());
         }
     }

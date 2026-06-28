@@ -10,6 +10,7 @@ import com.ptit.doancnpm.service.AssignTopicService;
 import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -35,6 +36,7 @@ public class AssignTopicToClassController {
     @FXML private ComboBox<String> cbMode;
 
     @FXML private TableView<AssignedTopicRow> tableAssigned;
+    @FXML private TableColumn<AssignedTopicRow, Void> colStt;
     @FXML private TableColumn<AssignedTopicRow, String> colMaDeTai;
     @FXML private TableColumn<AssignedTopicRow, String> colTenDeTai;
     @FXML private TableColumn<AssignedTopicRow, Integer> colToiDa;
@@ -88,6 +90,7 @@ public class AssignTopicToClassController {
     }
 
     private void setupTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colMaDeTai.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getMaDeTaiHeThong()));
         colTenDeTai.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTenDeTai()));
         colToiDa.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getSoLuongToiDa()).asObject());
@@ -431,4 +434,6 @@ public class AssignTopicToClassController {
     @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
     @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
     @FXML private void handleNavFinalReport() { MainApp.setRoot(MainApp.LECTURER_FINAL_REPORT_VIEW); }
+    @FXML private void handleShowChangePassword() { MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW); }
+    @FXML private void handleLogout() { MainApp.showLogin(); }
 }

@@ -31,7 +31,8 @@ src/main/resources
     pages/             CSS riêng từng màn hình
 
 sql/
-  schema.sql           Script tạo database, bảng và dữ liệu mẫu
+  schema.sql           Tạo database, bảng, trigger, view và stored procedure
+  data.sql             Nạp dữ liệu mẫu để chạy và kiểm thử hệ thống
 ```
 
 ## Cấu Hình Database
@@ -39,7 +40,7 @@ sql/
 Sao chép file mẫu:
 
 ```text
-src/main/resources/config/database.example.properties
+src/main/resources/config/db.example.properties
 ```
 
 thành file cấu hình cục bộ:
@@ -66,18 +67,21 @@ DB_PASSWORD
 
 ## Tạo Database
 
-Chạy script:
+Chạy lần lượt hai script:
 
 ```text
 sql/schema.sql
+sql/data.sql
 ```
 
-Script sẽ tạo database `PhanCongDeTai`, các bảng nghiệp vụ và dữ liệu mẫu cho hệ thống phân công đề tài.
+`schema.sql` tạo mới database `PhanCongDeTai` cùng toàn bộ cấu trúc nghiệp vụ;
+`data.sql` nạp các tài khoản và dữ liệu demo.
 
 Nếu dùng `sqlcmd`:
 
 ```powershell
 sqlcmd -S localhost -E -i sql\schema.sql
+sqlcmd -S localhost -E -i sql\data.sql
 ```
 
 ## Chạy Ứng Dụng
@@ -101,6 +105,10 @@ Không chạy trực tiếp `MainApp` bằng lệnh `java` thủ công, vì Java
 ```powershell
 .\mvnw.cmd clean test
 ```
+
+Mật khẩu mới được lưu bằng PBKDF2-HMAC-SHA256 với salt riêng. Tài khoản dùng
+mật khẩu rõ/SHA-256 từ dữ liệu cũ sẽ được nâng cấp tự động sau lần đăng nhập
+thành công đầu tiên.
 
 ## Lưu Ý JDK
 

@@ -8,9 +8,11 @@ import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
 import com.ptit.doancnpm.util.TableCells;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -23,7 +25,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,9 +35,6 @@ import java.util.Optional;
  * xem chi tiết và hủy đăng ký khi cổng đăng ký còn mở.
  */
 public class MyRegistrationController {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
     private Label lblUserInfo;
@@ -49,6 +47,9 @@ public class MyRegistrationController {
 
     @FXML
     private TableView<RegisteredTopic> tblRegistrations;
+
+    @FXML
+    private TableColumn<RegisteredTopic, Void> colStt;
 
     @FXML
     private TableColumn<RegisteredTopic, String> colCode;
@@ -175,6 +176,7 @@ public class MyRegistrationController {
     }
 
     private void setupTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maDeTaiHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().tenDeTai()));
         colClass.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maLop()));
@@ -236,12 +238,12 @@ public class MyRegistrationController {
 
     private void fillDetail(RegisteredTopic topic) {
         lblDetailTitle.setText(topic.maDeTaiHeThong() + " — " + topic.tenDeTai());
-        lblDetailClass.setText("Lớp học phần: " + nullToDash(topic.tenLopHocPhan())
-                + " (" + nullToDash(topic.tenMonHoc()) + ")");
-        lblDetailLecturer.setText("Giảng viên: " + nullToDash(topic.tenGiangVien()));
+        lblDetailClass.setText("Lớp học phần: " + TextFormat.orDash(topic.tenLopHocPhan())
+                + " (" + TextFormat.orDash(topic.tenMonHoc()) + ")");
+        lblDetailLecturer.setText("Giảng viên: " + TextFormat.orDash(topic.tenGiangVien()));
         lblDetailMode.setText("Hình thức: " + topic.hinhThucPhanCongText());
         lblDetailTime.setText("Thời điểm đăng ký: " + formatTime(topic));
-        lblDetailDescription.setText(nullToDash(topic.moTa()));
+        lblDetailDescription.setText(TextFormat.orDash(topic.moTa()));
     }
 
     private void clearDetail() {
@@ -355,12 +357,12 @@ public class MyRegistrationController {
 
     @FXML
     private void handleShowHistory() {
-        MainApp.setRoot("/views/student/registration-history.fxml");
+        MainApp.setRoot(MainApp.STUDENT_REGISTRATION_HISTORY_VIEW);
     }
 
     @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -396,11 +398,7 @@ public class MyRegistrationController {
     }
 
     private String formatTime(RegisteredTopic topic) {
-        return topic.thoiDiemDangKy() == null ? "—" : DATE_TIME_FORMATTER.format(topic.thoiDiemDangKy());
-    }
-
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
+        return topic.thoiDiemDangKy() == null ? "—" : DateTimeFormatters.DATE_TIME.format(topic.thoiDiemDangKy());
     }
 
     private void showMessage(String message) {

@@ -10,6 +10,7 @@ import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.CsvExporter;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -32,6 +33,7 @@ public class FinalReportController {
     @FXML private Button btnExportCsv;
 
     @FXML private TableView<RegistrationResultRow> tableReport;
+    @FXML private TableColumn<RegistrationResultRow, Void> colStt;
     @FXML private TableColumn<RegistrationResultRow, String> colMaSV;
     @FXML private TableColumn<RegistrationResultRow, String> colTenSV;
     @FXML private TableColumn<RegistrationResultRow, String> colLopSH;
@@ -66,6 +68,7 @@ public class FinalReportController {
     }
 
     private void setupTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colMaSV.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getMaSoSinhVien()));
         colTenSV.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTenSinhVien()));
         colLopSH.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getLopSinhHoat()));
@@ -217,4 +220,6 @@ public class FinalReportController {
     @FXML private void handleNavAssignTopic() { MainApp.setRoot(MainApp.LECTURER_ASSIGN_TOPIC_TO_CLASS_VIEW); }
     @FXML private void handleNavRegistrationPeriod() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_PERIOD_VIEW); }
     @FXML private void handleNavRegistrationResult() { MainApp.setRoot(MainApp.LECTURER_REGISTRATION_RESULT_VIEW); }
+    @FXML private void handleShowChangePassword() { MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW); }
+    @FXML private void handleLogout() { MainApp.showLogin(); }
 }

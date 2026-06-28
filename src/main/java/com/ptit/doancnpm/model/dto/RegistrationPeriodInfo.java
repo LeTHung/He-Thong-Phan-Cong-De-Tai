@@ -1,8 +1,9 @@
 package com.ptit.doancnpm.model.dto;
 
+import com.ptit.doancnpm.util.DateTimeFormatters;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Đợt đăng ký đề tài của một lớp học phần (bảng dot_dang_ky).
@@ -13,8 +14,6 @@ public record RegistrationPeriodInfo(
         LocalDateTime thoiGianKetThuc,
         String trangThai,
         boolean dangMo) {
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /** Số ngày còn lại được xem là "sắp hết hạn". */
     private static final long NGUONG_SAP_HET_HAN_NGAY = 3;
@@ -58,7 +57,7 @@ public record RegistrationPeriodInfo(
         if (dangMo) {
             String base = thoiGianKetThuc == null
                     ? "Cổng đăng ký đang mở"
-                    : "Cổng đăng ký đang mở · Hạn: " + FORMATTER.format(thoiGianKetThuc);
+                    : "Cổng đăng ký đang mở · Hạn: " + DateTimeFormatters.DATE_TIME.format(thoiGianKetThuc);
             String conLai = thoiGianConLaiText();
             return conLai.isEmpty() ? base : base + " (" + conLai + ")";
         }
@@ -69,8 +68,8 @@ public record RegistrationPeriodInfo(
             return "Đã đóng (đã chốt danh sách)";
         }
         if (thoiGianBatDau != null && thoiGianKetThuc != null) {
-            return "Ngoài thời gian đăng ký (" + FORMATTER.format(thoiGianBatDau)
-                    + " - " + FORMATTER.format(thoiGianKetThuc) + ")";
+            return "Ngoài thời gian đăng ký (" + DateTimeFormatters.DATE_TIME.format(thoiGianBatDau)
+                    + " - " + DateTimeFormatters.DATE_TIME.format(thoiGianKetThuc) + ")";
         }
         return "Cổng đăng ký đã đóng";
     }

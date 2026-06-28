@@ -84,6 +84,24 @@ public class UserDAO {
         }
     }
 
+    public void updatePasswordHash(int accountId, String passwordHash) {
+        String sql = """
+                UPDATE dbo.tai_khoan
+                SET mat_khau_ma_hoa = ?, thoi_diem_cap_nhat = SYSDATETIME()
+                WHERE ma_tai_khoan = ?
+                """;
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, passwordHash);
+            statement.setInt(2, accountId);
+            if (statement.executeUpdate() == 0) {
+                throw new RuntimeException("Không tìm thấy tài khoản cần nâng cấp mật khẩu.");
+            }
+        } catch (SQLException exception) {
+            throw new RuntimeException("Lỗi nâng cấp mật khẩu: " + exception.getMessage(), exception);
+        }
+    }
+
     private LocalDateTime toLocalDateTime(Timestamp value) {
         return value == null ? null : value.toLocalDateTime();
     }

@@ -5,8 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -36,6 +36,7 @@
             <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
 
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
@@ -57,17 +58,25 @@
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="+ Thêm sinh viên" styleClass="btn-primary" onAction="#handleAddStudent"/>
                         <Button fx:id="btnWithdraw" text="Rút khỏi lớp" styleClass="btn-warning" onAction="#handleWithdrawStudent"/>
-                        <Button text="Import Excel" styleClass="btn-outline" onAction="#handleNotImplemented"/>
+                        <Button text="Import Excel" styleClass="btn-outline" onAction="#handleImportExcel"/>
                         <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshStudents"/>
                     </HBox>
 
-                    <GridPane hgap="10" vgap="8">
-                        <Label text="Lớp học phần" styleClass="caption-strong" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                        <ComboBox fx:id="cboCourseSection" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    </GridPane>
+                    <VBox spacing="6">
+                        <Label text="Lớp học phần" styleClass="caption-strong"/>
+                        <ComboBox fx:id="cboCourseSection" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Tìm kiếm" styleClass="caption-strong"/>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <TextField fx:id="txtSearch" promptText="Tìm mã sinh viên, họ tên hoặc email..." HBox.hgrow="ALWAYS"/>
+                            <Button text="Xóa tìm kiếm" styleClass="btn-outline" onAction="#handleClearFilters"/>
+                        </HBox>
+                    </VBox>
 
                     <TableView fx:id="tblStudents" VBox.vgrow="ALWAYS">
                         <columns>
+                            <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                             <TableColumn fx:id="colStudentCode" text="Mã sinh viên" prefWidth="130"/>
                             <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="190"/>
                             <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>

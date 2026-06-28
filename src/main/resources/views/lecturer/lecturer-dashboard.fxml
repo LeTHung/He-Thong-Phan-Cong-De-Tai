@@ -34,6 +34,7 @@
             <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowFinalReport"/>
 
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
             <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
@@ -84,6 +85,7 @@
 
                 <TableView fx:id="tableSections" prefHeight="260">
                     <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                         <TableColumn fx:id="colDashMaLop" text="Mã lớp" prefWidth="180"/>
                         <TableColumn fx:id="colDashTenLop" text="Tên lớp học phần" prefWidth="340"/>
                         <TableColumn fx:id="colDashSoDeTai" text="Số đề tài" prefWidth="100"/>

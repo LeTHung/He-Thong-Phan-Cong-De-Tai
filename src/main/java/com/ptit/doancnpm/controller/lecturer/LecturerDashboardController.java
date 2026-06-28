@@ -6,6 +6,7 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -26,6 +27,7 @@ public class LecturerDashboardController {
     @FXML private Label lblStatRegistered;
     @FXML private Label lblStatGate;
     @FXML private TableView<LecturerCourseSectionSummary> tableSections;
+    @FXML private TableColumn<LecturerCourseSectionSummary, Void> colStt;
     @FXML private TableColumn<LecturerCourseSectionSummary, String> colDashMaLop;
     @FXML private TableColumn<LecturerCourseSectionSummary, String> colDashTenLop;
     @FXML private TableColumn<LecturerCourseSectionSummary, Integer> colDashSoDeTai;
@@ -53,6 +55,7 @@ public class LecturerDashboardController {
     }
 
     private void setupTable() {
+        colStt.setCellFactory(TableCells.indexColumn());
         colDashMaLop.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().maLop()));
         colDashTenLop.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().tenLopHocPhan()));
         colDashSoDeTai.setCellValueFactory(cd ->
@@ -114,6 +117,11 @@ public class LecturerDashboardController {
     @FXML
     private void handleLogout() {
         MainApp.showLogin();
+    }
+
+    @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML

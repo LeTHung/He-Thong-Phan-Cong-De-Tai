@@ -72,6 +72,11 @@ public class AdminDashboardController {
     }
 
     @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
+    }
+
+    @FXML
     private void handleShowAccounts() {
         MainApp.setRoot(MainApp.ACCOUNT_MANAGEMENT_VIEW);
     }

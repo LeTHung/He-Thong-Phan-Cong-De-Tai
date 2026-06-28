@@ -51,6 +51,7 @@
 
                 <TableView fx:id="tblHistory" prefHeight="420" VBox.vgrow="ALWAYS">
                     <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                         <TableColumn fx:id="colTime" text="Thời điểm" prefWidth="140"/>
                         <TableColumn fx:id="colAction" text="Hành động" prefWidth="150"/>
                         <TableColumn fx:id="colCode" text="Mã ĐT" prefWidth="80"/>

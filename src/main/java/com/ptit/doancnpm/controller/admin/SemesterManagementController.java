@@ -5,8 +5,13 @@ import com.ptit.doancnpm.model.entity.Semester;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.SemesterService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -18,12 +23,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class SemesterManagementController {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final String ALL_STATUSES = "Tất cả trạng thái";
 
     @FXML
     private Label lblUserInfo;
@@ -33,6 +37,9 @@ public class SemesterManagementController {
 
     @FXML
     private TableView<Semester> tblSemesters;
+
+    @FXML
+    private TableColumn<Semester, Void> colStt;
 
     @FXML
     private TableColumn<Semester, String> colCode;
@@ -64,7 +71,15 @@ public class SemesterManagementController {
     @FXML
     private Button btnClose;
 
+    @FXML
+    private TextField txtSearch;
+
+    @FXML
+    private ComboBox<String> cboStatusFilter;
+
     private final SemesterService semesterService = new SemesterService();
+    private final ObservableList<Semester> allSemesters = FXCollections.observableArrayList();
+    private final FilteredList<Semester> filteredSemesters = new FilteredList<>(allSemesters, semester -> true);
 
     @FXML
     private void initialize() {
@@ -82,6 +97,7 @@ public class SemesterManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
+        setupFilters();
         loadSemesters();
     }
 
@@ -118,6 +134,11 @@ public class SemesterManagementController {
     @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
+    }
+
+    @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -186,8 +207,16 @@ public class SemesterManagementController {
         showMessage("Đã làm mới danh sách học kỳ.");
     }
 
+    @FXML
+    private void handleClearFilters() {
+        txtSearch.clear();
+        cboStatusFilter.setValue(ALL_STATUSES);
+    }
+
     private void setupTable() {
+        tblSemesters.setItems(filteredSemesters);
         tblSemesters.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colStt.setCellFactory(TableCells.indexColumn());
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaHocKyHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenHocKy()));
         colSchoolYear.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getNamHoc()));
@@ -213,12 +242,30 @@ public class SemesterManagementController {
         });
     }
 
+    private void setupFilters() {
+        cboStatusFilter.getItems().setAll(ALL_STATUSES, "Nháp", "Đang mở", "Đã đóng");
+        cboStatusFilter.setValue(ALL_STATUSES);
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        cboStatusFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+    }
+
+    private void applyFilters() {
+        String status = cboStatusFilter.getValue();
+        filteredSemesters.setPredicate(semester ->
+                AdminFilterSupport.contains(
+                        txtSearch.getText(),
+                        semester.getMaHocKyHeThong(),
+                        semester.getTenHocKy(),
+                        semester.getNamHoc())
+                        && (ALL_STATUSES.equals(status) || formatStatus(semester.getTrangThai()).equals(status)));
+    }
+
     private void loadSemesters() {
         try {
             List<Semester> semesters = semesterService.getAllSemesters();
-            tblSemesters.getItems().setAll(semesters);
+            allSemesters.setAll(semesters);
         } catch (RuntimeException exception) {
-            tblSemesters.getItems().clear();
+            allSemesters.clear();
             showMessage(exception.getMessage());
         }
     }
@@ -288,7 +335,7 @@ public class SemesterManagementController {
     }
 
     private String formatDate(java.time.LocalDate date) {
-        return date == null ? "" : date.format(DATE_FORMATTER);
+        return date == null ? "" : date.format(DateTimeFormatters.DATE_ONLY);
     }
 
     private void showMessage(String message) {

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -35,6 +36,8 @@
             <Button text="Kết quả &amp; phân công" styleClass="side-menu-active" maxWidth="Infinity"/>
             <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
 
@@ -56,11 +59,35 @@
             </HBox>
 
             <TabPane fx:id="tabPane" styleClass="result-tabs" VBox.vgrow="ALWAYS">
+                <Tab text="Sinh viên" closable="false">
+                    <VBox spacing="12" styleClass="result-tab-content">
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Label fx:id="lblTotalStudents" text="Tổng sinh viên: 0" styleClass="result-count"/>
+                            <Label fx:id="lblWithTopicStudents" text="Đã có đề tài: 0" styleClass="body-muted"/>
+                            <Label fx:id="lblWithoutTopicStudents" text="Chưa có đề tài: 0" styleClass="body-muted"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <TextField fx:id="txtSearchStudents" prefWidth="260" promptText="Mã SV, họ tên, email, đề tài..."/>
+                        </HBox>
+                        <TableView fx:id="tableStudents" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colSStt" text="STT" prefWidth="50"/>
+                                <TableColumn fx:id="colSMaSV" text="Mã SV" prefWidth="120"/>
+                                <TableColumn fx:id="colSHoTen" text="Họ tên" prefWidth="180"/>
+                                <TableColumn fx:id="colSEmail" text="Email" prefWidth="220"/>
+                                <TableColumn fx:id="colSLopSH" text="Lớp SH" prefWidth="110"/>
+                                <TableColumn fx:id="colSMaDeTai" text="Mã đề tài" prefWidth="120"/>
+                                <TableColumn fx:id="colSTenDeTai" text="Tên đề tài" prefWidth="280"/>
+                                <TableColumn fx:id="colSHinhThuc" text="Hình thức" prefWidth="130"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </Tab>
                 <Tab text="Đã có đề tài" closable="false">
                     <VBox spacing="12" styleClass="result-tab-content">
                         <Label fx:id="lblRegisteredCount" text="Đã có đề tài: 0 sinh viên" styleClass="result-count"/>
                         <TableView fx:id="tableRegistered" VBox.vgrow="ALWAYS">
                             <columns>
+                                <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                                 <TableColumn fx:id="colMaSV" text="Mã SV" prefWidth="120"/>
                                 <TableColumn fx:id="colTenSV" text="Họ tên" prefWidth="200"/>
                                 <TableColumn fx:id="colLopSH" text="Lớp SH" prefWidth="120"/>
@@ -77,6 +104,7 @@
                         <Label fx:id="lblUnregisteredCount" text="Chưa có đề tài: 0 sinh viên" styleClass="result-count"/>
                         <TableView fx:id="tableUnregistered" prefHeight="280" VBox.vgrow="ALWAYS">
                             <columns>
+                                <TableColumn fx:id="colUStt" text="STT" prefWidth="50"/>
                                 <TableColumn fx:id="colUMaSV" text="Mã SV" prefWidth="120"/>
                                 <TableColumn fx:id="colUTenSV" text="Họ tên" prefWidth="200"/>
                                 <TableColumn fx:id="colULopSH" text="Lớp SH" prefWidth="120"/>

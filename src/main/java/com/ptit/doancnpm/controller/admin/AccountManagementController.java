@@ -6,8 +6,14 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.model.entity.UserStatus;
 import com.ptit.doancnpm.service.AccountManagementService;
+import com.ptit.doancnpm.util.DateTimeFormatters;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -27,12 +33,11 @@ import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AccountManagementController {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final String ALL_ROLES = "Tất cả vai trò";
+    private static final String ALL_STATUSES = "Tất cả trạng thái";
 
     @FXML
     private Label lblUserInfo;
@@ -42,6 +47,9 @@ public class AccountManagementController {
 
     @FXML
     private TableView<AccountSummary> tblAccounts;
+
+    @FXML
+    private TableColumn<AccountSummary, Void> colStt;
 
     @FXML
     private TableColumn<AccountSummary, String> colUsername;
@@ -73,7 +81,18 @@ public class AccountManagementController {
     @FXML
     private Button btnResetPassword;
 
+    @FXML
+    private TextField txtSearch;
+
+    @FXML
+    private ComboBox<String> cboRoleFilter;
+
+    @FXML
+    private ComboBox<String> cboStatusFilter;
+
     private final AccountManagementService accountManagementService = new AccountManagementService();
+    private final ObservableList<AccountSummary> allAccounts = FXCollections.observableArrayList();
+    private final FilteredList<AccountSummary> filteredAccounts = new FilteredList<>(allAccounts, account -> true);
 
     @FXML
     private void initialize() {
@@ -91,6 +110,7 @@ public class AccountManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
+        setupFilters();
         loadAccounts();
     }
 
@@ -127,6 +147,11 @@ public class AccountManagementController {
     @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
+    }
+
+    @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -205,13 +230,22 @@ public class AccountManagementController {
         showMessage("Đã làm mới danh sách tài khoản.");
     }
 
+    @FXML
+    private void handleClearFilters() {
+        txtSearch.clear();
+        cboRoleFilter.setValue(ALL_ROLES);
+        cboStatusFilter.setValue(ALL_STATUSES);
+    }
+
     private void setupTable() {
+        tblAccounts.setItems(filteredAccounts);
         tblAccounts.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colStt.setCellFactory(TableCells.indexColumn());
         colUsername.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenDangNhap()));
         colRole.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getVaiTroText()));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
-        colEmail.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getEmail())));
-        colPhone.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getSoDienThoai())));
+        colEmail.setCellValueFactory(data -> new ReadOnlyStringWrapper(TextFormat.emptyIfNull(data.getValue().getEmail())));
+        colPhone.setCellValueFactory(data -> new ReadOnlyStringWrapper(TextFormat.emptyIfNull(data.getValue().getSoDienThoai())));
         colLastLogin.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatLastLogin(data.getValue().getLanDangNhapCuoi())));
 
         btnEdit.disableProperty().bind(tblAccounts.getSelectionModel().selectedItemProperty().isNull());
@@ -231,12 +265,40 @@ public class AccountManagementController {
         });
     }
 
+    private void setupFilters() {
+        cboRoleFilter.getItems().setAll(
+                ALL_ROLES,
+                UserRole.QUAN_TRI_VIEN.getDisplayName(),
+                UserRole.GIANG_VIEN.getDisplayName(),
+                UserRole.SINH_VIEN.getDisplayName());
+        cboStatusFilter.getItems().setAll(ALL_STATUSES, "Hoạt động", "Bị khóa");
+        cboRoleFilter.setValue(ALL_ROLES);
+        cboStatusFilter.setValue(ALL_STATUSES);
+
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        cboRoleFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        cboStatusFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+    }
+
+    private void applyFilters() {
+        String role = cboRoleFilter.getValue();
+        String status = cboStatusFilter.getValue();
+        filteredAccounts.setPredicate(account ->
+                AdminFilterSupport.contains(
+                        txtSearch.getText(),
+                        account.getTenDangNhap(),
+                        account.getEmail(),
+                        account.getSoDienThoai())
+                        && (ALL_ROLES.equals(role) || account.getVaiTroText().equals(role))
+                        && (ALL_STATUSES.equals(status) || account.getTrangThaiText().equals(status)));
+    }
+
     private void loadAccounts() {
         try {
             List<AccountSummary> accounts = accountManagementService.getAllAccounts();
-            tblAccounts.getItems().setAll(accounts);
+            allAccounts.setAll(accounts);
         } catch (RuntimeException exception) {
-            tblAccounts.getItems().clear();
+            allAccounts.clear();
             showMessage(exception.getMessage());
         }
     }
@@ -263,6 +325,7 @@ public class AccountManagementController {
         roleBox.setConverter(roleConverter());
         roleBox.setValue(isEdit ? account.getVaiTro() : UserRole.SINH_VIEN);
         roleBox.setMaxWidth(Double.MAX_VALUE);
+        roleBox.setDisable(isEdit);
 
         ComboBox<UserStatus> statusBox = new ComboBox<>();
         statusBox.getItems().setAll(UserStatus.values());
@@ -270,10 +333,10 @@ public class AccountManagementController {
         statusBox.setValue(isEdit ? account.getTrangThai() : UserStatus.HOAT_DONG);
         statusBox.setMaxWidth(Double.MAX_VALUE);
 
-        TextField emailField = new TextField(isEdit ? emptyIfNull(account.getEmail()) : "");
+        TextField emailField = new TextField(isEdit ? TextFormat.emptyIfNull(account.getEmail()) : "");
         emailField.setPromptText("email@ptit.edu.vn");
 
-        TextField phoneField = new TextField(isEdit ? emptyIfNull(account.getSoDienThoai()) : "");
+        TextField phoneField = new TextField(isEdit ? TextFormat.emptyIfNull(account.getSoDienThoai()) : "");
         phoneField.setPromptText("VD: 0900000000");
 
         Label errorLabel = new Label();
@@ -383,7 +446,7 @@ public class AccountManagementController {
     }
 
     private String formatLastLogin(LocalDateTime lastLogin) {
-        return lastLogin == null ? "Chưa đăng nhập" : lastLogin.format(DATE_TIME_FORMATTER);
+        return lastLogin == null ? "Chưa đăng nhập" : lastLogin.format(DateTimeFormatters.DATE_TIME);
     }
 
     private String formatStatus(UserStatus status) {
@@ -391,10 +454,6 @@ public class AccountManagementController {
             return "";
         }
         return status == UserStatus.HOAT_DONG ? "Hoạt động" : "Bị khóa";
-    }
-
-    private String emptyIfNull(String value) {
-        return value == null ? "" : value;
     }
 
     private void showMessage(String message) {

@@ -1,27 +1,26 @@
 package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.NotificationDAO;
-import com.ptit.doancnpm.model.dto.TopicNotification;
+import com.ptit.doancnpm.model.dto.StudentNotification;
 import com.ptit.doancnpm.util.NotificationStateStore;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Nghiệp vụ thông báo "đề tài mới" cho sinh viên: lấy các đề tài mới được thêm
- * gần đây và xác định đề tài nào chưa đọc dựa trên mốc đã xem lưu cục bộ.
+ * Nghiệp vụ thông báo dành cho sinh viên và trạng thái đã đọc.
  */
 public class NotificationService {
 
-    /** Chỉ coi là "mới" các đề tài được thêm trong khoảng số ngày gần đây. */
+    /** Chỉ hiển thị lịch sử được thêm lớp trong khoảng số ngày gần đây. */
     private static final int LOOKBACK_DAYS = 30;
 
     private final NotificationDAO notificationDAO = new NotificationDAO();
 
-    /** Danh sách đề tài mới được thêm gần đây trong các lớp của sinh viên, mới nhất trước. */
-    public List<TopicNotification> getRecentTopics(int maTaiKhoan) {
+    /** Danh sách thông báo mới nhất của sinh viên. */
+    public List<StudentNotification> getNotifications(int maTaiKhoan) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(LOOKBACK_DAYS);
-        return notificationDAO.findRecentTopicsForStudent(maTaiKhoan, cutoff);
+        return notificationDAO.findForStudent(maTaiKhoan, cutoff);
     }
 
     /** Mốc đã xem thông báo gần nhất của tài khoản, hoặc {@code null} nếu chưa từng xem. */
@@ -29,16 +28,16 @@ public class NotificationService {
         return NotificationStateStore.getLastSeen(maTaiKhoan);
     }
 
-    /** Một đề tài là chưa đọc nếu được thêm sau mốc đã xem gần nhất. */
-    public boolean isUnread(TopicNotification topic, LocalDateTime lastSeen) {
+    /** Thông báo chưa đọc nếu sự kiện phát sinh sau mốc đã xem gần nhất. */
+    public boolean isUnread(StudentNotification notification, LocalDateTime lastSeen) {
         if (lastSeen == null) {
             return true;
         }
-        return topic.thoiDiemTao() != null && topic.thoiDiemTao().isAfter(lastSeen);
+        return notification.eventTime() != null && notification.eventTime().isAfter(lastSeen);
     }
 
-    public long countUnread(List<TopicNotification> topics, LocalDateTime lastSeen) {
-        return topics.stream().filter(topic -> isUnread(topic, lastSeen)).count();
+    public long countUnread(List<StudentNotification> notifications, LocalDateTime lastSeen) {
+        return notifications.stream().filter(notification -> isUnread(notification, lastSeen)).count();
     }
 
     /** Đánh dấu đã đọc toàn bộ thông báo tính đến hiện tại. */

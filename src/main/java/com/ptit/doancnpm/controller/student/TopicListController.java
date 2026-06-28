@@ -11,6 +11,7 @@ import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
 import com.ptit.doancnpm.util.TableCells;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -71,13 +72,13 @@ public class TopicListController {
     private ComboBox<String> cboSort;
 
     @FXML
-    private ComboBox<String> cboStatus;
-
-    @FXML
     private ComboBox<StudentCourseSection> cboClass;
 
     @FXML
     private TableView<StudentTopicSummary> tblTopics;
+
+    @FXML
+    private TableColumn<StudentTopicSummary, Void> colStt;
 
     @FXML
     private TableColumn<StudentTopicSummary, String> colCode;
@@ -100,28 +101,11 @@ public class TopicListController {
     @FXML
     private TableColumn<StudentTopicSummary, String> colRegistered;
 
-    @FXML
-    private Label lblPageInfo;
-
-    @FXML
-    private Button btnPrevPage;
-
-    @FXML
-    private Button btnNextPage;
-
-    private static final int PAGE_SIZE = 8;
-
     private static final String SORT_DEFAULT = "Mặc định";
     private static final String SORT_MOST_AVAILABLE = "Còn nhiều chỗ nhất";
     private static final String SORT_LEAST_AVAILABLE = "Còn ít chỗ nhất";
     private static final String SORT_NAME = "Tên A → Z";
     private static final String SORT_CODE = "Mã đề tài A → Z";
-
-    private static final String STATUS_ALL = "Tất cả trạng thái";
-
-    /** Tùy chọn "không lọc theo lớp" trong bộ lọc; phân biệt bằng maLopHocPhan == 0. */
-    private static final StudentCourseSection CLASS_ALL =
-            new StudentCourseSection(0, null, "Tất cả lớp học phần", null);
 
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
@@ -133,7 +117,6 @@ public class TopicListController {
     private boolean suppressClassEvent;
     private List<StudentTopicSummary> allTopics = List.of();
     private List<StudentTopicSummary> filteredTopics = List.of();
-    private int currentPage = 0;
     private Timeline countdown;
 
     @FXML
@@ -155,8 +138,8 @@ public class TopicListController {
 
         setupTable();
         setupSort();
-        setupStatusFilter();
         setupClassFilter();
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> applyFilter());
         loadStudentInfo();
         loadTopics();
     }
@@ -165,15 +148,6 @@ public class TopicListController {
         cboSort.getItems().setAll(
                 SORT_DEFAULT, SORT_MOST_AVAILABLE, SORT_LEAST_AVAILABLE, SORT_NAME, SORT_CODE);
         cboSort.setValue(SORT_DEFAULT);
-    }
-
-    private void setupStatusFilter() {
-        cboStatus.getItems().setAll(
-                STATUS_ALL,
-                trangThaiText("DANG_MO"),
-                trangThaiText("DA_DU"),
-                trangThaiText("DA_DONG"));
-        cboStatus.setValue(STATUS_ALL);
     }
 
     private void setupClassFilter() {
@@ -191,24 +165,17 @@ public class TopicListController {
     }
 
     /**
-     * Nạp các lớp học phần của sinh viên vào bộ lọc. Nếu có nhiều hơn một lớp thì
-     * thêm tùy chọn "Tất cả lớp học phần" ở đầu. Việc đổi giá trị ở đây được tắt
-     * sự kiện để tránh xử lý lặp; sau khi gọi sẽ chủ động {@link #onClassChanged()}.
+     * Nạp đúng các lớp học phần của sinh viên vào bộ lọc, không thêm lựa chọn
+     * "Tất cả lớp". Việc đổi giá trị ở đây được tắt để tránh xử lý lặp.
      */
     private void populateClassOptions() {
         suppressClassEvent = true;
         try {
             StudentCourseSection current = cboClass.getValue();
-            List<StudentCourseSection> options = new java.util.ArrayList<>();
-            if (sections.size() > 1) {
-                options.add(CLASS_ALL);
-            }
-            options.addAll(sections);
-
-            cboClass.getItems().setAll(options);
-            cboClass.setDisable(options.isEmpty());
-            cboClass.setValue(options.contains(current) ? current
-                    : (options.isEmpty() ? null : options.get(0)));
+            cboClass.getItems().setAll(sections);
+            cboClass.setDisable(sections.isEmpty());
+            cboClass.setValue(sections.contains(current) ? current
+                    : (sections.isEmpty() ? null : sections.get(0)));
         } finally {
             suppressClassEvent = false;
         }
@@ -226,20 +193,12 @@ public class TopicListController {
     private void onClassChanged() {
         StudentCourseSection selected = cboClass.getValue();
         cboClass.setTooltip(selected == null ? null : new Tooltip(selected.moTaDayDu()));
-        if (selected != null && selected.maLopHocPhan() > 0) {
-            maLopHocPhan = selected.maLopHocPhan();
-        } else if (sections.size() == 1) {
-            maLopHocPhan = sections.get(0).maLopHocPhan();
-        } else {
-            maLopHocPhan = null;
-        }
+        maLopHocPhan = selected == null ? null : selected.maLopHocPhan();
 
         if (sections.isEmpty()) {
             lblCourseName.setText("Chưa được xếp vào lớp học phần");
-        } else if (selected != null && selected.maLopHocPhan() > 0) {
-            lblCourseName.setText("Lớp HP: " + nullToDash(selected.tenLopHocPhan()));
-        } else {
-            lblCourseName.setText("Lớp HP: Tất cả (" + sections.size() + " lớp)");
+        } else if (selected != null) {
+            lblCourseName.setText("Lớp HP: " + TextFormat.orDash(selected.tenLopHocPhan()));
         }
 
         loadPeriod();
@@ -247,6 +206,8 @@ public class TopicListController {
     }
 
     private void setupTable() {
+        tblTopics.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colStt.setCellFactory(TableCells.indexColumn());
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maDeTaiHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().tenDeTai()));
         colName.setCellFactory(TableCells.wrapping());
@@ -268,7 +229,7 @@ public class TopicListController {
             maSinhVien = info.maSinhVien();
             lblStudentName.setText(info.hoTen());
             lblStudentCode.setText("MSSV: " + info.maSoSinhVien());
-            lblStudentClass.setText("Lớp: " + nullToDash(info.lopSinhHoat()));
+            lblStudentClass.setText("Lớp: " + TextFormat.orDash(info.lopSinhHoat()));
 
             sections = topicRegistrationService.getCourseSections(maTaiKhoan);
             populateClassOptions();
@@ -346,10 +307,13 @@ public class TopicListController {
     private void applyFilter() {
         String keyword = txtSearch.getText() == null ? "" : txtSearch.getText().trim().toLowerCase();
         boolean onlyAvailable = chkOnlyAvailable.isSelected();
-        String status = cboStatus == null ? null : cboStatus.getValue();
-        boolean allStatus = status == null || STATUS_ALL.equals(status);
         StudentCourseSection cls = cboClass == null ? null : cboClass.getValue();
-        boolean allClasses = cls == null || cls.maLopHocPhan() <= 0;
+
+        if (cls == null) {
+            filteredTopics = List.of();
+            tblTopics.getItems().clear();
+            return;
+        }
 
         filteredTopics = allTopics.stream()
                 .filter(topic -> keyword.isEmpty()
@@ -357,54 +321,10 @@ public class TopicListController {
                         || contains(topic.tenDeTai(), keyword))
                 .filter(topic -> !onlyAvailable
                         || (topic.soChoConLai() > 0 && "DANG_MO".equals(topic.trangThai())))
-                .filter(topic -> allStatus || status.equals(trangThaiText(topic.trangThai())))
-                .filter(topic -> allClasses || Objects.equals(topic.maLop(), cls.maLop()))
+                .filter(topic -> Objects.equals(topic.maLop(), cls.maLop()))
                 .sorted(currentComparator())
                 .toList();
-        currentPage = 0;
-        renderPage();
-    }
-
-    /**
-     * Tổng số trang theo {@link #PAGE_SIZE}, tối thiểu 1 trang kể cả khi rỗng.
-     */
-    private int totalPages() {
-        return Math.max(1, (int) Math.ceil(filteredTopics.size() / (double) PAGE_SIZE));
-    }
-
-    /**
-     * Hiển thị đúng trang hiện tại của danh sách đã lọc, cập nhật nhãn trang và
-     * trạng thái bật/tắt của hai nút điều hướng.
-     */
-    private void renderPage() {
-        int totalPages = totalPages();
-        currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
-
-        int from = currentPage * PAGE_SIZE;
-        int to = Math.min(from + PAGE_SIZE, filteredTopics.size());
-        List<StudentTopicSummary> pageItems = from >= to ? List.of() : filteredTopics.subList(from, to);
-        tblTopics.getItems().setAll(pageItems);
-
-        lblPageInfo.setText("Trang " + (currentPage + 1) + "/" + totalPages
-                + " • " + filteredTopics.size() + " đề tài");
-        btnPrevPage.setDisable(currentPage <= 0);
-        btnNextPage.setDisable(currentPage >= totalPages - 1);
-    }
-
-    @FXML
-    private void handlePrevPage() {
-        if (currentPage > 0) {
-            currentPage--;
-            renderPage();
-        }
-    }
-
-    @FXML
-    private void handleNextPage() {
-        if (currentPage < totalPages() - 1) {
-            currentPage++;
-            renderPage();
-        }
+        tblTopics.getItems().setAll(filteredTopics);
     }
 
     /**
@@ -438,16 +358,6 @@ public class TopicListController {
     @FXML
     private void handleSort() {
         applyFilter();
-    }
-
-    @FXML
-    private void handleRefresh() {
-        txtSearch.clear();
-        chkOnlyAvailable.setSelected(false);
-        cboSort.setValue(SORT_DEFAULT);
-        cboStatus.setValue(STATUS_ALL);
-        loadStudentInfo();
-        loadTopics();
     }
 
     @FXML
@@ -507,12 +417,12 @@ public class TopicListController {
 
     @FXML
     private void handleShowHistory() {
-        MainApp.setRoot("/views/student/registration-history.fxml");
+        MainApp.setRoot(MainApp.STUDENT_REGISTRATION_HISTORY_VIEW);
     }
 
     @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -560,9 +470,6 @@ public class TopicListController {
         return value != null && value.toLowerCase().contains(keyword);
     }
 
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
-    }
 
     private void showMessage(String message) {
         lblMessage.setText(message == null ? "" : message);

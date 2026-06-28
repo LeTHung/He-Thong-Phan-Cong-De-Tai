@@ -43,4 +43,18 @@ public final class TableCells {
             }
         };
     }
+
+    /**
+     * Cell factory cho cột số thứ tự (STT): hiển thị vị trí dòng hiện tại trong
+     * TableView (theo đúng thứ tự hiển thị, kể cả khi đã sắp xếp/lọc), bắt đầu từ 1.
+     */
+    public static <S> Callback<TableColumn<S, Void>, TableCell<S, Void>> indexColumn() {
+        return column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void value, boolean empty) {
+                super.updateItem(value, empty);
+                setText(empty ? null : String.valueOf(getIndex() + 1));
+            }
+        };
+    }
 }

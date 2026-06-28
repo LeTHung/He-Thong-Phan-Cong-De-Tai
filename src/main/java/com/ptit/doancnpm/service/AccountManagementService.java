@@ -5,6 +5,7 @@ import com.ptit.doancnpm.model.dto.AccountSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.model.entity.UserStatus;
+import com.ptit.doancnpm.util.PasswordUtil;
 
 import java.util.List;
 
@@ -29,13 +30,14 @@ public class AccountManagementService {
         String cleanPassword = cleanRequired(password, "Mật khẩu không được để trống.");
         UserRole cleanRole = requireRole(role);
         UserStatus cleanStatus = requireStatus(status);
+        validateProfileCode(cleanUsername, cleanRole);
 
         if (accountManagementDAO.existsByUsername(cleanUsername, null)) {
             throw new IllegalArgumentException("Tên đăng nhập đã tồn tại.");
         }
 
         accountManagementDAO.create(new User(
-                0, cleanUsername, cleanPassword, cleanRole, cleanStatus,
+                0, cleanUsername, PasswordUtil.hash(cleanPassword), cleanRole, cleanStatus,
                 cleanOptional(email), cleanOptional(phone)));
     }
 
@@ -49,6 +51,13 @@ public class AccountManagementService {
         String cleanUsername = cleanRequired(username, "Tên đăng nhập không được để trống.");
         UserRole cleanRole = requireRole(role);
         UserStatus cleanStatus = requireStatus(status);
+        validateProfileCode(cleanUsername, cleanRole);
+
+        UserRole currentRole = accountManagementDAO.findRoleById(accountId);
+        if (currentRole != cleanRole) {
+            throw new IllegalArgumentException(
+                    "Không thể thay đổi vai trò của tài khoản đã tạo. Hãy tạo tài khoản mới đúng vai trò.");
+        }
 
         if (accountManagementDAO.existsByUsername(cleanUsername, accountId)) {
             throw new IllegalArgumentException("Tên đăng nhập đã tồn tại.");
@@ -68,8 +77,15 @@ public class AccountManagementService {
     }
 
     public String resetPassword(int accountId) {
-        accountManagementDAO.resetPassword(accountId, DEFAULT_RESET_PASSWORD);
+        accountManagementDAO.resetPassword(accountId, PasswordUtil.hash(DEFAULT_RESET_PASSWORD));
         return DEFAULT_RESET_PASSWORD;
+    }
+
+    private void validateProfileCode(String username, UserRole role) {
+        if (role != UserRole.QUAN_TRI_VIEN && username.length() > 30) {
+            throw new IllegalArgumentException(
+                    "Tên đăng nhập của sinh viên/giảng viên không được vượt quá 30 ký tự.");
+        }
     }
 
     private String cleanRequired(String value, String errorMessage) {

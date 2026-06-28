@@ -13,7 +13,7 @@ public class AdminDashboardService {
 
     public String getDemoDataStatus(AdminDashboardSummary summary) {
         if (summary.getTotalAccounts() < 5) {
-            return "Thiếu tài khoản mẫu. Cần chạy lại sql/schema.sql.";
+            return "Thiếu tài khoản mẫu. Cần chạy lại sql/data.sql.";
         }
         if (summary.getTotalStudents() < 3) {
             return "Thiếu dữ liệu 3 sinh viên nhóm.";

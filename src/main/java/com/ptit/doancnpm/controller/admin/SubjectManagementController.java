@@ -6,7 +6,11 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.SubjectService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -22,6 +26,8 @@ import java.util.List;
 
 public class SubjectManagementController {
 
+    private static final String ALL_STATUSES = "Tất cả trạng thái";
+
     @FXML
     private Label lblUserInfo;
 
@@ -30,6 +36,9 @@ public class SubjectManagementController {
 
     @FXML
     private TableView<Subject> tblSubjects;
+
+    @FXML
+    private TableColumn<Subject, Void> colStt;
 
     @FXML
     private TableColumn<Subject, String> colCode;
@@ -52,7 +61,15 @@ public class SubjectManagementController {
     @FXML
     private Button btnDeactivate;
 
+    @FXML
+    private TextField txtSearch;
+
+    @FXML
+    private ComboBox<String> cboStatusFilter;
+
     private final SubjectService subjectService = new SubjectService();
+    private final ObservableList<Subject> allSubjects = FXCollections.observableArrayList();
+    private final FilteredList<Subject> filteredSubjects = new FilteredList<>(allSubjects, subject -> true);
 
     @FXML
     private void initialize() {
@@ -70,6 +87,7 @@ public class SubjectManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
+        setupFilters();
         loadSubjects();
     }
 
@@ -106,6 +124,11 @@ public class SubjectManagementController {
     @FXML
     private void handleNotImplemented() {
         MainApp.showInfo("Chức năng này sẽ làm ở ngày tiếp theo.");
+    }
+
+    @FXML
+    private void handleShowChangePassword() {
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -161,8 +184,16 @@ public class SubjectManagementController {
         showMessage("Đã làm mới danh sách môn học.");
     }
 
+    @FXML
+    private void handleClearFilters() {
+        txtSearch.clear();
+        cboStatusFilter.setValue(ALL_STATUSES);
+    }
+
     private void setupTable() {
+        tblSubjects.setItems(filteredSubjects);
         tblSubjects.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colStt.setCellFactory(TableCells.indexColumn());
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaMonHocHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenMonHoc()));
         colCredits.setCellValueFactory(data -> new ReadOnlyStringWrapper(String.valueOf(data.getValue().getSoTinChi())));
@@ -185,12 +216,30 @@ public class SubjectManagementController {
         });
     }
 
+    private void setupFilters() {
+        cboStatusFilter.getItems().setAll(ALL_STATUSES, "Đang sử dụng", "Ngừng sử dụng");
+        cboStatusFilter.setValue(ALL_STATUSES);
+        txtSearch.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        cboStatusFilter.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+    }
+
+    private void applyFilters() {
+        String status = cboStatusFilter.getValue();
+        filteredSubjects.setPredicate(subject ->
+                AdminFilterSupport.contains(
+                        txtSearch.getText(),
+                        subject.getMaMonHocHeThong(),
+                        subject.getTenMonHoc(),
+                        subject.getMoTa())
+                        && (ALL_STATUSES.equals(status) || formatStatus(subject.getTrangThai()).equals(status)));
+    }
+
     private void loadSubjects() {
         try {
             List<Subject> subjects = subjectService.getAllSubjects();
-            tblSubjects.getItems().setAll(subjects);
+            allSubjects.setAll(subjects);
         } catch (RuntimeException exception) {
-            tblSubjects.getItems().clear();
+            allSubjects.clear();
             showMessage(exception.getMessage());
         }
     }

@@ -6,6 +6,7 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TextFormat;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
@@ -65,15 +66,15 @@ public class StudentProfileController {
     private void loadProfile(int maTaiKhoan) {
         try {
             StudentInfo info = topicRegistrationService.getStudentInfo(maTaiKhoan);
-            lblName.setText(nullToDash(info.hoTen()));
-            lblCode.setText(nullToDash(info.maSoSinhVien()));
-            lblEmail.setText(nullToDash(info.email()));
-            lblClass.setText(nullToDash(info.lopSinhHoat()));
-            lblCourseYear.setText(nullToDash(info.khoaHoc()));
-            lblMajor.setText(nullToDash(info.nganh()));
+            lblName.setText(TextFormat.orDash(info.hoTen()));
+            lblCode.setText(TextFormat.orDash(info.maSoSinhVien()));
+            lblEmail.setText(TextFormat.orDash(info.email()));
+            lblClass.setText(TextFormat.orDash(info.lopSinhHoat()));
+            lblCourseYear.setText(TextFormat.orDash(info.khoaHoc()));
+            lblMajor.setText(TextFormat.orDash(info.nganh()));
             lblCourseSection.setText(info.maLopHocPhan() == null
                     ? "Chưa được xếp vào lớp học phần"
-                    : nullToDash(info.tenLopHocPhan()));
+                    : TextFormat.orDash(info.tenLopHocPhan()));
         } catch (RuntimeException exception) {
             lblMessage.setText(exception.getMessage());
         }
@@ -96,12 +97,12 @@ public class StudentProfileController {
 
     @FXML
     private void handleShowHistory() {
-        MainApp.setRoot("/views/student/registration-history.fxml");
+        MainApp.setRoot(MainApp.STUDENT_REGISTRATION_HISTORY_VIEW);
     }
 
     @FXML
     private void handleShowChangePassword() {
-        MainApp.setRoot("/views/student/change-password.fxml");
+        MainApp.setRoot(MainApp.CHANGE_PASSWORD_VIEW);
     }
 
     @FXML
@@ -109,7 +110,4 @@ public class StudentProfileController {
         MainApp.showLogin();
     }
 
-    private String nullToDash(String value) {
-        return value == null || value.isBlank() ? "—" : value;
-    }
 }
