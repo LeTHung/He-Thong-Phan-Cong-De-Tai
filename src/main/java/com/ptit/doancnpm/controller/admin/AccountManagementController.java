@@ -8,12 +8,22 @@ import com.ptit.doancnpm.model.entity.UserStatus;
 import com.ptit.doancnpm.service.AccountManagementService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 
 import java.time.LocalDateTime;
@@ -52,22 +62,16 @@ public class AccountManagementController {
     private TableColumn<AccountSummary, String> colLastLogin;
 
     @FXML
-    private TextField txtUsername;
+    private Button btnEdit;
 
     @FXML
-    private TextField txtPassword;
+    private Button btnLock;
 
     @FXML
-    private ComboBox<UserRole> cboRole;
+    private Button btnUnlock;
 
     @FXML
-    private ComboBox<UserStatus> cboStatus;
-
-    @FXML
-    private TextField txtEmail;
-
-    @FXML
-    private TextField txtPhone;
+    private Button btnResetPassword;
 
     private final AccountManagementService accountManagementService = new AccountManagementService();
 
@@ -87,7 +91,6 @@ public class AccountManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
-        setupForm();
         loadAccounts();
     }
 
@@ -133,20 +136,7 @@ public class AccountManagementController {
 
     @FXML
     private void handleAddAccount() {
-        try {
-            accountManagementService.createAccount(
-                    txtUsername.getText(),
-                    txtPassword.getText(),
-                    cboRole.getValue(),
-                    cboStatus.getValue(),
-                    txtEmail.getText(),
-                    txtPhone.getText());
-            showMessage("Đã thêm tài khoản.");
-            clearForm();
-            loadAccounts();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showAccountDialog(null);
     }
 
     @FXML
@@ -156,20 +146,7 @@ public class AccountManagementController {
             showMessage("Vui lòng chọn tài khoản cần sửa.");
             return;
         }
-
-        try {
-            accountManagementService.updateAccount(
-                    selectedAccount.getMaTaiKhoan(),
-                    txtUsername.getText(),
-                    cboRole.getValue(),
-                    cboStatus.getValue(),
-                    txtEmail.getText(),
-                    txtPhone.getText());
-            showMessage("Đã cập nhật tài khoản.");
-            loadAccounts();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showAccountDialog(selectedAccount);
     }
 
     @FXML
@@ -228,13 +205,8 @@ public class AccountManagementController {
         showMessage("Đã làm mới danh sách tài khoản.");
     }
 
-    @FXML
-    private void handleClearForm() {
-        clearForm();
-        showMessage("Đã xóa trắng dữ liệu đang nhập.");
-    }
-
     private void setupTable() {
+        tblAccounts.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colUsername.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenDangNhap()));
         colRole.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getVaiTroText()));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
@@ -242,42 +214,21 @@ public class AccountManagementController {
         colPhone.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getSoDienThoai())));
         colLastLogin.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatLastLogin(data.getValue().getLanDangNhapCuoi())));
 
-        tblAccounts.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                fillForm(newValue);
-            }
+        btnEdit.disableProperty().bind(tblAccounts.getSelectionModel().selectedItemProperty().isNull());
+        btnLock.disableProperty().bind(tblAccounts.getSelectionModel().selectedItemProperty().isNull());
+        btnUnlock.disableProperty().bind(tblAccounts.getSelectionModel().selectedItemProperty().isNull());
+        btnResetPassword.disableProperty().bind(tblAccounts.getSelectionModel().selectedItemProperty().isNull());
+
+        tblAccounts.setRowFactory(table -> {
+            TableRow<AccountSummary> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    tblAccounts.getSelectionModel().select(row.getItem());
+                    handleUpdateAccount();
+                }
+            });
+            return row;
         });
-    }
-
-    private void setupForm() {
-        cboRole.getItems().setAll(UserRole.values());
-        cboRole.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(UserRole role) {
-                return role == null ? "" : role.getDisplayName();
-            }
-
-            @Override
-            public UserRole fromString(String value) {
-                return null;
-            }
-        });
-
-        cboStatus.getItems().setAll(UserStatus.values());
-        cboStatus.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(UserStatus status) {
-                return formatStatus(status);
-            }
-
-            @Override
-            public UserStatus fromString(String value) {
-                return null;
-            }
-        });
-
-        cboRole.setValue(UserRole.SINH_VIEN);
-        cboStatus.setValue(UserStatus.HOAT_DONG);
     }
 
     private void loadAccounts() {
@@ -290,24 +241,141 @@ public class AccountManagementController {
         }
     }
 
-    private void fillForm(AccountSummary account) {
-        txtUsername.setText(account.getTenDangNhap());
-        txtPassword.clear();
-        cboRole.setValue(account.getVaiTro());
-        cboStatus.setValue(account.getTrangThai());
-        txtEmail.setText(emptyIfNull(account.getEmail()));
-        txtPhone.setText(emptyIfNull(account.getSoDienThoai()));
-        showMessage("Đang chọn tài khoản " + account.getTenDangNhap() + ".");
+    private void showAccountDialog(AccountSummary account) {
+        boolean isEdit = account != null;
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(isEdit ? "Sửa tài khoản" : "Thêm tài khoản");
+        dialog.setHeaderText(isEdit
+                ? "Chỉnh sửa thông tin tài khoản " + account.getTenDangNhap()
+                : "Nhập thông tin tài khoản mới");
+        dialog.initOwner(tblAccounts.getScene().getWindow());
+
+        TextField usernameField = new TextField(isEdit ? account.getTenDangNhap() : "");
+        usernameField.setPromptText("VD: N23DCCN023");
+        usernameField.setPrefWidth(300);
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("VD: 123456");
+
+        ComboBox<UserRole> roleBox = new ComboBox<>();
+        roleBox.getItems().setAll(UserRole.values());
+        roleBox.setConverter(roleConverter());
+        roleBox.setValue(isEdit ? account.getVaiTro() : UserRole.SINH_VIEN);
+        roleBox.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<UserStatus> statusBox = new ComboBox<>();
+        statusBox.getItems().setAll(UserStatus.values());
+        statusBox.setConverter(statusConverter());
+        statusBox.setValue(isEdit ? account.getTrangThai() : UserStatus.HOAT_DONG);
+        statusBox.setMaxWidth(Double.MAX_VALUE);
+
+        TextField emailField = new TextField(isEdit ? emptyIfNull(account.getEmail()) : "");
+        emailField.setPromptText("email@ptit.edu.vn");
+
+        TextField phoneField = new TextField(isEdit ? emptyIfNull(account.getSoDienThoai()) : "");
+        phoneField.setPromptText("VD: 0900000000");
+
+        Label errorLabel = new Label();
+        errorLabel.setWrapText(true);
+        errorLabel.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: 700;");
+
+        GridPane form = new GridPane();
+        form.setHgap(14);
+        form.setVgap(12);
+        form.setPadding(new Insets(8, 4, 4, 4));
+        int row = 0;
+        addFormRow(form, row++, "Tên đăng nhập", usernameField);
+        if (!isEdit) {
+            addFormRow(form, row++, "Mật khẩu", passwordField);
+        }
+        addFormRow(form, row++, "Vai trò", roleBox);
+        addFormRow(form, row++, "Trạng thái", statusBox);
+        addFormRow(form, row++, "Email", emailField);
+        addFormRow(form, row++, "Số điện thoại", phoneField);
+        form.add(errorLabel, 0, row, 2, 1);
+
+        ButtonType saveButtonType = new ButtonType(
+                isEdit ? "Lưu thay đổi" : "Thêm tài khoản",
+                ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+        dialog.getDialogPane().setContent(form);
+        dialog.getDialogPane().setPrefWidth(520);
+        dialog.getDialogPane().getStyleClass().add("account-form-dialog");
+        dialog.getDialogPane().getStylesheets().setAll(tblAccounts.getScene().getStylesheets());
+
+        boolean[] saved = {false};
+        Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
+        saveButton.getStyleClass().add("btn-primary");
+        dialog.getDialogPane().lookupButton(ButtonType.CANCEL).getStyleClass().add("btn-outline");
+        saveButton.addEventFilter(ActionEvent.ACTION, event -> {
+            try {
+                if (isEdit) {
+                    accountManagementService.updateAccount(
+                            account.getMaTaiKhoan(),
+                            usernameField.getText(),
+                            roleBox.getValue(),
+                            statusBox.getValue(),
+                            emailField.getText(),
+                            phoneField.getText());
+                } else {
+                    accountManagementService.createAccount(
+                            usernameField.getText(),
+                            passwordField.getText(),
+                            roleBox.getValue(),
+                            statusBox.getValue(),
+                            emailField.getText(),
+                            phoneField.getText());
+                }
+                saved[0] = true;
+            } catch (RuntimeException exception) {
+                errorLabel.setText(exception.getMessage());
+                event.consume();
+            }
+        });
+
+        dialog.showAndWait();
+        if (saved[0]) {
+            loadAccounts();
+            tblAccounts.getSelectionModel().clearSelection();
+            showMessage(isEdit ? "Đã cập nhật tài khoản." : "Đã thêm tài khoản.");
+        }
     }
 
-    private void clearForm() {
-        tblAccounts.getSelectionModel().clearSelection();
-        txtUsername.clear();
-        txtPassword.clear();
-        cboRole.setValue(UserRole.SINH_VIEN);
-        cboStatus.setValue(UserStatus.HOAT_DONG);
-        txtEmail.clear();
-        txtPhone.clear();
+    private void addFormRow(GridPane form, int row, String labelText, Node field) {
+        Label label = new Label(labelText);
+        label.getStyleClass().add("caption-strong");
+        form.add(label, 0, row);
+        form.add(field, 1, row);
+        GridPane.setHgrow(field, javafx.scene.layout.Priority.ALWAYS);
+    }
+
+    private StringConverter<UserRole> roleConverter() {
+        return new StringConverter<>() {
+            @Override
+            public String toString(UserRole role) {
+                return role == null ? "" : role.getDisplayName();
+            }
+
+            @Override
+            public UserRole fromString(String value) {
+                return null;
+            }
+        };
+    }
+
+    private StringConverter<UserStatus> statusConverter() {
+        return new StringConverter<>() {
+            @Override
+            public String toString(UserStatus status) {
+                return formatStatus(status);
+            }
+
+            @Override
+            public UserStatus fromString(String value) {
+                return null;
+            }
+        };
     }
 
     private AccountSummary getSelectedAccount() {

@@ -9,12 +9,15 @@ import com.ptit.doancnpm.service.CourseSectionService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 
 import java.util.List;
 
@@ -51,28 +54,16 @@ public class CourseSectionManagementController {
     private TableColumn<CourseSectionSummary, String> colStatus;
 
     @FXML
-    private TextField txtCode;
+    private Button btnEdit;
 
     @FXML
-    private TextField txtName;
+    private Button btnOpen;
 
     @FXML
-    private ComboBox<OptionItem> cboSubject;
+    private Button btnClose;
 
     @FXML
-    private ComboBox<OptionItem> cboSemester;
-
-    @FXML
-    private ComboBox<OptionItem> cboLecturer;
-
-    @FXML
-    private TextField txtMaxSize;
-
-    @FXML
-    private ComboBox<String> cboStatus;
-
-    @FXML
-    private TextArea txtNote;
+    private Button btnArchive;
 
     private final CourseSectionService courseSectionService = new CourseSectionService();
 
@@ -92,7 +83,6 @@ public class CourseSectionManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
-        setupForm();
         loadCourseSections();
     }
 
@@ -138,22 +128,7 @@ public class CourseSectionManagementController {
 
     @FXML
     private void handleAddCourseSection() {
-        try {
-            courseSectionService.createCourseSection(
-                    txtCode.getText(),
-                    txtName.getText(),
-                    cboSubject.getValue(),
-                    cboSemester.getValue(),
-                    cboLecturer.getValue(),
-                    txtMaxSize.getText(),
-                    txtNote.getText(),
-                    cboStatus.getValue());
-            showMessage("Đã thêm lớp học phần.");
-            clearForm();
-            loadCourseSections();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showCourseSectionDialog(null);
     }
 
     @FXML
@@ -164,22 +139,7 @@ public class CourseSectionManagementController {
             return;
         }
 
-        try {
-            courseSectionService.updateCourseSection(
-                    selectedSection.getMaLopHocPhan(),
-                    txtCode.getText(),
-                    txtName.getText(),
-                    cboSubject.getValue(),
-                    cboSemester.getValue(),
-                    cboLecturer.getValue(),
-                    txtMaxSize.getText(),
-                    txtNote.getText(),
-                    cboStatus.getValue());
-            showMessage("Đã cập nhật lớp học phần.");
-            loadCourseSections();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showCourseSectionDialog(selectedSection);
     }
 
     @FXML
@@ -234,19 +194,13 @@ public class CourseSectionManagementController {
     }
 
     @FXML
-    private void handleClearForm() {
-        clearForm();
-        showMessage("Đã xóa trắng dữ liệu đang nhập.");
-    }
-
-    @FXML
     private void handleRefreshCourseSections() {
-        setupForm();
         loadCourseSections();
         showMessage("Đã làm mới danh sách lớp học phần.");
     }
 
     private void setupTable() {
+        tblCourseSections.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaLop()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenLopHocPhan()));
         colSubject.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenMonHoc()));
@@ -255,27 +209,21 @@ public class CourseSectionManagementController {
         colMaxSize.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatMaxSize(data.getValue().getSiSoToiDa())));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
 
-        tblCourseSections.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                fillForm(newValue);
-            }
+        btnEdit.disableProperty().bind(tblCourseSections.getSelectionModel().selectedItemProperty().isNull());
+        btnOpen.disableProperty().bind(tblCourseSections.getSelectionModel().selectedItemProperty().isNull());
+        btnClose.disableProperty().bind(tblCourseSections.getSelectionModel().selectedItemProperty().isNull());
+        btnArchive.disableProperty().bind(tblCourseSections.getSelectionModel().selectedItemProperty().isNull());
+
+        tblCourseSections.setRowFactory(table -> {
+            TableRow<CourseSectionSummary> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    tblCourseSections.getSelectionModel().select(row.getItem());
+                    handleUpdateCourseSection();
+                }
+            });
+            return row;
         });
-    }
-
-    private void setupForm() {
-        cboStatus.getItems().setAll(
-                CourseSectionService.STATUS_OPEN,
-                CourseSectionService.STATUS_CLOSED,
-                CourseSectionService.STATUS_ARCHIVED);
-        cboStatus.setValue(CourseSectionService.STATUS_OPEN);
-
-        try {
-            cboSubject.getItems().setAll(courseSectionService.getSubjectOptions());
-            cboSemester.getItems().setAll(courseSectionService.getSemesterOptions());
-            cboLecturer.getItems().setAll(courseSectionService.getLecturerOptions());
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
     }
 
     private void loadCourseSections() {
@@ -288,28 +236,80 @@ public class CourseSectionManagementController {
         }
     }
 
-    private void fillForm(CourseSectionSummary section) {
-        txtCode.setText(section.getMaLop());
-        txtName.setText(section.getTenLopHocPhan());
-        selectOptionById(cboSubject, section.getMaMonHoc());
-        selectOptionById(cboSemester, section.getMaHocKy());
-        selectOptionById(cboLecturer, section.getMaGiangVien());
-        txtMaxSize.setText(section.getSiSoToiDa() == null ? "" : String.valueOf(section.getSiSoToiDa()));
-        txtNote.setText(section.getGhiChu() == null ? "" : section.getGhiChu());
-        cboStatus.setValue(section.getTrangThai());
-        showMessage("Đang chọn lớp học phần " + section.getMaLop() + ".");
-    }
+    private void showCourseSectionDialog(CourseSectionSummary section) {
+        boolean isEdit = section != null;
+        try {
+            TextField codeField = new TextField(isEdit ? section.getMaLop() : "");
+            codeField.setPromptText("VD: CNPM_D23CQCN01_N");
+            codeField.setPrefWidth(340);
+            TextField nameField = new TextField(isEdit ? section.getTenLopHocPhan() : "");
+            nameField.setPromptText("Công nghệ phần mềm - D23CQCN01-N");
 
-    private void clearForm() {
-        tblCourseSections.getSelectionModel().clearSelection();
-        txtCode.clear();
-        txtName.clear();
-        cboSubject.setValue(null);
-        cboSemester.setValue(null);
-        cboLecturer.setValue(null);
-        txtMaxSize.clear();
-        txtNote.clear();
-        cboStatus.setValue(CourseSectionService.STATUS_OPEN);
+            ComboBox<OptionItem> subjectBox = new ComboBox<>();
+            subjectBox.getItems().setAll(courseSectionService.getSubjectOptions());
+            subjectBox.setMaxWidth(Double.MAX_VALUE);
+            ComboBox<OptionItem> semesterBox = new ComboBox<>();
+            semesterBox.getItems().setAll(courseSectionService.getSemesterOptions());
+            semesterBox.setMaxWidth(Double.MAX_VALUE);
+            ComboBox<OptionItem> lecturerBox = new ComboBox<>();
+            lecturerBox.getItems().setAll(courseSectionService.getLecturerOptions());
+            lecturerBox.setMaxWidth(Double.MAX_VALUE);
+
+            TextField maxSizeField = new TextField(
+                    isEdit && section.getSiSoToiDa() != null ? String.valueOf(section.getSiSoToiDa()) : "");
+            maxSizeField.setPromptText("VD: 80");
+            ComboBox<String> statusBox = new ComboBox<>();
+            statusBox.getItems().setAll(CourseSectionService.STATUS_OPEN, CourseSectionService.STATUS_CLOSED,
+                    CourseSectionService.STATUS_ARCHIVED);
+            statusBox.setValue(isEdit ? section.getTrangThai() : CourseSectionService.STATUS_OPEN);
+            statusBox.setMaxWidth(Double.MAX_VALUE);
+            TextArea noteArea = new TextArea(isEdit && section.getGhiChu() != null ? section.getGhiChu() : "");
+            noteArea.setPrefRowCount(3);
+            noteArea.setWrapText(true);
+
+            if (isEdit) {
+                selectOptionById(subjectBox, section.getMaMonHoc());
+                selectOptionById(semesterBox, section.getMaHocKy());
+                selectOptionById(lecturerBox, section.getMaGiangVien());
+            }
+
+            GridPane form = AdminFormDialog.createForm();
+            AdminFormDialog.addRow(form, 0, "Mã lớp", codeField);
+            AdminFormDialog.addRow(form, 1, "Tên lớp học phần", nameField);
+            AdminFormDialog.addRow(form, 2, "Môn học", subjectBox);
+            AdminFormDialog.addRow(form, 3, "Học kỳ", semesterBox);
+            AdminFormDialog.addRow(form, 4, "Giảng viên", lecturerBox);
+            AdminFormDialog.addRow(form, 5, "Sĩ số tối đa", maxSizeField);
+            AdminFormDialog.addRow(form, 6, "Trạng thái", statusBox);
+            AdminFormDialog.addRow(form, 7, "Ghi chú", noteArea);
+
+            boolean saved = AdminFormDialog.show(
+                    tblCourseSections.getScene().getWindow(),
+                    isEdit ? "Sửa lớp học phần" : "Thêm lớp học phần",
+                    isEdit ? "Chỉnh sửa lớp " + section.getMaLop() : "Nhập thông tin lớp học phần mới",
+                    isEdit ? "Lưu thay đổi" : "Thêm lớp học phần",
+                    form,
+                    () -> {
+                        if (isEdit) {
+                            courseSectionService.updateCourseSection(section.getMaLopHocPhan(), codeField.getText(),
+                                    nameField.getText(), subjectBox.getValue(), semesterBox.getValue(),
+                                    lecturerBox.getValue(), maxSizeField.getText(), noteArea.getText(),
+                                    statusBox.getValue());
+                        } else {
+                            courseSectionService.createCourseSection(codeField.getText(), nameField.getText(),
+                                    subjectBox.getValue(), semesterBox.getValue(), lecturerBox.getValue(),
+                                    maxSizeField.getText(), noteArea.getText(), statusBox.getValue());
+                        }
+                    });
+
+            if (saved) {
+                loadCourseSections();
+                tblCourseSections.getSelectionModel().clearSelection();
+                showMessage(isEdit ? "Đã cập nhật lớp học phần." : "Đã thêm lớp học phần.");
+            }
+        } catch (RuntimeException exception) {
+            showMessage(exception.getMessage());
+        }
     }
 
     private void selectOptionById(ComboBox<OptionItem> comboBox, int id) {

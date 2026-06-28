@@ -23,14 +23,38 @@ public class StudentClassDAO {
         return findOptions(sql);
     }
 
-    public List<OptionItem> findAvailableStudentOptions() {
+    public List<OptionItem> findAvailableStudentOptions(int courseSectionId) {
         String sql = """
-                SELECT ma_sinh_vien, ma_so_sinh_vien, ho_ten
-                FROM dbo.sinh_vien
-                WHERE trang_thai = N'DANG_HOC'
-                ORDER BY ma_so_sinh_vien
+                SELECT sv.ma_sinh_vien, sv.ma_so_sinh_vien, sv.ho_ten
+                FROM dbo.sinh_vien sv
+                WHERE sv.trang_thai = N'DANG_HOC'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM dbo.sinh_vien_lop svl
+                      WHERE svl.ma_lop_hoc_phan = ?
+                        AND svl.ma_sinh_vien = sv.ma_sinh_vien
+                        AND svl.trang_thai = N'DANG_HOC'
+                  )
+                ORDER BY sv.ma_so_sinh_vien
                 """;
-        return findOptions(sql);
+
+        List<OptionItem> options = new ArrayList<>();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, courseSectionId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    options.add(new OptionItem(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3)));
+                }
+            }
+            return options;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải danh sách sinh viên có thể thêm: " + e.getMessage(), e);
+        }
     }
 
     public List<StudentClassMemberSummary> findStudentsByCourseSection(int courseSectionId) {
@@ -69,36 +93,8 @@ public class StudentClassDAO {
         }
     }
 
-    public String findEnrollmentStatus(int courseSectionId, int studentId) {
-        String sql = """
-                SELECT trang_thai
-                FROM dbo.sinh_vien_lop
-                WHERE ma_lop_hoc_phan = ?
-                  AND ma_sinh_vien = ?
-                """;
-
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, courseSectionId);
-            statement.setInt(2, studentId);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next() ? resultSet.getString("trang_thai") : null;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi kiểm tra sinh viên trong lớp: " + e.getMessage(), e);
-        }
-    }
-
-    public void addStudentToCourseSection(int courseSectionId, int studentId, String note) {
-        String status = findEnrollmentStatus(courseSectionId, studentId);
-        if (status == null) {
-            insertStudent(courseSectionId, studentId, note);
-            return;
-        }
-
-        String sql = """
+    public void addStudentsToCourseSection(int courseSectionId, List<Integer> studentIds, String note) {
+        String updateSql = """
                 UPDATE dbo.sinh_vien_lop
                 SET trang_thai = N'DANG_HOC',
                     ngay_tham_gia = CONVERT(DATE, SYSDATETIME()),
@@ -106,16 +102,36 @@ public class StudentClassDAO {
                 WHERE ma_lop_hoc_phan = ?
                   AND ma_sinh_vien = ?
                 """;
+        String insertSql = """
+                INSERT INTO dbo.sinh_vien_lop (ma_lop_hoc_phan, ma_sinh_vien, ghi_chu)
+                VALUES (?, ?, ?)
+                """;
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, note);
-            statement.setInt(2, courseSectionId);
-            statement.setInt(3, studentId);
-            statement.executeUpdate();
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try (
+                    PreparedStatement updateStatement = connection.prepareStatement(updateSql);
+                    PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+                for (int studentId : studentIds) {
+                    updateStatement.setString(1, note);
+                    updateStatement.setInt(2, courseSectionId);
+                    updateStatement.setInt(3, studentId);
+                    int affectedRows = updateStatement.executeUpdate();
+
+                    if (affectedRows == 0) {
+                        insertStatement.setInt(1, courseSectionId);
+                        insertStatement.setInt(2, studentId);
+                        insertStatement.setString(3, note);
+                        insertStatement.executeUpdate();
+                    }
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi thêm lại sinh viên vào lớp: " + e.getMessage(), e);
+            throw new RuntimeException("Lỗi thêm danh sách sinh viên vào lớp: " + e.getMessage(), e);
         }
     }
 
@@ -138,24 +154,6 @@ public class StudentClassDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi rút sinh viên khỏi lớp: " + e.getMessage(), e);
-        }
-    }
-
-    private void insertStudent(int courseSectionId, int studentId, String note) {
-        String sql = """
-                INSERT INTO dbo.sinh_vien_lop (ma_lop_hoc_phan, ma_sinh_vien, ghi_chu)
-                VALUES (?, ?, ?)
-                """;
-
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, courseSectionId);
-            statement.setInt(2, studentId);
-            statement.setString(3, note);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi thêm sinh viên vào lớp: " + e.getMessage(), e);
         }
     }
 

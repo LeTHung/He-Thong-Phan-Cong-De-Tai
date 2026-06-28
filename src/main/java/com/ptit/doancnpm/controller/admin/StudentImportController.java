@@ -7,15 +7,28 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.StudentClassService;
 import com.ptit.doancnpm.util.SessionManager;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class StudentImportController {
 
@@ -50,10 +63,7 @@ public class StudentImportController {
     private TableColumn<StudentClassMemberSummary, String> colNote;
 
     @FXML
-    private ComboBox<OptionItem> cboStudent;
-
-    @FXML
-    private TextArea txtNote;
+    private Button btnWithdraw;
 
     private final StudentClassService studentClassService = new StudentClassService();
 
@@ -119,13 +129,78 @@ public class StudentImportController {
     @FXML
     private void handleAddStudent() {
         try {
-            studentClassService.addStudentToCourseSection(
-                    cboCourseSection.getValue(),
-                    cboStudent.getValue(),
-                    txtNote.getText());
-            showMessage("Đã thêm sinh viên vào lớp.");
-            txtNote.clear();
-            loadStudents();
+            OptionItem courseSection = cboCourseSection.getValue();
+            if (courseSection == null) {
+                showMessage("Vui lòng chọn lớp học phần.");
+                return;
+            }
+
+            List<OptionItem> studentOptions = studentClassService.getStudentOptions(courseSection);
+            if (studentOptions.isEmpty()) {
+                showMessage("Không còn sinh viên nào có thể thêm vào lớp này.");
+                return;
+            }
+
+            Map<Integer, BooleanProperty> selectionStates = new LinkedHashMap<>();
+            studentOptions.forEach(student ->
+                    selectionStates.put(student.getId(), new SimpleBooleanProperty(false)));
+
+            ListView<OptionItem> studentList = new ListView<>();
+            studentList.getItems().setAll(studentOptions);
+            studentList.setCellFactory(CheckBoxListCell.forListView(
+                    student -> selectionStates.get(student.getId())));
+            studentList.setPrefHeight(260);
+            studentList.setPrefWidth(380);
+
+            CheckBox selectAll = new CheckBox("Chọn tất cả");
+            Label selectedCount = new Label();
+            selectedCount.getStyleClass().add("body-muted");
+            Runnable updateSelectionSummary = () -> {
+                long count = selectionStates.values().stream().filter(BooleanProperty::get).count();
+                selectedCount.setText("Đã chọn " + count + "/" + studentOptions.size() + " sinh viên");
+                selectAll.setIndeterminate(count > 0 && count < studentOptions.size());
+                if (count == 0) {
+                    selectAll.setSelected(false);
+                } else if (count == studentOptions.size()) {
+                    selectAll.setSelected(true);
+                }
+            };
+            selectionStates.values().forEach(state ->
+                    state.addListener((observable, oldValue, newValue) -> updateSelectionSummary.run()));
+            selectAll.setOnAction(event -> {
+                boolean selected = selectAll.isSelected();
+                selectionStates.values().forEach(state -> state.set(selected));
+            });
+            updateSelectionSummary.run();
+
+            VBox studentSelector = new VBox(8, selectAll, studentList, selectedCount);
+            TextArea noteArea = new TextArea();
+            noteArea.setPrefRowCount(3);
+            noteArea.setWrapText(true);
+
+            GridPane form = AdminFormDialog.createForm();
+            AdminFormDialog.addRow(form, 0, "Sinh viên", studentSelector);
+            AdminFormDialog.addRow(form, 1, "Ghi chú", noteArea);
+
+            int[] addedCount = {0};
+            boolean saved = AdminFormDialog.show(
+                    tblStudents.getScene().getWindow(),
+                    "Thêm sinh viên vào lớp",
+                    "Lớp học phần: " + courseSection.getCode(),
+                    "Thêm các sinh viên",
+                    form,
+                    () -> {
+                        List<OptionItem> selectedStudents = studentOptions.stream()
+                                .filter(student -> selectionStates.get(student.getId()).get())
+                                .toList();
+                        addedCount[0] = studentClassService.addStudentsToCourseSection(
+                                courseSection, selectedStudents, noteArea.getText());
+                    });
+            if (saved) {
+                loadStudents();
+                tblStudents.getSelectionModel().clearSelection();
+                showMessage("Đã thêm " + addedCount[0] + " sinh viên vào lớp.");
+            }
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
         }
@@ -133,11 +208,27 @@ public class StudentImportController {
 
     @FXML
     private void handleWithdrawStudent() {
+        StudentClassMemberSummary student = tblStudents.getSelectionModel().getSelectedItem();
+        if (student == null) {
+            showMessage("Vui lòng chọn sinh viên cần rút khỏi lớp.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận rút sinh viên");
+        confirm.setHeaderText("Rút " + student.getHoTen() + " khỏi lớp?");
+        confirm.setContentText("Sinh viên sẽ không còn thuộc lớp học phần đang chọn.");
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
         try {
             studentClassService.withdrawStudentFromCourseSection(
                     cboCourseSection.getValue(),
-                    tblStudents.getSelectionModel().getSelectedItem());
+                    student);
             showMessage("Đã rút sinh viên khỏi lớp.");
+            tblStudents.getSelectionModel().clearSelection();
             loadStudents();
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
@@ -147,17 +238,18 @@ public class StudentImportController {
     @FXML
     private void handleRefreshStudents() {
         setupForm();
-        loadStudents();
         showMessage("Đã làm mới dữ liệu sinh viên lớp.");
     }
 
     private void setupTable() {
+        tblStudents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colStudentCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaSoSinhVien()));
         colFullName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getHoTen()));
         colEmail.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getEmail())));
         colClassName.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getLopSinhHoat())));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
         colNote.setCellValueFactory(data -> new ReadOnlyStringWrapper(emptyIfNull(data.getValue().getGhiChu())));
+        btnWithdraw.disableProperty().bind(tblStudents.getSelectionModel().selectedItemProperty().isNull());
     }
 
     private void setupForm() {
@@ -166,10 +258,6 @@ public class StudentImportController {
             OptionItem selectedCourseSection = cboCourseSection.getValue();
             cboCourseSection.getItems().setAll(courseSections);
             selectOrFirst(cboCourseSection, selectedCourseSection);
-
-            OptionItem selectedStudent = cboStudent.getValue();
-            cboStudent.getItems().setAll(studentClassService.getStudentOptions());
-            selectOrFirst(cboStudent, selectedStudent);
 
             cboCourseSection.setOnAction(event -> loadStudents());
             loadStudents();

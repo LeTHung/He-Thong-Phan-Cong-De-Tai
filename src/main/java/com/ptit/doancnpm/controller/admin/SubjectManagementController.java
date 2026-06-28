@@ -8,12 +8,15 @@ import com.ptit.doancnpm.service.SubjectService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 
 import java.util.List;
 
@@ -41,19 +44,13 @@ public class SubjectManagementController {
     private TableColumn<Subject, String> colStatus;
 
     @FXML
-    private TextField txtCode;
+    private Button btnEdit;
 
     @FXML
-    private TextField txtName;
+    private Button btnActivate;
 
     @FXML
-    private TextField txtCredits;
-
-    @FXML
-    private TextArea txtDescription;
-
-    @FXML
-    private ComboBox<String> cboStatus;
+    private Button btnDeactivate;
 
     private final SubjectService subjectService = new SubjectService();
 
@@ -73,7 +70,6 @@ public class SubjectManagementController {
 
         lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
         setupTable();
-        setupForm();
         loadSubjects();
     }
 
@@ -119,19 +115,7 @@ public class SubjectManagementController {
 
     @FXML
     private void handleAddSubject() {
-        try {
-            subjectService.createSubject(
-                    txtCode.getText(),
-                    txtName.getText(),
-                    txtCredits.getText(),
-                    txtDescription.getText(),
-                    cboStatus.getValue());
-            showMessage("Đã thêm môn học.");
-            clearForm();
-            loadSubjects();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showSubjectDialog(null);
     }
 
     @FXML
@@ -142,19 +126,7 @@ public class SubjectManagementController {
             return;
         }
 
-        try {
-            subjectService.updateSubject(
-                    selectedSubject.getMaMonHoc(),
-                    txtCode.getText(),
-                    txtName.getText(),
-                    txtCredits.getText(),
-                    txtDescription.getText(),
-                    cboStatus.getValue());
-            showMessage("Đã cập nhật môn học.");
-            loadSubjects();
-        } catch (RuntimeException exception) {
-            showMessage(exception.getMessage());
-        }
+        showSubjectDialog(selectedSubject);
     }
 
     @FXML
@@ -184,28 +156,33 @@ public class SubjectManagementController {
     }
 
     @FXML
-    private void handleClearForm() {
-        clearForm();
-        showMessage("Đã xóa trắng dữ liệu đang nhập.");
+    private void handleRefreshSubjects() {
+        loadSubjects();
+        showMessage("Đã làm mới danh sách môn học.");
     }
 
     private void setupTable() {
+        tblSubjects.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaMonHocHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenMonHoc()));
         colCredits.setCellValueFactory(data -> new ReadOnlyStringWrapper(String.valueOf(data.getValue().getSoTinChi())));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(
                 formatStatus(data.getValue().getTrangThai())));
 
-        tblSubjects.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                fillForm(newValue);
-            }
-        });
-    }
+        btnEdit.disableProperty().bind(tblSubjects.getSelectionModel().selectedItemProperty().isNull());
+        btnActivate.disableProperty().bind(tblSubjects.getSelectionModel().selectedItemProperty().isNull());
+        btnDeactivate.disableProperty().bind(tblSubjects.getSelectionModel().selectedItemProperty().isNull());
 
-    private void setupForm() {
-        cboStatus.getItems().setAll(SubjectService.STATUS_ACTIVE, SubjectService.STATUS_INACTIVE);
-        cboStatus.setValue(SubjectService.STATUS_ACTIVE);
+        tblSubjects.setRowFactory(table -> {
+            TableRow<Subject> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    tblSubjects.getSelectionModel().select(row.getItem());
+                    handleUpdateSubject();
+                }
+            });
+            return row;
+        });
     }
 
     private void loadSubjects() {
@@ -218,22 +195,51 @@ public class SubjectManagementController {
         }
     }
 
-    private void fillForm(Subject subject) {
-        txtCode.setText(subject.getMaMonHocHeThong());
-        txtName.setText(subject.getTenMonHoc());
-        txtCredits.setText(String.valueOf(subject.getSoTinChi()));
-        txtDescription.setText(subject.getMoTa() == null ? "" : subject.getMoTa());
-        cboStatus.setValue(subject.getTrangThai());
-        showMessage("Đang chọn môn học " + subject.getMaMonHocHeThong() + ".");
-    }
+    private void showSubjectDialog(Subject subject) {
+        boolean isEdit = subject != null;
+        TextField codeField = new TextField(isEdit ? subject.getMaMonHocHeThong() : "");
+        codeField.setPromptText("VD: CNPM");
+        codeField.setPrefWidth(320);
+        TextField nameField = new TextField(isEdit ? subject.getTenMonHoc() : "");
+        nameField.setPromptText("Công nghệ phần mềm");
+        TextField creditsField = new TextField(isEdit ? String.valueOf(subject.getSoTinChi()) : "");
+        creditsField.setPromptText("3");
+        ComboBox<String> statusBox = new ComboBox<>();
+        statusBox.getItems().setAll(SubjectService.STATUS_ACTIVE, SubjectService.STATUS_INACTIVE);
+        statusBox.setValue(isEdit ? subject.getTrangThai() : SubjectService.STATUS_ACTIVE);
+        statusBox.setMaxWidth(Double.MAX_VALUE);
+        TextArea descriptionArea = new TextArea(isEdit && subject.getMoTa() != null ? subject.getMoTa() : "");
+        descriptionArea.setPrefRowCount(4);
+        descriptionArea.setWrapText(true);
 
-    private void clearForm() {
-        tblSubjects.getSelectionModel().clearSelection();
-        txtCode.clear();
-        txtName.clear();
-        txtCredits.clear();
-        txtDescription.clear();
-        cboStatus.setValue(SubjectService.STATUS_ACTIVE);
+        GridPane form = AdminFormDialog.createForm();
+        AdminFormDialog.addRow(form, 0, "Mã môn", codeField);
+        AdminFormDialog.addRow(form, 1, "Tên môn học", nameField);
+        AdminFormDialog.addRow(form, 2, "Số tín chỉ", creditsField);
+        AdminFormDialog.addRow(form, 3, "Trạng thái", statusBox);
+        AdminFormDialog.addRow(form, 4, "Mô tả", descriptionArea);
+
+        boolean saved = AdminFormDialog.show(
+                tblSubjects.getScene().getWindow(),
+                isEdit ? "Sửa môn học" : "Thêm môn học",
+                isEdit ? "Chỉnh sửa môn học " + subject.getMaMonHocHeThong() : "Nhập thông tin môn học mới",
+                isEdit ? "Lưu thay đổi" : "Thêm môn học",
+                form,
+                () -> {
+                    if (isEdit) {
+                        subjectService.updateSubject(subject.getMaMonHoc(), codeField.getText(), nameField.getText(),
+                                creditsField.getText(), descriptionArea.getText(), statusBox.getValue());
+                    } else {
+                        subjectService.createSubject(codeField.getText(), nameField.getText(), creditsField.getText(),
+                                descriptionArea.getText(), statusBox.getValue());
+                    }
+                });
+
+        if (saved) {
+            loadSubjects();
+            tblSubjects.getSelectionModel().clearSelection();
+            showMessage(isEdit ? "Đã cập nhật môn học." : "Đã thêm môn học.");
+        }
     }
 
     private Subject getSelectedSubject() {

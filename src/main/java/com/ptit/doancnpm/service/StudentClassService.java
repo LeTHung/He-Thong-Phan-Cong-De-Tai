@@ -7,16 +7,15 @@ import com.ptit.doancnpm.model.dto.StudentClassMemberSummary;
 import java.util.List;
 
 public class StudentClassService {
-    private static final String STATUS_ACTIVE = "DANG_HOC";
-
     private final StudentClassDAO studentClassDAO = new StudentClassDAO();
 
     public List<OptionItem> getCourseSectionOptions() {
         return studentClassDAO.findCourseSectionOptions();
     }
 
-    public List<OptionItem> getStudentOptions() {
-        return studentClassDAO.findAvailableStudentOptions();
+    public List<OptionItem> getStudentOptions(OptionItem courseSection) {
+        OptionItem cleanCourseSection = requireOption(courseSection, "Vui lòng chọn lớp học phần.");
+        return studentClassDAO.findAvailableStudentOptions(cleanCourseSection.getId());
     }
 
     public List<StudentClassMemberSummary> getStudentsByCourseSection(OptionItem courseSection) {
@@ -24,19 +23,17 @@ public class StudentClassService {
         return studentClassDAO.findStudentsByCourseSection(cleanCourseSection.getId());
     }
 
-    public void addStudentToCourseSection(OptionItem courseSection, OptionItem student, String note) {
+    public int addStudentsToCourseSection(OptionItem courseSection, List<OptionItem> students, String note) {
         OptionItem cleanCourseSection = requireOption(courseSection, "Vui lòng chọn lớp học phần.");
-        OptionItem cleanStudent = requireOption(student, "Vui lòng chọn sinh viên.");
-
-        String currentStatus = studentClassDAO.findEnrollmentStatus(cleanCourseSection.getId(), cleanStudent.getId());
-        if (STATUS_ACTIVE.equalsIgnoreCase(currentStatus)) {
-            throw new IllegalArgumentException("Sinh viên này đang học trong lớp đã chọn.");
+        List<Integer> studentIds = students == null
+                ? List.of()
+                : students.stream().filter(java.util.Objects::nonNull).map(OptionItem::getId).distinct().toList();
+        if (studentIds.isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng tích chọn ít nhất một sinh viên.");
         }
 
-        studentClassDAO.addStudentToCourseSection(
-                cleanCourseSection.getId(),
-                cleanStudent.getId(),
-                optional(note));
+        studentClassDAO.addStudentsToCourseSection(cleanCourseSection.getId(), studentIds, optional(note));
+        return studentIds.size();
     }
 
     public void withdrawStudentFromCourseSection(OptionItem courseSection, StudentClassMemberSummary student) {

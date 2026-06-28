@@ -133,6 +133,24 @@
     -fx-min-width: 330;
 }
 
+.account-form-dialog,
+.admin-form-dialog {
+    -fx-background-color: white;
+    -fx-padding: 10;
+}
+
+.account-form-dialog .header-panel,
+.admin-form-dialog .header-panel {
+    -fx-background-color: white;
+}
+
+.account-form-dialog .header-panel .label,
+.admin-form-dialog .header-panel .label {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0F172A;
+}
+
 .stat-card-blue {
     -fx-background-color: linear-gradient(to bottom right, #2563EB, #1D4ED8);
 }
