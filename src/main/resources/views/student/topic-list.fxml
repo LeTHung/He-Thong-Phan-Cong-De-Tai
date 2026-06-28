@@ -53,9 +53,9 @@
                                onAction="#handleSearch" prefWidth="240"/>
                     <CheckBox fx:id="chkOnlyAvailable" text="Chỉ còn chỗ" onAction="#handleSearch"/>
                     <Label text="Trạng thái:" styleClass="body-muted"/>
-                    <ComboBox fx:id="cboStatus" prefWidth="150" onAction="#handleSearch"/>
-                    <Label text="Giảng viên:" styleClass="body-muted"/>
-                    <ComboBox fx:id="cboLecturer" prefWidth="170" onAction="#handleSearch"/>
+                    <ComboBox fx:id="cboStatus" prefWidth="180" onAction="#handleSearch"/>
+                    <Label text="Lớp học phần:" styleClass="body-muted"/>
+                    <ComboBox fx:id="cboClass" prefWidth="220" onAction="#handleClassFilter"/>
                     <Label text="Sắp xếp:" styleClass="body-muted"/>
                     <ComboBox fx:id="cboSort" prefWidth="180" onAction="#handleSort"/>
                     <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>

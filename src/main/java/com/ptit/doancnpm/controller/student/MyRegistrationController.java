@@ -10,6 +10,7 @@ import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.RegistrationCountdown;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -181,6 +182,12 @@ public class MyRegistrationController {
         colLecturer.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().tenGiangVien()));
         colMode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().hinhThucPhanCongText()));
         colTime.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatTime(data.getValue())));
+
+        // Hiển thị đầy đủ chữ (xuống dòng) thay vì cắt bớt "..." ở các cột dài.
+        colName.setCellFactory(TableCells.wrapping());
+        colSubject.setCellFactory(TableCells.wrapping());
+        colLecturer.setCellFactory(TableCells.wrapping());
+        colMode.setCellFactory(TableCells.wrapping());
 
         tblRegistrations.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue != null) {

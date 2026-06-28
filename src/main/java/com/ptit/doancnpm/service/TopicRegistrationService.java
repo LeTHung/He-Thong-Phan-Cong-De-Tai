@@ -4,6 +4,7 @@ import com.ptit.doancnpm.model.dao.TopicRegistrationDAO;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
 import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.StudentCourseSection;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.dto.TopicDetail;
@@ -35,6 +36,10 @@ public class TopicRegistrationService {
 
     public List<StudentTopicSummary> getRegistrableTopics(int maTaiKhoan) {
         return topicRegistrationDAO.findRegistrableTopics(maTaiKhoan);
+    }
+
+    public List<StudentCourseSection> getCourseSections(int maTaiKhoan) {
+        return topicRegistrationDAO.findCourseSectionsByAccountId(maTaiKhoan);
     }
 
     public Optional<TopicDetail> getTopicDetail(int maDeTaiLop, int maTaiKhoan) {

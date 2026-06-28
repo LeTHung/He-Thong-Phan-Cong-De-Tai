@@ -9,6 +9,7 @@ import java.util.List;
  */
 public record StudentDashboardData(
         StudentInfo studentInfo,
+        List<StudentCourseSection> courseSections,
         List<StudentTopicSummary> topics,
         RegistrationPeriod registrationPeriod,
         List<RegisteredTopic> registeredTopics) {

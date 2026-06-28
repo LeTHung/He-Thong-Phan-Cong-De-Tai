@@ -3,6 +3,7 @@ package com.ptit.doancnpm.model.dao;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
 import com.ptit.doancnpm.model.dto.RegistrationHistoryEntry;
 import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.StudentCourseSection;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.dto.TopicDetail;
@@ -79,6 +80,51 @@ public class TopicRegistrationDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi tải thông tin sinh viên: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Danh sách các lớp học phần mà sinh viên đang theo học (trạng thái DANG_HOC),
+     * lớp mới nhất xếp trước. Dùng cho bộ lọc theo lớp ở màn danh sách đề tài.
+     */
+    public List<StudentCourseSection> findCourseSectionsByAccountId(int maTaiKhoan) {
+        String sql = """
+                SELECT
+                    lhp.ma_lop_hoc_phan,
+                    lhp.ma_lop,
+                    lhp.ten_lop_hoc_phan,
+                    mh.ten_mon_hoc
+                FROM dbo.sinh_vien sv
+                JOIN dbo.sinh_vien_lop svl
+                    ON svl.ma_sinh_vien = sv.ma_sinh_vien
+                    AND svl.trang_thai = N'DANG_HOC'
+                JOIN dbo.lop_hoc_phan lhp
+                    ON lhp.ma_lop_hoc_phan = svl.ma_lop_hoc_phan
+                JOIN dbo.mon_hoc mh ON mh.ma_mon_hoc = lhp.ma_mon_hoc
+                WHERE sv.ma_tai_khoan = ?
+                ORDER BY lhp.thoi_diem_tao DESC, lhp.ma_lop
+                """;
+
+        List<StudentCourseSection> sections = new ArrayList<>();
+
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maTaiKhoan);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    sections.add(new StudentCourseSection(
+                            resultSet.getInt("ma_lop_hoc_phan"),
+                            resultSet.getString("ma_lop"),
+                            resultSet.getString("ten_lop_hoc_phan"),
+                            resultSet.getString("ten_mon_hoc")));
+                }
+            }
+
+            return sections;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải danh sách lớp học phần: " + e.getMessage(), e);
         }
     }
 

@@ -55,7 +55,7 @@
                         <TableColumn fx:id="colAction" text="Hành động" prefWidth="150"/>
                         <TableColumn fx:id="colCode" text="Mã ĐT" prefWidth="80"/>
                         <TableColumn fx:id="colName" text="Tên đề tài" prefWidth="260"/>
-                        <TableColumn fx:id="colClass" text="Lớp HP" prefWidth="140"/>
+                        <TableColumn fx:id="colClass" text="Lớp HP" prefWidth="180" minWidth="180"/>
                         <TableColumn fx:id="colMode" text="Hình thức" prefWidth="160"/>
                         <TableColumn fx:id="colReason" text="Lý do" prefWidth="200"/>
                     </columns>
