@@ -6,6 +6,7 @@ import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.TopicRegistrationService;
 import com.ptit.doancnpm.util.SessionManager;
+import com.ptit.doancnpm.util.TableCells;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -101,6 +102,11 @@ public class RegistrationHistoryController {
         colClass.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().maLop()));
         colMode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().hinhThucText()));
         colReason.setCellValueFactory(data -> new ReadOnlyStringWrapper(nullToDash(data.getValue().lyDo())));
+
+        // Hiển thị đầy đủ chữ (xuống dòng) thay vì cắt bớt "..." ở các cột dài.
+        colName.setCellFactory(TableCells.wrapping());
+        colMode.setCellFactory(TableCells.wrapping());
+        colReason.setCellFactory(TableCells.wrapping());
     }
 
     private void loadHistory() {
