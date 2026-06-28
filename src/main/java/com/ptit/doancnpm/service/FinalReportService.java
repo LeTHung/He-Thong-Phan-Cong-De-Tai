@@ -14,8 +14,8 @@ public class FinalReportService {
     public boolean hasPeriodForLop(int maLopHocPhan) { return finalReportDAO.hasPeriodForLop(maLopHocPhan); }
     public boolean hasRegistrationStarted(int maLopHocPhan) { return finalReportDAO.hasRegistrationStarted(maLopHocPhan); }
     public boolean isRegistrationOpen(int maLopHocPhan) { return finalReportDAO.isRegistrationOpen(maLopHocPhan); }
-    public void finalizeRegistration(int maGiangVien, int maLopHocPhan) {
-        finalReportDAO.finalizeRegistration(maGiangVien, maLopHocPhan);
+    public int finalizeRegistration(int maGiangVien, int maLopHocPhan) {
+        return finalReportDAO.finalizeRegistration(maGiangVien, maLopHocPhan);
     }
     public List<RegistrationResultRow> getFinalReport(int maLopHocPhan) {
         return finalReportDAO.getFinalReport(maLopHocPhan);

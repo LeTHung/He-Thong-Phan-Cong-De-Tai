@@ -11,5 +11,6 @@ public record LecturerCourseSectionSummary(
         String trangThai,
         String cheDoPhanCong,
         int tongSoSinhVien,
-        int tongSoDeTai) {
+        int tongSoDeTai,
+        String trangThaiDotDangKy) {
 }

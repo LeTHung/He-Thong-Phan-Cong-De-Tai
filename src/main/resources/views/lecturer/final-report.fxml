@@ -85,7 +85,12 @@
 
             <!-- Bảng báo cáo -->
             <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
-                <Label text="Danh sách phân công đề tài" styleClass="card-title"/>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label text="Danh sách phân công đề tài" styleClass="card-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnExportCsv" text="Xuất CSV" styleClass="btn-secondary"
+                            onAction="#handleExportCsv"/>
+                </HBox>
                 <TableView fx:id="tableReport" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colMaSV" text="Mã SV" prefWidth="120"/>

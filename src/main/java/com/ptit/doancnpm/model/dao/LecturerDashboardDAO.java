@@ -40,7 +40,24 @@ public class LecturerDashboardDAO {
                     lhp.trang_thai,
                     lhp.che_do_phan_cong,
                     COUNT(DISTINCT svl.ma_sinh_vien) AS tong_so_sinh_vien,
-                    COUNT(DISTINCT dtl.ma_de_tai_lop) AS tong_so_de_tai
+                    COUNT(DISTINCT dtl.ma_de_tai_lop) AS tong_so_de_tai,
+                    (SELECT TOP 1
+                         CASE
+                             WHEN ddk.trang_thai = N'DANG_MO'
+                                  AND SYSDATETIME() >= ddk.thoi_gian_bat_dau
+                                  AND SYSDATETIME() <= ddk.thoi_gian_ket_thuc
+                             THEN N'DANG_MO'
+                             WHEN ddk.trang_thai = N'DANG_MO'
+                                  AND SYSDATETIME() < ddk.thoi_gian_bat_dau
+                             THEN N'CHO_MO'
+                             WHEN ddk.trang_thai = N'DA_DONG'
+                             THEN N'DA_DONG'
+                             ELSE N'CHUA_MO'
+                         END
+                     FROM dbo.dot_dang_ky ddk
+                     WHERE ddk.ma_lop_hoc_phan = lhp.ma_lop_hoc_phan
+                     ORDER BY ddk.thoi_diem_tao DESC
+                    ) AS trang_thai_dot_dk
                 FROM dbo.lop_hoc_phan lhp
                 JOIN dbo.giang_vien gv ON gv.ma_giang_vien = lhp.ma_giang_vien
                 JOIN dbo.mon_hoc mh ON mh.ma_mon_hoc = lhp.ma_mon_hoc
@@ -84,7 +101,8 @@ public class LecturerDashboardDAO {
                             resultSet.getString("trang_thai"),
                             resultSet.getString("che_do_phan_cong"),
                             resultSet.getInt("tong_so_sinh_vien"),
-                            resultSet.getInt("tong_so_de_tai")));
+                            resultSet.getInt("tong_so_de_tai"),
+                            resultSet.getString("trang_thai_dot_dk")));
                 }
             }
 

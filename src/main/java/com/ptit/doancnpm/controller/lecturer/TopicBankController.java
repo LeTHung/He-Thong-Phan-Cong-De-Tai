@@ -162,13 +162,13 @@ public class TopicBankController {
         TextField txtTen = new TextField(isEdit ? existing.getTenDeTai() : "");
         txtTen.setPromptText("Tên đề tài");
         TextArea txtMoTa = new TextArea(isEdit ? (existing.getMoTa() == null ? "" : existing.getMoTa()) : "");
-        txtMoTa.setPromptText("Mô tả");
-        txtMoTa.setPrefRowCount(3);
+        txtMoTa.setPromptText("Mô tả đề tài");
+        txtMoTa.setPrefRowCount(4);
         TextArea txtYeuCau = new TextArea(isEdit ? (existing.getYeuCau() == null ? "" : existing.getYeuCau()) : "");
-        txtYeuCau.setPromptText("Yêu cầu");
-        txtYeuCau.setPrefRowCount(3);
-        TextField txtSoLuong = new TextField(isEdit ? String.valueOf(existing.getSoLuongMacDinh()) : "3");
-        txtSoLuong.setPromptText("Số sinh viên tối đa");
+        txtYeuCau.setPromptText("Yêu cầu / công nghệ sử dụng");
+        txtYeuCau.setPrefRowCount(4);
+        // Số SV tối đa không hiển thị trong dialog — được đặt khi gán đề tài vào lớp
+        int soLuong = isEdit ? existing.getSoLuongMacDinh() : 3;
 
         grid.add(new Label("Mã đề tài:"), 0, 0);
         grid.add(txtMa, 1, 0);
@@ -178,8 +178,6 @@ public class TopicBankController {
         grid.add(txtMoTa, 1, 2);
         grid.add(new Label("Yêu cầu:"), 0, 3);
         grid.add(txtYeuCau, 1, 3);
-        grid.add(new Label("Số SV tối đa:"), 0, 4);
-        grid.add(txtSoLuong, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -189,7 +187,6 @@ public class TopicBankController {
             String ten = txtTen.getText().trim();
             String moTa = txtMoTa.getText().trim();
             String yeuCau = txtYeuCau.getText().trim();
-            String soLuongStr = txtSoLuong.getText().trim();
 
             if (ma.isEmpty() || ten.isEmpty()) {
                 MainApp.showError("Mã đề tài và tên đề tài không được để trống.");
@@ -201,14 +198,6 @@ public class TopicBankController {
             }
             if (ten.length() > 255) {
                 MainApp.showError("Tên đề tài không được vượt quá 255 ký tự.");
-                return;
-            }
-            int soLuong;
-            try {
-                soLuong = Integer.parseInt(soLuongStr);
-                if (soLuong <= 0) throw new NumberFormatException();
-            } catch (NumberFormatException ex) {
-                MainApp.showError("Số sinh viên tối đa phải là số nguyên dương.");
                 return;
             }
 

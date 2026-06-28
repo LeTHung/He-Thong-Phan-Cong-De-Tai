@@ -4,6 +4,8 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.BorderPane?>
@@ -102,6 +104,20 @@
                 </HBox>
                 <Label text="Nhánh Giảng viên phân công không cần mở cổng; hãy thao tác tại màn hình Kết quả &amp; phân công."
                        styleClass="body-muted" wrapText="true"/>
+            </VBox>
+
+            <!-- Bảng tình trạng đề tài trong lớp -->
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                <Label text="Tình trạng đề tài trong lớp" styleClass="card-title"/>
+                <TableView fx:id="tableTopicStatus" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colTpMaDeTai"   text="Mã đề tài"  prefWidth="120"/>
+                        <TableColumn fx:id="colTpTenDeTai"  text="Tên đề tài" prefWidth="340"/>
+                        <TableColumn fx:id="colTpDaDangKy"  text="Đã ĐK"      prefWidth="70"/>
+                        <TableColumn fx:id="colTpToiDa"     text="Tối đa"     prefWidth="70"/>
+                        <TableColumn fx:id="colTpTrangThai" text="Trạng thái" prefWidth="130"/>
+                    </columns>
+                </TableView>
             </VBox>
         </VBox>
     </center>
