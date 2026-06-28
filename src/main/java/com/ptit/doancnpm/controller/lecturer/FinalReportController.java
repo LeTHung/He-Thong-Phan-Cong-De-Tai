@@ -8,12 +8,15 @@ import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.FinalReportService;
 import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.service.TopicBankService;
+import com.ptit.doancnpm.util.CsvExporter;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +29,7 @@ public class FinalReportController {
     @FXML private Label lblTotalTopics;
     @FXML private Label lblStatusLabel;
     @FXML private Button btnFinalize;
+    @FXML private Button btnExportCsv;
 
     @FXML private TableView<RegistrationResultRow> tableReport;
     @FXML private TableColumn<RegistrationResultRow, String> colMaSV;
@@ -157,14 +161,44 @@ public class FinalReportController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                finalReportService.finalizeRegistration(maGiangVien, section.maLopHocPhan());
+                int soTuDong = finalReportService.finalizeRegistration(maGiangVien, section.maLopHocPhan());
                 lblStatusLabel.setText("Đã chốt danh sách");
                 btnFinalize.setDisable(true);
-                loadReport(section.maLopHocPhan());
-                MainApp.showInfo("Đã chốt danh sách thành công.");
+                onSectionSelected();
+                String msg = "Đã chốt danh sách thành công cho lớp \"" + section.maLop() + "\".";
+                if (soTuDong > 0) {
+                    msg += "\nHệ thống tự động phân công thêm " + soTuDong + " sinh viên vào các chỗ trống.";
+                }
+                MainApp.showInfo(msg);
             } catch (Exception e) {
                 MainApp.showError("Lỗi chốt danh sách: " + e.getMessage());
             }
+        }
+    }
+
+    @FXML
+    private void handleExportCsv() {
+        LecturerCourseSectionSummary section = cbSection.getValue();
+        if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
+        List<RegistrationResultRow> rows = tableReport.getItems();
+        if (rows.isEmpty()) {
+            MainApp.showError("Bảng báo cáo trống. Vui lòng chốt danh sách trước khi xuất CSV.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Lưu báo cáo CSV");
+        fileChooser.setInitialFileName("phan_cong_" + section.maLop() + ".csv");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+        File file = fileChooser.showSaveDialog(MainApp.getPrimaryStage());
+        if (file == null) return;
+
+        try {
+            new CsvExporter().export(rows, file);
+            MainApp.showInfo("Xuất CSV thành công:\n" + file.getAbsolutePath());
+        } catch (Exception e) {
+            MainApp.showError("Lỗi xuất CSV: " + e.getMessage());
         }
     }
 

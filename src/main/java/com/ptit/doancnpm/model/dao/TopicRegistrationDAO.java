@@ -438,6 +438,40 @@ public class TopicRegistrationDAO {
     }
 
     /**
+     * Đổi đề tài trong cùng một giao dịch JDBC: hủy cũ → đăng ký mới.
+     * Nếu bước nào thất bại, toàn bộ được rollback — sinh viên không bị mất đề tài cũ.
+     */
+    public void changeTopicTransactional(int maSinhVien, int maLopHocPhan,
+                                         int newMaDeTaiLop) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (CallableStatement cancel = conn.prepareCall(
+                        "{call dbo.sp_huy_dang_ky_de_tai(?, ?, ?)}")) {
+                    cancel.setInt(1, maSinhVien);
+                    cancel.setInt(2, maLopHocPhan);
+                    cancel.setString(3, "Đổi sang đề tài khác");
+                    cancel.execute();
+                }
+                try (CallableStatement register = conn.prepareCall(
+                        "{call dbo.sp_dang_ky_de_tai(?, ?)}")) {
+                    register.setInt(1, maSinhVien);
+                    register.setInt(2, newMaDeTaiLop);
+                    register.execute();
+                }
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw new RuntimeException(ex.getMessage(), ex);
+            }
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kết nối khi đổi đề tài: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Sinh viên hủy đăng ký đề tài trong một lớp học phần.
      */
     public void cancelRegistration(int maSinhVien, int maLopHocPhan, String lyDo) {

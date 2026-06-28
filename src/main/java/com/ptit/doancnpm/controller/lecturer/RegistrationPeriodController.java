@@ -1,14 +1,18 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
+import com.ptit.doancnpm.model.dto.AssignedTopicRow;
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
 import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.AssignTopicService;
 import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.service.RegistrationPeriodService;
 import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -34,9 +38,17 @@ public class RegistrationPeriodController {
     @FXML private Button btnOpen;
     @FXML private Button btnClose;
 
+    @FXML private TableView<AssignedTopicRow> tableTopicStatus;
+    @FXML private TableColumn<AssignedTopicRow, String>  colTpMaDeTai;
+    @FXML private TableColumn<AssignedTopicRow, String>  colTpTenDeTai;
+    @FXML private TableColumn<AssignedTopicRow, Integer> colTpDaDangKy;
+    @FXML private TableColumn<AssignedTopicRow, Integer> colTpToiDa;
+    @FXML private TableColumn<AssignedTopicRow, String>  colTpTrangThai;
+
     private final LecturerDashboardService dashboardService = new LecturerDashboardService();
     private final RegistrationPeriodService periodService = new RegistrationPeriodService();
     private final TopicBankService topicBankService = new TopicBankService();
+    private final AssignTopicService assignTopicService = new AssignTopicService();
     private int maGiangVien;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
@@ -57,11 +69,29 @@ public class RegistrationPeriodController {
             return;
         }
 
+        setupTopicTable();
         loadSections(user.getMaTaiKhoan());
         cbSection.setOnAction(e -> onSectionSelected());
 
         txtStartTime.setPromptText("HH:mm  (VD: 08:00)");
         txtEndTime.setPromptText("HH:mm  (VD: 23:59)");
+    }
+
+    private void setupTopicTable() {
+        colTpMaDeTai.setCellValueFactory(cd ->
+                new SimpleStringProperty(cd.getValue().getMaDeTaiHeThong()));
+        colTpTenDeTai.setCellValueFactory(cd ->
+                new SimpleStringProperty(cd.getValue().getTenDeTai()));
+        colTpDaDangKy.setCellValueFactory(cd ->
+                new SimpleIntegerProperty(cd.getValue().getSoLuongHienTai()).asObject());
+        colTpToiDa.setCellValueFactory(cd ->
+                new SimpleIntegerProperty(cd.getValue().getSoLuongToiDa()).asObject());
+        colTpTrangThai.setCellValueFactory(cd -> {
+            AssignedTopicRow r = cd.getValue();
+            String text = r.getSoChoConLai() <= 0 ? "Hết chỗ" : "Còn " + r.getSoChoConLai() + " chỗ";
+            return new SimpleStringProperty(text);
+        });
+        tableTopicStatus.setPlaceholder(new Label("Chọn lớp học phần để xem tình trạng đề tài."));
     }
 
     private void loadSections(int maTaiKhoan) {
@@ -83,6 +113,16 @@ public class RegistrationPeriodController {
         LecturerCourseSectionSummary section = cbSection.getValue();
         if (section == null) return;
         refreshStatus(section.maLopHocPhan());
+        loadTopicStatus(section.maLopHocPhan());
+    }
+
+    private void loadTopicStatus(int maLopHocPhan) {
+        try {
+            java.util.List<AssignedTopicRow> rows = assignTopicService.findByLop(maLopHocPhan);
+            tableTopicStatus.setItems(FXCollections.observableArrayList(rows));
+        } catch (Exception e) {
+            MainApp.showError("Lỗi tải tình trạng đề tài: " + e.getMessage());
+        }
     }
 
     private void refreshStatus(int maLopHocPhan) {
@@ -117,7 +157,7 @@ public class RegistrationPeriodController {
                 if (p.thoiGianBatDau() != null) info += "Từ: " + DISPLAY_FMT.format(p.thoiGianBatDau());
                 if (p.thoiGianKetThuc() != null) info += "  →  Đến: " + DISPLAY_FMT.format(p.thoiGianKetThuc());
                 lblCurrentPeriodInfo.setText(info.isBlank() ? "—" : info);
-                btnOpen.setDisable("DA_DONG".equals(p.trangThai()));
+                btnOpen.setDisable(p.dangMo() || "DA_DONG".equals(p.trangThai()));
                 btnClose.setDisable(!p.dangMo());
             }
 
@@ -173,6 +213,19 @@ public class RegistrationPeriodController {
         }
         if (!ketThuc.isAfter(LocalDateTime.now())) {
             MainApp.showError("Thời gian kết thúc phải lớn hơn thời điểm hiện tại.");
+            return;
+        }
+
+        try {
+            Optional<RegistrationPeriodInfo> existing =
+                    periodService.findCurrentByLop(section.maLopHocPhan());
+            if (existing.isPresent() && existing.get().dangMo()) {
+                MainApp.showError("Lớp này đã có đợt đăng ký đang mở.\n"
+                        + "Vui lòng đóng đợt hiện tại trước khi tạo đợt mới.");
+                return;
+            }
+        } catch (Exception e) {
+            MainApp.showError("Lỗi kiểm tra đợt đăng ký: " + e.getMessage());
             return;
         }
 

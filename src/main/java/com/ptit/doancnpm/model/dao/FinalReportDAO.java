@@ -13,25 +13,43 @@ import java.util.List;
 public class FinalReportDAO {
 
     /**
-     * Chốt danh sách đề tài cho lớp học phần.
-     * Gọi stored procedure sp_chot_danh_sach.
+     * Chốt danh sách: tự động phân công sinh viên chưa có đề tài vào chỗ trống,
+     * sau đó đóng đợt đăng ký và khóa lớp học phần.
+     *
+     * @return số sinh viên được hệ thống tự động phân công
      */
-    public void finalizeRegistration(int maGiangVien, int maLopHocPhan) {
-        String sql = "{call dbo.sp_chot_danh_sach(?, ?)}";
+    public int finalizeRegistration(int maGiangVien, int maLopHocPhan) {
+        int soTuDong = 0;
+
+        // Bước 1: phân công tự động sinh viên còn chưa có đề tài
         try (Connection conn = DatabaseConnection.getConnection();
-             CallableStatement stmt = conn.prepareCall(sql)) {
+             CallableStatement stmt = conn.prepareCall("{call dbo.sp_phan_cong_tu_dong(?, ?, ?)}")) {
+            stmt.setInt(1, maGiangVien);
+            stmt.setInt(2, maLopHocPhan);
+            stmt.registerOutParameter(3, Types.INTEGER);
+            stmt.execute();
+            soTuDong = stmt.getInt(3);
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi phân công tự động trước khi chốt: " + e.getMessage(), e);
+        }
+
+        // Bước 2: chốt — đóng đợt ĐK, khóa đề tài và lớp học phần
+        try (Connection conn = DatabaseConnection.getConnection();
+             CallableStatement stmt = conn.prepareCall("{call dbo.sp_chot_danh_sach(?, ?)}")) {
             stmt.setInt(1, maGiangVien);
             stmt.setInt(2, maLopHocPhan);
             stmt.execute();
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException("Lỗi chốt danh sách: " + e.getMessage(), e);
         }
+
+        return soTuDong;
     }
 
     /** Lấy báo cáo kết quả cuối (dùng view vw_bao_cao_nhom_de_tai) */
     public List<RegistrationResultRow> getFinalReport(int maLopHocPhan) {
         String sql = """
-                SELECT ma_so_sinh_vien, ho_ten AS ten_sinh_vien,
+                SELECT ma_so_sinh_vien, ten_sinh_vien,
                        lop_sinh_hoat, ma_de_tai_he_thong, ten_de_tai,
                        hinh_thuc_phan_cong, thoi_diem_dang_ky
                 FROM dbo.vw_bao_cao_nhom_de_tai

@@ -22,6 +22,7 @@ public class MyCourseSectionsController {
     @FXML private TableColumn<LecturerCourseSectionSummary, String> colMonHoc;
     @FXML private TableColumn<LecturerCourseSectionSummary, String> colHocKy;
     @FXML private TableColumn<LecturerCourseSectionSummary, Integer> colSoSV;
+    @FXML private TableColumn<LecturerCourseSectionSummary, String> colTrangThaiDot;
     @FXML private Label lblTotalSections;
 
     private final LecturerDashboardService dashboardService = new LecturerDashboardService();
@@ -44,6 +45,9 @@ public class MyCourseSectionsController {
                 cd.getValue().tenHocKy() + " " + cd.getValue().namHoc()));
         colSoSV.setCellValueFactory(cd ->
                 new javafx.beans.property.SimpleIntegerProperty(cd.getValue().tongSoSinhVien()).asObject());
+        colTrangThaiDot.setCellValueFactory(cd ->
+                new javafx.beans.property.SimpleStringProperty(
+                        formatTrangThaiDot(cd.getValue().trangThaiDotDangKy())));
         tableView.setPlaceholder(new Label("Bạn chưa được phân công lớp học phần nào."));
 
         loadData(user.getMaTaiKhoan());
@@ -57,6 +61,16 @@ public class MyCourseSectionsController {
         } catch (Exception e) {
             MainApp.showError("Lỗi tải danh sách lớp học phần: " + e.getMessage());
         }
+    }
+
+    private String formatTrangThaiDot(String trangThai) {
+        if (trangThai == null) return "Chưa mở";
+        return switch (trangThai) {
+            case "DANG_MO" -> "Đang mở";
+            case "CHO_MO"  -> "Chờ giờ mở";
+            case "DA_DONG" -> "Đã đóng";
+            default        -> "Chưa mở";
+        };
     }
 
     @FXML private void handleBack() { MainApp.setRoot(MainApp.LECTURER_DASHBOARD_VIEW); }
