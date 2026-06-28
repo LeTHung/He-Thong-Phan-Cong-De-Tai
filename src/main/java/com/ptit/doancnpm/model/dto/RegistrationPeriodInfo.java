@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
  * Đợt đăng ký đề tài của một lớp học phần (bảng dot_dang_ky).
  * dangMo = true khi cổng đang mở và thời điểm hiện tại nằm trong khoảng cho phép.
  */
-public record RegistrationPeriod(
+public record RegistrationPeriodInfo(
         LocalDateTime thoiGianBatDau,
         LocalDateTime thoiGianKetThuc,
         String trangThai,

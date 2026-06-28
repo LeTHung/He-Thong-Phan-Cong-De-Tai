@@ -127,12 +127,14 @@ CREATE TABLE dbo.lop_hoc_phan (
     ma_giang_vien        INT NOT NULL,
     si_so_toi_da         INT NULL,
     ghi_chu              NVARCHAR(500) NULL,
+    che_do_phan_cong     NVARCHAR(30) NOT NULL CONSTRAINT DF_lop_hoc_phan_che_do DEFAULT N'SINH_VIEN_TU_DANG_KY',
     trang_thai           NVARCHAR(20) NOT NULL CONSTRAINT DF_lop_hoc_phan_trang_thai DEFAULT N'DANG_MO',
     thoi_diem_tao        DATETIME2(0) NOT NULL CONSTRAINT DF_lop_hoc_phan_thoi_diem_tao DEFAULT SYSDATETIME(),
 
     CONSTRAINT PK_lop_hoc_phan PRIMARY KEY (ma_lop_hoc_phan),
     CONSTRAINT UQ_lop_hoc_phan_ma_lop UNIQUE (ma_lop),
     CONSTRAINT CK_lop_hoc_phan_si_so CHECK (si_so_toi_da IS NULL OR si_so_toi_da > 0),
+    CONSTRAINT CK_lop_hoc_phan_che_do CHECK (che_do_phan_cong IN (N'GIANG_VIEN_PHAN_CONG', N'SINH_VIEN_TU_DANG_KY')),
     CONSTRAINT CK_lop_hoc_phan_trang_thai CHECK (trang_thai IN (N'DANG_MO', N'DA_DONG', N'LUU_TRU')),
     CONSTRAINT FK_lop_hoc_phan_mon_hoc FOREIGN KEY (ma_mon_hoc)
         REFERENCES dbo.mon_hoc(ma_mon_hoc),
@@ -206,6 +208,23 @@ CREATE TABLE dbo.de_tai_lop (
     CONSTRAINT FK_de_tai_lop_de_tai FOREIGN KEY (ma_de_tai)
         REFERENCES dbo.ngan_hang_de_tai(ma_de_tai)
 );
+GO
+
+CREATE TRIGGER dbo.trg_de_tai_lop_dong_bo_che_do
+ON dbo.de_tai_lop
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF TRIGGER_NESTLEVEL() > 1 RETURN;
+
+    UPDATE dtl
+    SET che_do_phan_cong = lhp.che_do_phan_cong
+    FROM dbo.de_tai_lop dtl
+    JOIN inserted i ON i.ma_de_tai_lop = dtl.ma_de_tai_lop
+    JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = dtl.ma_lop_hoc_phan
+    WHERE dtl.che_do_phan_cong <> lhp.che_do_phan_cong;
+END;
 GO
 
 CREATE TABLE dbo.dot_dang_ky (
@@ -471,6 +490,55 @@ GO
    5. STORED PROCEDURE NGHIEP VU
    ============================================================ */
 
+CREATE PROCEDURE dbo.sp_cap_nhat_che_do_phan_cong_lop
+    @ma_giang_vien INT,
+    @ma_lop_hoc_phan INT,
+    @che_do_phan_cong NVARCHAR(30)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @che_do_phan_cong NOT IN (N'GIANG_VIEN_PHAN_CONG', N'SINH_VIEN_TU_DANG_KY')
+        THROW 50601, 'Che do phan cong khong hop le.', 1;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND ma_giang_vien = @ma_giang_vien
+    )
+        THROW 50602, 'Giang vien khong phu trach lop hoc phan nay.', 1;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND trang_thai <> N'DANG_MO'
+    )
+        THROW 50603, 'Lop hoc phan da dong hoac luu tru.', 1;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.dang_ky_de_tai
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+    )
+        THROW 50604, 'Khong the doi che do khi lop da co sinh vien co de tai.', 1;
+
+    BEGIN TRANSACTION;
+
+    UPDATE dbo.lop_hoc_phan
+    SET che_do_phan_cong = @che_do_phan_cong
+    WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan;
+
+    UPDATE dbo.de_tai_lop
+    SET che_do_phan_cong = @che_do_phan_cong
+    WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan;
+
+    COMMIT TRANSACTION;
+END;
+GO
+
 CREATE PROCEDURE dbo.sp_mo_cong_dang_ky
     @ma_lop_hoc_phan INT,
     @ma_giang_vien INT,
@@ -547,24 +615,31 @@ BEGIN
     DECLARE @so_luong_toi_da INT;
     DECLARE @so_luong_hien_tai INT;
     DECLARE @trang_thai NVARCHAR(20);
+    DECLARE @che_do_phan_cong NVARCHAR(30);
     DECLARE @ma_dang_ky INT;
 
     BEGIN TRY
         BEGIN TRANSACTION;
 
         SELECT
-            @ma_lop_hoc_phan = ma_lop_hoc_phan,
-            @so_luong_toi_da = so_luong_toi_da,
-            @so_luong_hien_tai = so_luong_hien_tai,
-            @trang_thai = trang_thai
-        FROM dbo.de_tai_lop WITH (UPDLOCK, HOLDLOCK)
-        WHERE ma_de_tai_lop = @ma_de_tai_lop;
+            @ma_lop_hoc_phan = dtl.ma_lop_hoc_phan,
+            @so_luong_toi_da = dtl.so_luong_toi_da,
+            @so_luong_hien_tai = dtl.so_luong_hien_tai,
+            @trang_thai = dtl.trang_thai,
+            @che_do_phan_cong = lhp.che_do_phan_cong
+        FROM dbo.de_tai_lop dtl WITH (UPDLOCK, HOLDLOCK)
+        JOIN dbo.lop_hoc_phan lhp
+          ON lhp.ma_lop_hoc_phan = dtl.ma_lop_hoc_phan
+        WHERE dtl.ma_de_tai_lop = @ma_de_tai_lop;
 
         IF @ma_lop_hoc_phan IS NULL
             THROW 50101, 'Khong tim thay de tai lop.', 1;
 
         IF @trang_thai <> N'DANG_MO'
             THROW 50102, 'De tai khong o trang thai dang mo.', 1;
+
+        IF @che_do_phan_cong <> N'SINH_VIEN_TU_DANG_KY'
+            THROW 50107, 'De tai nay do giang vien phan cong, sinh vien khong duoc tu dang ky.', 1;
 
         IF NOT EXISTS (
             SELECT 1
@@ -636,6 +711,7 @@ BEGIN
 
     DECLARE @ma_dang_ky INT;
     DECLARE @ma_de_tai_lop INT;
+    DECLARE @hinh_thuc_phan_cong NVARCHAR(20);
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -652,13 +728,17 @@ BEGIN
 
         SELECT
             @ma_dang_ky = ma_dang_ky,
-            @ma_de_tai_lop = ma_de_tai_lop
+            @ma_de_tai_lop = ma_de_tai_lop,
+            @hinh_thuc_phan_cong = hinh_thuc_phan_cong
         FROM dbo.dang_ky_de_tai
         WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
           AND ma_sinh_vien = @ma_sinh_vien;
 
         IF @ma_dang_ky IS NULL
             THROW 50202, 'Sinh vien chua co dang ky de huy.', 1;
+
+        IF @hinh_thuc_phan_cong <> N'TU_DANG_KY'
+            THROW 50203, 'Sinh vien chi duoc huy de tai do minh tu dang ky; de tai giang vien/he thong phan cong khong duoc huy.', 1;
 
         INSERT INTO dbo.lich_su_dang_ky (
             ma_dang_ky, ma_lop_hoc_phan, ma_sinh_vien, ma_de_tai_lop,
@@ -693,6 +773,8 @@ BEGIN
 
     DECLARE @ma_lop_hoc_phan INT;
     DECLARE @so_luong_toi_da INT;
+    DECLARE @trang_thai_lop NVARCHAR(20);
+    DECLARE @trang_thai_de_tai NVARCHAR(20);
     DECLARE @ma_dang_ky INT;
     DECLARE @ma_tai_khoan_giang_vien INT;
 
@@ -701,7 +783,9 @@ BEGIN
 
         SELECT
             @ma_lop_hoc_phan = dtl.ma_lop_hoc_phan,
-            @so_luong_toi_da = dtl.so_luong_toi_da
+            @so_luong_toi_da = dtl.so_luong_toi_da,
+            @trang_thai_lop = lhp.trang_thai,
+            @trang_thai_de_tai = dtl.trang_thai
         FROM dbo.de_tai_lop dtl WITH (UPDLOCK, HOLDLOCK)
         JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = dtl.ma_lop_hoc_phan
         WHERE dtl.ma_de_tai_lop = @ma_de_tai_lop
@@ -709,6 +793,12 @@ BEGIN
 
         IF @ma_lop_hoc_phan IS NULL
             THROW 50301, 'Giang vien khong co quyen phan cong vao de tai nay.', 1;
+
+        IF @trang_thai_lop <> N'DANG_MO'
+            THROW 50305, 'Lop hoc phan da dong hoac luu tru, khong the phan cong them.', 1;
+
+        IF @trang_thai_de_tai = N'DA_DONG'
+            THROW 50306, 'De tai da dong, khong the phan cong them.', 1;
 
         IF NOT EXISTS (
             SELECT 1 FROM dbo.sinh_vien_lop
@@ -757,6 +847,116 @@ BEGIN
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE dbo.sp_phan_cong_tu_dong
+    @ma_giang_vien INT,
+    @ma_lop_hoc_phan INT,
+    @so_da_phan_cong INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @ma_sinh_vien INT;
+    DECLARE @ma_de_tai_lop INT;
+    DECLARE @ma_dang_ky INT;
+    DECLARE @ma_tai_khoan_giang_vien INT;
+
+    SET @so_da_phan_cong = 0;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND ma_giang_vien = @ma_giang_vien
+    )
+        THROW 50501, 'Giang vien khong phu trach lop hoc phan nay.', 1;
+
+    IF EXISTS (
+        SELECT 1 FROM dbo.lop_hoc_phan
+        WHERE ma_lop_hoc_phan = @ma_lop_hoc_phan
+          AND trang_thai <> N'DANG_MO'
+    )
+        THROW 50502, 'Lop hoc phan da dong hoac luu tru, khong the phan cong tu dong.', 1;
+
+    SELECT @ma_tai_khoan_giang_vien = ma_tai_khoan
+    FROM dbo.giang_vien
+    WHERE ma_giang_vien = @ma_giang_vien;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE cur_sv CURSOR LOCAL FAST_FORWARD FOR
+            SELECT svl.ma_sinh_vien
+            FROM dbo.sinh_vien_lop svl
+            WHERE svl.ma_lop_hoc_phan = @ma_lop_hoc_phan
+              AND svl.trang_thai = N'DANG_HOC'
+              AND NOT EXISTS (
+                  SELECT 1 FROM dbo.dang_ky_de_tai dk
+                  WHERE dk.ma_lop_hoc_phan = svl.ma_lop_hoc_phan
+                    AND dk.ma_sinh_vien = svl.ma_sinh_vien
+              )
+            ORDER BY svl.ma_sinh_vien;
+
+        OPEN cur_sv;
+        FETCH NEXT FROM cur_sv INTO @ma_sinh_vien;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @ma_de_tai_lop = NULL;
+
+            SELECT TOP 1 @ma_de_tai_lop = dtl.ma_de_tai_lop
+            FROM dbo.de_tai_lop dtl WITH (UPDLOCK, HOLDLOCK)
+            WHERE dtl.ma_lop_hoc_phan = @ma_lop_hoc_phan
+              AND dtl.trang_thai <> N'DA_DONG'
+              AND dtl.so_luong_hien_tai < dtl.so_luong_toi_da
+            ORDER BY
+                dtl.so_luong_hien_tai,
+                dtl.ma_de_tai_lop;
+
+            IF @ma_de_tai_lop IS NULL
+                BREAK;
+
+            INSERT INTO dbo.dang_ky_de_tai (
+                ma_lop_hoc_phan, ma_sinh_vien, ma_de_tai_lop,
+                hinh_thuc_phan_cong, ghi_chu
+            )
+            VALUES (
+                @ma_lop_hoc_phan, @ma_sinh_vien, @ma_de_tai_lop,
+                N'TU_DONG', N'He thong phan cong tu dong theo cho trong con lai'
+            );
+
+            SET @ma_dang_ky = CONVERT(INT, SCOPE_IDENTITY());
+
+            INSERT INTO dbo.lich_su_dang_ky (
+                ma_dang_ky, ma_lop_hoc_phan, ma_sinh_vien, ma_de_tai_lop,
+                hanh_dong, hinh_thuc_phan_cong, ly_do, nguoi_thuc_hien
+            )
+            VALUES (
+                @ma_dang_ky, @ma_lop_hoc_phan, @ma_sinh_vien, @ma_de_tai_lop,
+                N'PHAN_CONG_TU_DONG', N'TU_DONG',
+                N'Giang vien yeu cau he thong phan cong tu dong',
+                @ma_tai_khoan_giang_vien
+            );
+
+            SET @so_da_phan_cong += 1;
+            FETCH NEXT FROM cur_sv INTO @ma_sinh_vien;
+        END;
+
+        CLOSE cur_sv;
+        DEALLOCATE cur_sv;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF CURSOR_STATUS('local', 'cur_sv') >= 0
+            CLOSE cur_sv;
+        IF CURSOR_STATUS('local', 'cur_sv') > -3
+            DEALLOCATE cur_sv;
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         THROW;
     END CATCH
@@ -833,7 +1033,7 @@ SELECT
     dtl.so_luong_hien_tai,
     (dtl.so_luong_toi_da - dtl.so_luong_hien_tai) AS so_cho_con_lai,
     dtl.trang_thai,
-    dtl.che_do_phan_cong
+    lhp.che_do_phan_cong
 FROM dbo.de_tai_lop dtl
 JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = dtl.ma_lop_hoc_phan
 JOIN dbo.ngan_hang_de_tai ndt ON ndt.ma_de_tai = dtl.ma_de_tai;

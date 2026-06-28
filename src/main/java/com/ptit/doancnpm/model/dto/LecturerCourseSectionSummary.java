@@ -9,6 +9,7 @@ public record LecturerCourseSectionSummary(
         String namHoc,
         int siSoToiDa,
         String trangThai,
+        String cheDoPhanCong,
         int tongSoSinhVien,
         int tongSoDeTai) {
 }

@@ -1,7 +1,7 @@
 package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
@@ -88,6 +88,9 @@ public class TopicListController {
 
     @FXML
     private TableColumn<StudentTopicSummary, String> colStatus;
+
+    @FXML
+    private TableColumn<StudentTopicSummary, String> colMode;
 
     @FXML
     private TableColumn<StudentTopicSummary, String> colRegistered;
@@ -198,8 +201,10 @@ public class TopicListController {
                 String.valueOf(data.getValue().soChoConLai())));
         colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(
                 trangThaiText(data.getValue().trangThai())));
+        colMode.setCellValueFactory(data -> new ReadOnlyStringWrapper(
+                cheDoText(data.getValue().cheDoPhanCong())));
         colRegistered.setCellValueFactory(data -> new ReadOnlyStringWrapper(
-                data.getValue().daDangKy() ? "Đã đăng ký" : ""));
+                data.getValue().daDangKy() ? "Đã có đề tài" : ""));
     }
 
     private void loadStudentInfo() {
@@ -230,7 +235,7 @@ public class TopicListController {
         }
 
         try {
-            Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
+            Optional<RegistrationPeriodInfo> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
             if (period.isEmpty()) {
                 lblPeriod.setText("Chưa mở đợt đăng ký");
                 lblPeriod.getStyleClass().setAll("badge", "badge-info");
@@ -238,7 +243,7 @@ public class TopicListController {
                 return;
             }
 
-            RegistrationPeriod current = period.get();
+            RegistrationPeriodInfo current = period.get();
             dangMoDangKy = current.dangMo();
             lblPeriod.setText(current.moTaTrangThai());
             lblPeriod.getStyleClass().setAll("badge",
@@ -270,7 +275,11 @@ public class TopicListController {
             if (allTopics.isEmpty()) {
                 showMessage("Chưa có đề tài nào trong lớp học phần của bạn.");
             } else {
-                showMessage("Có " + allTopics.size() + " đề tài. Chọn một đề tài rồi bấm Đăng ký hoặc Xem chi tiết.");
+                long selfRegistrationTopics = allTopics.stream()
+                        .filter(topic -> "SINH_VIEN_TU_DANG_KY".equals(topic.cheDoPhanCong()))
+                        .count();
+                showMessage("Có " + allTopics.size() + " đề tài, trong đó "
+                        + selfRegistrationTopics + " đề tài cho sinh viên tự đăng ký.");
             }
         } catch (RuntimeException exception) {
             tblTopics.getItems().clear();
@@ -408,6 +417,10 @@ public class TopicListController {
             showMessage("Bạn đã đăng ký đề tài này rồi.");
             return;
         }
+        if (!"SINH_VIEN_TU_DANG_KY".equals(selected.cheDoPhanCong())) {
+            showMessage("Đề tài này do giảng viên phân công; sinh viên chỉ được xem thông tin.");
+            return;
+        }
         if (!dangMoDangKy) {
             showMessage("Cổng đăng ký hiện không mở nên không thể đăng ký.");
             return;
@@ -463,6 +476,17 @@ public class TopicListController {
         alert.setHeaderText(null);
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+    private String cheDoText(String cheDo) {
+        if (cheDo == null) {
+            return "";
+        }
+        return switch (cheDo) {
+            case "SINH_VIEN_TU_DANG_KY" -> "SV đăng ký";
+            case "GIANG_VIEN_PHAN_CONG" -> "GV phân công";
+            default -> cheDo;
+        };
     }
 
     private String trangThaiText(String trangThai) {

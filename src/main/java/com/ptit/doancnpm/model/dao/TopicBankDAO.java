@@ -1,6 +1,6 @@
 package com.ptit.doancnpm.model.dao;
 
-import com.ptit.doancnpm.model.dto.TopicBankItem;
+import com.ptit.doancnpm.model.entity.Topic;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.*;
@@ -13,16 +13,17 @@ import java.util.List;
  */
 public class TopicBankDAO {
 
-    public List<TopicBankItem> findByGiangVien(int maGiangVien) {
+    public List<Topic> findByGiangVien(int maGiangVien) {
         String sql = """
                 SELECT ma_de_tai, ma_de_tai_he_thong, ten_de_tai, mo_ta, yeu_cau,
-                       so_luong_mac_dinh, trang_thai, thoi_diem_tao
+                       ghi_chu, so_luong_mac_dinh, ma_giang_vien_tao, trang_thai,
+                       thoi_diem_tao, thoi_diem_cap_nhat
                 FROM dbo.ngan_hang_de_tai
                 WHERE ma_giang_vien_tao = ?
                   AND trang_thai = N'DANG_SU_DUNG'
                 ORDER BY thoi_diem_tao DESC
                 """;
-        List<TopicBankItem> list = new ArrayList<>();
+        List<Topic> list = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, maGiangVien);
@@ -37,10 +38,11 @@ public class TopicBankDAO {
         }
     }
 
-    public List<TopicBankItem> searchByName(int maGiangVien, String keyword) {
+    public List<Topic> searchByName(int maGiangVien, String keyword) {
         String sql = """
                 SELECT ma_de_tai, ma_de_tai_he_thong, ten_de_tai, mo_ta, yeu_cau,
-                       so_luong_mac_dinh, trang_thai, thoi_diem_tao
+                       ghi_chu, so_luong_mac_dinh, ma_giang_vien_tao, trang_thai,
+                       thoi_diem_tao, thoi_diem_cap_nhat
                 FROM dbo.ngan_hang_de_tai
                 WHERE ma_giang_vien_tao = ?
                   AND trang_thai = N'DANG_SU_DUNG'
@@ -48,7 +50,7 @@ public class TopicBankDAO {
                 ORDER BY thoi_diem_tao DESC
                 """;
         String pattern = "%" + keyword + "%";
-        List<TopicBankItem> list = new ArrayList<>();
+        List<Topic> list = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, maGiangVien);
@@ -65,8 +67,7 @@ public class TopicBankDAO {
         }
     }
 
-    public void insert(int maGiangVien, String maDeTaiHeThong, String tenDeTai,
-                       String moTa, String yeuCau, int soLuongMacDinh) {
+    public void insert(Topic topic) {
         String sql = """
                 INSERT INTO dbo.ngan_hang_de_tai
                     (ma_de_tai_he_thong, ten_de_tai, mo_ta, yeu_cau, so_luong_mac_dinh, ma_giang_vien_tao, trang_thai)
@@ -74,20 +75,19 @@ public class TopicBankDAO {
                 """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, maDeTaiHeThong);
-            stmt.setString(2, tenDeTai);
-            stmt.setString(3, moTa);
-            stmt.setString(4, yeuCau);
-            stmt.setInt(5, soLuongMacDinh);
-            stmt.setInt(6, maGiangVien);
+            stmt.setString(1, topic.getMaDeTaiHeThong());
+            stmt.setString(2, topic.getTenDeTai());
+            stmt.setString(3, topic.getMoTa());
+            stmt.setString(4, topic.getYeuCau());
+            stmt.setInt(5, topic.getSoLuongMacDinh());
+            stmt.setInt(6, topic.getMaGiangVienTao());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi thêm đề tài: " + e.getMessage(), e);
         }
     }
 
-    public void update(int maDeTai, int maGiangVien, String maDeTaiHeThong, String tenDeTai,
-                       String moTa, String yeuCau, int soLuongMacDinh) {
+    public void update(Topic topic) {
         String sql = """
                 UPDATE dbo.ngan_hang_de_tai
                 SET ma_de_tai_he_thong = ?, ten_de_tai = ?, mo_ta = ?, yeu_cau = ?,
@@ -96,13 +96,13 @@ public class TopicBankDAO {
                 """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, maDeTaiHeThong);
-            stmt.setString(2, tenDeTai);
-            stmt.setString(3, moTa);
-            stmt.setString(4, yeuCau);
-            stmt.setInt(5, soLuongMacDinh);
-            stmt.setInt(6, maDeTai);
-            stmt.setInt(7, maGiangVien);
+            stmt.setString(1, topic.getMaDeTaiHeThong());
+            stmt.setString(2, topic.getTenDeTai());
+            stmt.setString(3, topic.getMoTa());
+            stmt.setString(4, topic.getYeuCau());
+            stmt.setInt(5, topic.getSoLuongMacDinh());
+            stmt.setInt(6, topic.getMaDeTai());
+            stmt.setInt(7, topic.getMaGiangVienTao());
             int rows = stmt.executeUpdate();
             if (rows == 0) {
                 throw new RuntimeException("Không tìm thấy đề tài hoặc bạn không có quyền sửa đề tài này.");
@@ -187,16 +187,20 @@ public class TopicBankDAO {
         }
     }
 
-    private TopicBankItem mapRow(ResultSet rs) throws SQLException {
-        Timestamp ts = rs.getTimestamp("thoi_diem_tao");
-        return new TopicBankItem(
+    private Topic mapRow(ResultSet rs) throws SQLException {
+        Timestamp createdAt = rs.getTimestamp("thoi_diem_tao");
+        Timestamp updatedAt = rs.getTimestamp("thoi_diem_cap_nhat");
+        return new Topic(
                 rs.getInt("ma_de_tai"),
                 rs.getString("ma_de_tai_he_thong"),
                 rs.getString("ten_de_tai"),
                 rs.getString("mo_ta"),
                 rs.getString("yeu_cau"),
+                rs.getString("ghi_chu"),
                 rs.getInt("so_luong_mac_dinh"),
+                rs.getInt("ma_giang_vien_tao"),
                 rs.getString("trang_thai"),
-                ts == null ? null : ts.toLocalDateTime());
+                createdAt == null ? null : createdAt.toLocalDateTime(),
+                updatedAt == null ? null : updatedAt.toLocalDateTime());
     }
 }

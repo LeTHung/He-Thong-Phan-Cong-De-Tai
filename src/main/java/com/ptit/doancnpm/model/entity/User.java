@@ -1,5 +1,7 @@
 package com.ptit.doancnpm.model.entity;
 
+import java.time.LocalDateTime;
+
 public class User {
     private int maTaiKhoan;
     private String tenDangNhap;
@@ -8,6 +10,10 @@ public class User {
     private UserStatus trangThai;
     private String email;
     private String soDienThoai;
+    private String anhDaiDien;
+    private LocalDateTime lanDangNhapCuoi;
+    private LocalDateTime thoiDiemTao;
+    private LocalDateTime thoiDiemCapNhat;
 
     public User() {
     }
@@ -20,6 +26,22 @@ public class User {
             UserStatus trangThai,
             String email,
             String soDienThoai) {
+        this(maTaiKhoan, tenDangNhap, matKhauMaHoa, vaiTro, trangThai, email, soDienThoai,
+                null, null, null, null);
+    }
+
+    public User(
+            int maTaiKhoan,
+            String tenDangNhap,
+            String matKhauMaHoa,
+            UserRole vaiTro,
+            UserStatus trangThai,
+            String email,
+            String soDienThoai,
+            String anhDaiDien,
+            LocalDateTime lanDangNhapCuoi,
+            LocalDateTime thoiDiemTao,
+            LocalDateTime thoiDiemCapNhat) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.matKhauMaHoa = matKhauMaHoa;
@@ -27,6 +49,10 @@ public class User {
         this.trangThai = trangThai;
         this.email = email;
         this.soDienThoai = soDienThoai;
+        this.anhDaiDien = anhDaiDien;
+        this.lanDangNhapCuoi = lanDangNhapCuoi;
+        this.thoiDiemTao = thoiDiemTao;
+        this.thoiDiemCapNhat = thoiDiemCapNhat;
     }
 
     public int getMaTaiKhoan() {
@@ -83,5 +109,37 @@ public class User {
 
     public void setSoDienThoai(String soDienThoai) {
         this.soDienThoai = soDienThoai;
+    }
+
+    public String getAnhDaiDien() {
+        return anhDaiDien;
+    }
+
+    public void setAnhDaiDien(String anhDaiDien) {
+        this.anhDaiDien = anhDaiDien;
+    }
+
+    public LocalDateTime getLanDangNhapCuoi() {
+        return lanDangNhapCuoi;
+    }
+
+    public void setLanDangNhapCuoi(LocalDateTime lanDangNhapCuoi) {
+        this.lanDangNhapCuoi = lanDangNhapCuoi;
+    }
+
+    public LocalDateTime getThoiDiemTao() {
+        return thoiDiemTao;
+    }
+
+    public void setThoiDiemTao(LocalDateTime thoiDiemTao) {
+        this.thoiDiemTao = thoiDiemTao;
+    }
+
+    public LocalDateTime getThoiDiemCapNhat() {
+        return thoiDiemCapNhat;
+    }
+
+    public void setThoiDiemCapNhat(LocalDateTime thoiDiemCapNhat) {
+        this.thoiDiemCapNhat = thoiDiemCapNhat;
     }
 }

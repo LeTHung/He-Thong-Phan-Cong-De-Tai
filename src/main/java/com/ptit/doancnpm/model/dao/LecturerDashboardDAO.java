@@ -12,6 +12,21 @@ import java.util.List;
 
 public class LecturerDashboardDAO {
 
+    public String findLecturerNameByAccountId(int maTaiKhoan) {
+        String sql = "SELECT ho_ten FROM dbo.giang_vien WHERE ma_tai_khoan = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maTaiKhoan);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getString("ho_ten") : null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi tải thông tin giảng viên: " + e.getMessage(), e);
+        }
+    }
+
     public List<LecturerCourseSectionSummary> findCourseSectionsByAccountId(int maTaiKhoan) {
         String sql = """
                 SELECT
@@ -23,6 +38,7 @@ public class LecturerDashboardDAO {
                     hk.nam_hoc,
                     ISNULL(lhp.si_so_toi_da, 0) AS si_so_toi_da,
                     lhp.trang_thai,
+                    lhp.che_do_phan_cong,
                     COUNT(DISTINCT svl.ma_sinh_vien) AS tong_so_sinh_vien,
                     COUNT(DISTINCT dtl.ma_de_tai_lop) AS tong_so_de_tai
                 FROM dbo.lop_hoc_phan lhp
@@ -43,7 +59,8 @@ public class LecturerDashboardDAO {
                     hk.ten_hoc_ky,
                     hk.nam_hoc,
                     lhp.si_so_toi_da,
-                    lhp.trang_thai
+                    lhp.trang_thai,
+                    lhp.che_do_phan_cong
                 ORDER BY hk.nam_hoc DESC, hk.ten_hoc_ky DESC, lhp.ma_lop
                 """;
 
@@ -65,6 +82,7 @@ public class LecturerDashboardDAO {
                             resultSet.getString("nam_hoc"),
                             resultSet.getInt("si_so_toi_da"),
                             resultSet.getString("trang_thai"),
+                            resultSet.getString("che_do_phan_cong"),
                             resultSet.getInt("tong_so_sinh_vien"),
                             resultSet.getInt("tong_so_de_tai")));
                 }

@@ -2,7 +2,7 @@ package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.model.dto.StudentDashboardData;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.entity.User;
@@ -126,7 +126,7 @@ public class StudentDashboardController {
         lblCourseBadge.getStyleClass().setAll("badge", "badge-info");
     }
 
-    private void showPeriodBadge(StudentInfo info, RegistrationPeriod period) {
+    private void showPeriodBadge(StudentInfo info, RegistrationPeriodInfo period) {
         if (info.maLopHocPhan() == null) {
             lblPeriodBadge.setText("Chưa có đợt đăng ký");
             lblPeriodBadge.getStyleClass().setAll("badge", "badge-warning");

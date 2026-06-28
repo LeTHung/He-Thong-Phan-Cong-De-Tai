@@ -1,7 +1,7 @@
 package com.ptit.doancnpm.controller.admin;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dto.SemesterSummary;
+import com.ptit.doancnpm.model.entity.Semester;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.SemesterService;
@@ -29,25 +29,25 @@ public class SemesterManagementController {
     private Label lblMessage;
 
     @FXML
-    private TableView<SemesterSummary> tblSemesters;
+    private TableView<Semester> tblSemesters;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colCode;
+    private TableColumn<Semester, String> colCode;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colName;
+    private TableColumn<Semester, String> colName;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colSchoolYear;
+    private TableColumn<Semester, String> colSchoolYear;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colStartDate;
+    private TableColumn<Semester, String> colStartDate;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colEndDate;
+    private TableColumn<Semester, String> colEndDate;
 
     @FXML
-    private TableColumn<SemesterSummary, String> colStatus;
+    private TableColumn<Semester, String> colStatus;
 
     @FXML
     private TextField txtCode;
@@ -149,7 +149,7 @@ public class SemesterManagementController {
 
     @FXML
     private void handleUpdateSemester() {
-        SemesterSummary selectedSemester = getSelectedSemester();
+        Semester selectedSemester = getSelectedSemester();
         if (selectedSemester == null) {
             showMessage("Vui lòng chọn học kỳ cần sửa.");
             return;
@@ -173,7 +173,7 @@ public class SemesterManagementController {
 
     @FXML
     private void handleOpenSemester() {
-        SemesterSummary selectedSemester = getSelectedSemester();
+        Semester selectedSemester = getSelectedSemester();
         if (selectedSemester == null) {
             showMessage("Vui lòng chọn học kỳ cần mở.");
             return;
@@ -186,7 +186,7 @@ public class SemesterManagementController {
 
     @FXML
     private void handleCloseSemester() {
-        SemesterSummary selectedSemester = getSelectedSemester();
+        Semester selectedSemester = getSelectedSemester();
         if (selectedSemester == null) {
             showMessage("Vui lòng chọn học kỳ cần đóng.");
             return;
@@ -199,7 +199,7 @@ public class SemesterManagementController {
 
     @FXML
     private void handleDraftSemester() {
-        SemesterSummary selectedSemester = getSelectedSemester();
+        Semester selectedSemester = getSelectedSemester();
         if (selectedSemester == null) {
             showMessage("Vui lòng chọn học kỳ cần chuyển về nháp.");
             return;
@@ -222,7 +222,8 @@ public class SemesterManagementController {
         colSchoolYear.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getNamHoc()));
         colStartDate.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatDate(data.getValue().getNgayBatDau())));
         colEndDate.setCellValueFactory(data -> new ReadOnlyStringWrapper(formatDate(data.getValue().getNgayKetThuc())));
-        colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
+        colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(
+                formatStatus(data.getValue().getTrangThai())));
 
         tblSemesters.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -241,7 +242,7 @@ public class SemesterManagementController {
 
     private void loadSemesters() {
         try {
-            List<SemesterSummary> semesters = semesterService.getAllSemesters();
+            List<Semester> semesters = semesterService.getAllSemesters();
             tblSemesters.getItems().setAll(semesters);
         } catch (RuntimeException exception) {
             tblSemesters.getItems().clear();
@@ -249,7 +250,7 @@ public class SemesterManagementController {
         }
     }
 
-    private void fillForm(SemesterSummary semester) {
+    private void fillForm(Semester semester) {
         txtCode.setText(semester.getMaHocKyHeThong());
         txtName.setText(semester.getTenHocKy());
         txtSchoolYear.setText(semester.getNamHoc());
@@ -269,8 +270,16 @@ public class SemesterManagementController {
         cboStatus.setValue(SemesterService.STATUS_DRAFT);
     }
 
-    private SemesterSummary getSelectedSemester() {
+    private Semester getSelectedSemester() {
         return tblSemesters.getSelectionModel().getSelectedItem();
+    }
+
+    private String formatStatus(String status) {
+        return switch (status == null ? "" : status) {
+            case SemesterService.STATUS_OPEN -> "Đang mở";
+            case SemesterService.STATUS_CLOSED -> "Đã đóng";
+            default -> "Nháp";
+        };
     }
 
     private String formatDate(java.time.LocalDate date) {

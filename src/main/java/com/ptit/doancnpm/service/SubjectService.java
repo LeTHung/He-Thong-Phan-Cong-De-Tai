@@ -1,7 +1,7 @@
 package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.SubjectDAO;
-import com.ptit.doancnpm.model.dto.SubjectSummary;
+import com.ptit.doancnpm.model.entity.Subject;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public class SubjectService {
 
     private final SubjectDAO subjectDAO = new SubjectDAO();
 
-    public List<SubjectSummary> getAllSubjects() {
+    public List<Subject> getAllSubjects() {
         return subjectDAO.findAll();
     }
 
@@ -25,7 +25,8 @@ public class SubjectService {
             throw new IllegalArgumentException("Mã môn học đã tồn tại.");
         }
 
-        subjectDAO.create(cleanCode, cleanName, credits, optional(description), cleanStatus);
+        subjectDAO.create(new Subject(0, cleanCode, cleanName, credits,
+                optional(description), cleanStatus, null));
     }
 
     public void updateSubject(int id, String code, String name, String creditsText, String description, String status) {
@@ -38,7 +39,8 @@ public class SubjectService {
             throw new IllegalArgumentException("Mã môn học đã tồn tại.");
         }
 
-        subjectDAO.update(id, cleanCode, cleanName, credits, optional(description), cleanStatus);
+        subjectDAO.update(new Subject(id, cleanCode, cleanName, credits,
+                optional(description), cleanStatus, null));
     }
 
     public void activateSubject(int id) {

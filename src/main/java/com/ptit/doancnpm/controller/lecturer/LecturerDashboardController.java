@@ -1,10 +1,10 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dao.LecturerDashboardDAO;
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,7 +31,7 @@ public class LecturerDashboardController {
     @FXML private TableColumn<LecturerCourseSectionSummary, Integer> colDashSoDeTai;
     @FXML private TableColumn<LecturerCourseSectionSummary, String> colDashTrangThai;
 
-    private final LecturerDashboardDAO dao = new LecturerDashboardDAO();
+    private final LecturerDashboardService dashboardService = new LecturerDashboardService();
 
     @FXML
     private void initialize() {
@@ -47,9 +47,6 @@ public class LecturerDashboardController {
             MainApp.showLogin();
             return;
         }
-
-        lblWelcome.setText("Xin chào Giảng viên");
-        lblUserInfo.setText(user.getTenDangNhap() + " • " + user.getVaiTro().getDisplayName());
 
         setupTable();
         loadDashboard(user.getMaTaiKhoan());
@@ -67,7 +64,14 @@ public class LecturerDashboardController {
 
     private void loadDashboard(int maTaiKhoan) {
         try {
-            List<LecturerCourseSectionSummary> sections = dao.findCourseSectionsByAccountId(maTaiKhoan);
+            String lecturerName = dashboardService.getLecturerName(maTaiKhoan);
+            if (lecturerName == null || lecturerName.isBlank()) {
+                lecturerName = SessionManager.getCurrentUser().getTenDangNhap();
+            }
+            lblWelcome.setText("Xin chào, " + lecturerName);
+            lblUserInfo.setText(lecturerName + " • Giảng viên");
+
+            List<LecturerCourseSectionSummary> sections = dashboardService.getCourseSections(maTaiKhoan);
             int totalTopics = sections.stream()
                     .mapToInt(LecturerCourseSectionSummary::tongSoDeTai)
                     .sum();
@@ -81,8 +85,8 @@ public class LecturerDashboardController {
                 lblStatSectionNote.setText(sections.size() + " lớp học phần");
             }
             lblStatTopics.setText(String.valueOf(totalTopics));
-            lblStatRegistered.setText(String.valueOf(dao.getTotalRegisteredStudents(maTaiKhoan)));
-            lblStatGate.setText(formatGateStatus(dao.getRegistrationGateStatus(maTaiKhoan)));
+            lblStatRegistered.setText(String.valueOf(dashboardService.getTotalRegisteredStudents(maTaiKhoan)));
+            lblStatGate.setText(formatGateStatus(dashboardService.getRegistrationGateStatus(maTaiKhoan)));
             tableSections.setItems(FXCollections.observableArrayList(sections));
         } catch (Exception e) {
             MainApp.showError("Lỗi tải dữ liệu dashboard: " + e.getMessage());

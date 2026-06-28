@@ -32,6 +32,7 @@ public class AssignedTopicRow {
     public int getSoLuongHienTai() { return soLuongHienTai; }
     public String getCheDoPhancong() { return cheDoPhancong; }
     public String getTrangThai() { return trangThai; }
+    public int getSoChoConLai() { return soLuongToiDa - soLuongHienTai; }
 
     public String getCheDoPhanCongText() {
         if (cheDoPhancong == null) return "";
@@ -40,5 +41,10 @@ public class AssignedTopicRow {
             case "GIANG_VIEN_PHAN_CONG" -> "Giảng viên phân công";
             default -> cheDoPhancong;
         };
+    }
+
+    @Override
+    public String toString() {
+        return maDeTaiHeThong + " - " + tenDeTai + " (còn " + getSoChoConLai() + " chỗ)";
     }
 }

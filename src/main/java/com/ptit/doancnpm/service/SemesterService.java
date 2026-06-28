@@ -1,7 +1,7 @@
 package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.SemesterDAO;
-import com.ptit.doancnpm.model.dto.SemesterSummary;
+import com.ptit.doancnpm.model.entity.Semester;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +13,7 @@ public class SemesterService {
 
     private final SemesterDAO semesterDAO = new SemesterDAO();
 
-    public List<SemesterSummary> getAllSemesters() {
+    public List<Semester> getAllSemesters() {
         return semesterDAO.findAll();
     }
 
@@ -34,7 +34,8 @@ public class SemesterService {
             throw new IllegalArgumentException("Mã học kỳ đã tồn tại.");
         }
 
-        semesterDAO.create(cleanCode, cleanName, cleanSchoolYear, startDate, endDate, cleanStatus);
+        semesterDAO.create(new Semester(0, cleanCode, cleanName, cleanSchoolYear,
+                startDate, endDate, cleanStatus, null));
     }
 
     public void updateSemester(
@@ -55,7 +56,8 @@ public class SemesterService {
             throw new IllegalArgumentException("Mã học kỳ đã tồn tại.");
         }
 
-        semesterDAO.update(id, cleanCode, cleanName, cleanSchoolYear, startDate, endDate, cleanStatus);
+        semesterDAO.update(new Semester(id, cleanCode, cleanName, cleanSchoolYear,
+                startDate, endDate, cleanStatus, null));
     }
 
     public void openSemester(int id) {

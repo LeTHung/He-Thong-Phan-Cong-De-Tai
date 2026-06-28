@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class UserDAO {
@@ -22,7 +24,11 @@ public class UserDAO {
                     vai_tro,
                     trang_thai,
                     email,
-                    so_dien_thoai
+                    so_dien_thoai,
+                    anh_dai_dien,
+                    lan_dang_nhap_cuoi,
+                    thoi_diem_tao,
+                    thoi_diem_cap_nhat
                 FROM dbo.tai_khoan
                 WHERE ten_dang_nhap = ?
                 """;
@@ -44,7 +50,11 @@ public class UserDAO {
                         UserRole.fromDatabaseValue(resultSet.getString("vai_tro")),
                         UserStatus.fromDatabaseValue(resultSet.getString("trang_thai")),
                         resultSet.getString("email"),
-                        resultSet.getString("so_dien_thoai"));
+                        resultSet.getString("so_dien_thoai"),
+                        resultSet.getString("anh_dai_dien"),
+                        toLocalDateTime(resultSet.getTimestamp("lan_dang_nhap_cuoi")),
+                        toLocalDateTime(resultSet.getTimestamp("thoi_diem_tao")),
+                        toLocalDateTime(resultSet.getTimestamp("thoi_diem_cap_nhat")));
 
                 return Optional.of(user);
             }
@@ -72,5 +82,9 @@ public class UserDAO {
             // Không cho lỗi cập nhật thời điểm đăng nhập làm hỏng luồng đăng nhập.
             System.err.println("Không cập nhật được lần đăng nhập cuối: " + e.getMessage());
         }
+    }
+
+    private LocalDateTime toLocalDateTime(Timestamp value) {
+        return value == null ? null : value.toLocalDateTime();
     }
 }

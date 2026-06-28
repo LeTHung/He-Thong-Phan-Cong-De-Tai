@@ -2,7 +2,7 @@ package com.ptit.doancnpm.controller.student;
 
 import com.ptit.doancnpm.app.MainApp;
 import com.ptit.doancnpm.model.dto.RegisteredTopic;
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.model.dto.StudentInfo;
 import com.ptit.doancnpm.model.dto.StudentTopicSummary;
 import com.ptit.doancnpm.model.entity.User;
@@ -142,14 +142,14 @@ public class MyRegistrationController {
         }
 
         try {
-            Optional<RegistrationPeriod> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
+            Optional<RegistrationPeriodInfo> period = topicRegistrationService.getRegistrationPeriod(maLopHocPhan);
             if (period.isEmpty()) {
                 lblPeriod.setText("Chưa mở đợt đăng ký");
                 lblPeriod.getStyleClass().setAll("badge", "badge-info");
                 return;
             }
 
-            RegistrationPeriod current = period.get();
+            RegistrationPeriodInfo current = period.get();
             dangMoDangKy = current.dangMo();
             lblPeriod.setText(current.moTaTrangThai());
             lblPeriod.getStyleClass().setAll("badge",
@@ -185,6 +185,7 @@ public class MyRegistrationController {
         tblRegistrations.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue != null) {
                 fillDetail(newValue);
+                updateActionButtons(newValue);
             }
         });
     }
@@ -200,9 +201,8 @@ public class MyRegistrationController {
                 btnChange.setDisable(true);
                 showMessage("Bạn chưa đăng ký đề tài nào. Vào \"Danh sách đề tài\" để đăng ký.");
             } else {
-                btnCancel.setDisable(!dangMoDangKy);
-                btnChange.setDisable(!dangMoDangKy);
                 tblRegistrations.getSelectionModel().selectFirst();
+                updateActionButtons(tblRegistrations.getSelectionModel().getSelectedItem());
                 if (dangMoDangKy) {
                     showMessage("Bạn đã đăng ký " + registrations.size() + " đề tài.");
                 } else {
@@ -217,6 +217,14 @@ public class MyRegistrationController {
             btnChange.setDisable(true);
             showMessage(exception.getMessage());
         }
+    }
+
+    private void updateActionButtons(RegisteredTopic topic) {
+        boolean canStudentModify = topic != null
+                && dangMoDangKy
+                && "TU_DANG_KY".equals(topic.hinhThucPhanCong());
+        btnCancel.setDisable(!canStudentModify);
+        btnChange.setDisable(!canStudentModify);
     }
 
     private void fillDetail(RegisteredTopic topic) {
@@ -245,6 +253,10 @@ public class MyRegistrationController {
             showMessage("Vui lòng chọn đề tài cần đổi.");
             return;
         }
+        if (!"TU_DANG_KY".equals(selected.hinhThucPhanCong())) {
+            showMessage("Đề tài này do giảng viên/hệ thống phân công nên sinh viên không được tự đổi.");
+            return;
+        }
         if (!dangMoDangKy) {
             showMessage("Cổng đăng ký đã đóng nên không thể đổi đề tài.");
             return;
@@ -253,6 +265,7 @@ public class MyRegistrationController {
         List<StudentTopicSummary> options = topicRegistrationService.getRegistrableTopics(maTaiKhoan).stream()
                 .filter(topic -> topic.maDeTaiLop() != selected.maDeTaiLop()
                         && "DANG_MO".equals(topic.trangThai())
+                        && "SINH_VIEN_TU_DANG_KY".equals(topic.cheDoPhanCong())
                         && topic.soChoConLai() > 0
                         && !topic.daDangKy())
                 .toList();
@@ -296,6 +309,10 @@ public class MyRegistrationController {
         RegisteredTopic selected = tblRegistrations.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showMessage("Vui lòng chọn đề tài cần hủy đăng ký.");
+            return;
+        }
+        if (!"TU_DANG_KY".equals(selected.hinhThucPhanCong())) {
+            showMessage("Đề tài này do giảng viên/hệ thống phân công nên sinh viên không được tự hủy.");
             return;
         }
         if (!dangMoDangKy) {

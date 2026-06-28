@@ -18,7 +18,7 @@
             styleClass="lecturer-root">
 
     <left>
-        <VBox styleClass="side-bar lecturer-side" prefWidth="270" spacing="8">
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
             <HBox styleClass="side-brand">
                 <Label text="PT" styleClass="side-logo"/>
                 <VBox>
@@ -32,7 +32,7 @@
             <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavTopicBank"/>
             <Button text="Gán đề tài vào lớp" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavAssignTopic"/>
             <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationPeriod"/>
-            <Button text="Kết quả đăng ký" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Kết quả &amp; phân công" styleClass="side-menu-active" maxWidth="Infinity"/>
             <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
             <Region VBox.vgrow="ALWAYS"/>
         </VBox>
@@ -42,24 +42,24 @@
         <VBox styleClass="dashboard-content" spacing="18">
             <HBox alignment="CENTER_LEFT" spacing="16">
                 <VBox>
-                    <Label text="Kết quả đăng ký" styleClass="screen-title"/>
-                    <Label text="Xem sinh viên đã và chưa đăng ký đề tài." styleClass="screen-subtitle"/>
+                    <Label text="Kết quả đăng ký &amp; phân công" styleClass="screen-title"/>
+                    <Label text="Theo dõi kết quả và xử lý sinh viên chưa có đề tài." styleClass="screen-subtitle"/>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="← Quay lại" styleClass="btn-outline" onAction="#handleBack"/>
             </HBox>
 
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <Label text="Lớp học phần:"/>
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="result-toolbar">
+                <Label text="Lớp học phần" styleClass="form-label"/>
                 <ComboBox fx:id="cbSection" prefWidth="320"/>
                 <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
             </HBox>
 
-            <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS">
-                <Tab text="Đã đăng ký" closable="false">
-                    <VBox spacing="8">
-                        <Label fx:id="lblRegisteredCount" text="Đã đăng ký: 0 sinh viên" styleClass="body-muted"/>
-                        <TableView fx:id="tableRegistered" prefHeight="500">
+            <TabPane fx:id="tabPane" styleClass="result-tabs" VBox.vgrow="ALWAYS">
+                <Tab text="Đã có đề tài" closable="false">
+                    <VBox spacing="12" styleClass="result-tab-content">
+                        <Label fx:id="lblRegisteredCount" text="Đã có đề tài: 0 sinh viên" styleClass="result-count"/>
+                        <TableView fx:id="tableRegistered" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colMaSV" text="Mã SV" prefWidth="120"/>
                                 <TableColumn fx:id="colTenSV" text="Họ tên" prefWidth="200"/>
@@ -72,10 +72,10 @@
                         </TableView>
                     </VBox>
                 </Tab>
-                <Tab text="Chưa đăng ký" closable="false">
-                    <VBox spacing="8">
-                        <Label fx:id="lblUnregisteredCount" text="Chưa đăng ký: 0 sinh viên" styleClass="body-muted"/>
-                        <TableView fx:id="tableUnregistered" prefHeight="500">
+                <Tab text="Chưa có đề tài / Phân công" closable="false">
+                    <VBox spacing="12" styleClass="result-tab-content">
+                        <Label fx:id="lblUnregisteredCount" text="Chưa có đề tài: 0 sinh viên" styleClass="result-count"/>
+                        <TableView fx:id="tableUnregistered" prefHeight="280" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colUMaSV" text="Mã SV" prefWidth="120"/>
                                 <TableColumn fx:id="colUTenSV" text="Họ tên" prefWidth="200"/>
@@ -83,6 +83,24 @@
                                 <TableColumn fx:id="colUEmail" text="Email" prefWidth="220"/>
                             </columns>
                         </TableView>
+
+                        <VBox spacing="10" styleClass="assignment-panel">
+                            <Label text="Xử lý sinh viên chưa có đề tài" styleClass="card-title"/>
+                            <Label fx:id="lblAssignHint" text="Chọn lớp học phần để xem gợi ý phân công."
+                                   styleClass="body-muted" wrapText="true"/>
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <Label text="Sinh viên:"/>
+                                <ComboBox fx:id="cbUnregisteredStudent" prefWidth="260"/>
+                                <Label text="Đề tài còn chỗ:"/>
+                                <ComboBox fx:id="cbAssignableTopic" prefWidth="360"/>
+                            </HBox>
+                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                                <Button text="Phân công thủ công" styleClass="btn-primary"
+                                        onAction="#handleManualAssign"/>
+                                <Button text="Phân công tự động còn lại" styleClass="btn-outline"
+                                        onAction="#handleAutoAssign"/>
+                            </HBox>
+                        </VBox>
                     </VBox>
                 </Tab>
             </TabPane>

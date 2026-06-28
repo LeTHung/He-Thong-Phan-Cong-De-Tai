@@ -1,6 +1,6 @@
 package com.ptit.doancnpm.model.dao;
 
-import com.ptit.doancnpm.model.dto.SubjectSummary;
+import com.ptit.doancnpm.model.entity.Subject;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.Connection;
@@ -12,14 +12,15 @@ import java.util.List;
 
 public class SubjectDAO {
 
-    public List<SubjectSummary> findAll() {
+    public List<Subject> findAll() {
         String sql = """
-                SELECT ma_mon_hoc, ma_mon_hoc_he_thong, ten_mon_hoc, so_tin_chi, mo_ta, trang_thai
+                SELECT ma_mon_hoc, ma_mon_hoc_he_thong, ten_mon_hoc, so_tin_chi,
+                       mo_ta, trang_thai, thoi_diem_tao
                 FROM dbo.mon_hoc
                 ORDER BY ma_mon_hoc_he_thong
                 """;
 
-        List<SubjectSummary> subjects = new ArrayList<>();
+        List<Subject> subjects = new ArrayList<>();
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);
@@ -61,7 +62,7 @@ public class SubjectDAO {
         }
     }
 
-    public void create(String code, String name, int credits, String description, String status) {
+    public void create(Subject subject) {
         String sql = """
                 INSERT INTO dbo.mon_hoc (ma_mon_hoc_he_thong, ten_mon_hoc, so_tin_chi, mo_ta, trang_thai)
                 VALUES (?, ?, ?, ?, ?)
@@ -70,18 +71,18 @@ public class SubjectDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, code);
-            statement.setString(2, name);
-            statement.setInt(3, credits);
-            statement.setString(4, description);
-            statement.setString(5, status);
+            statement.setString(1, subject.getMaMonHocHeThong());
+            statement.setString(2, subject.getTenMonHoc());
+            statement.setInt(3, subject.getSoTinChi());
+            statement.setString(4, subject.getMoTa());
+            statement.setString(5, subject.getTrangThai());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi thêm môn học: " + e.getMessage(), e);
         }
     }
 
-    public void update(int id, String code, String name, int credits, String description, String status) {
+    public void update(Subject subject) {
         String sql = """
                 UPDATE dbo.mon_hoc
                 SET ma_mon_hoc_he_thong = ?,
@@ -95,12 +96,12 @@ public class SubjectDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, code);
-            statement.setString(2, name);
-            statement.setInt(3, credits);
-            statement.setString(4, description);
-            statement.setString(5, status);
-            statement.setInt(6, id);
+            statement.setString(1, subject.getMaMonHocHeThong());
+            statement.setString(2, subject.getTenMonHoc());
+            statement.setInt(3, subject.getSoTinChi());
+            statement.setString(4, subject.getMoTa());
+            statement.setString(5, subject.getTrangThai());
+            statement.setInt(6, subject.getMaMonHoc());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi cập nhật môn học: " + e.getMessage(), e);
@@ -121,13 +122,15 @@ public class SubjectDAO {
         }
     }
 
-    private SubjectSummary mapSubject(ResultSet resultSet) throws SQLException {
-        return new SubjectSummary(
+    private Subject mapSubject(ResultSet resultSet) throws SQLException {
+        var createdAt = resultSet.getTimestamp("thoi_diem_tao");
+        return new Subject(
                 resultSet.getInt("ma_mon_hoc"),
                 resultSet.getString("ma_mon_hoc_he_thong"),
                 resultSet.getString("ten_mon_hoc"),
                 resultSet.getInt("so_tin_chi"),
                 resultSet.getString("mo_ta"),
-                resultSet.getString("trang_thai"));
+                resultSet.getString("trang_thai"),
+                createdAt == null ? null : createdAt.toLocalDateTime());
     }
 }

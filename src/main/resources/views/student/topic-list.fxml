@@ -43,7 +43,7 @@
             <VBox spacing="18" HBox.hgrow="ALWAYS">
                 <VBox styleClass="student-hero" spacing="10">
                     <Label text="Danh sách đề tài" styleClass="student-hero-title"/>
-                    <Label text="Xem các đề tài còn chỗ trong lớp học phần của bạn, chọn một đề tài rồi đăng ký."
+                    <Label text="Xem đề tài của lớp học phần. Chỉ đề tài ở chế độ sinh viên tự đăng ký mới cho phép đăng ký."
                            styleClass="student-hero-desc" wrapText="true"/>
                     <Label fx:id="lblPeriod" text="" styleClass="badge badge-info"/>
                 </VBox>
@@ -69,8 +69,9 @@
                             <TableColumn fx:id="colName" text="Tên đề tài" prefWidth="300"/>
                             <TableColumn fx:id="colSlots" text="Số lượng" prefWidth="90"/>
                             <TableColumn fx:id="colRemaining" text="Còn lại" prefWidth="80"/>
-                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="110"/>
-                            <TableColumn fx:id="colRegistered" text="Đăng ký" prefWidth="110"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="105"/>
+                            <TableColumn fx:id="colMode" text="Chế độ" prefWidth="110"/>
+                            <TableColumn fx:id="colRegistered" text="Kết quả" prefWidth="105"/>
                         </columns>
                     </TableView>
 

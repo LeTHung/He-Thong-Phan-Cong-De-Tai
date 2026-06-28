@@ -11,10 +11,6 @@
     -fx-padding: 24 18 24 18;
 }
 
-.lecturer-side {
-    -fx-background-color: #102A43;
-}
-
 .side-brand {
     -fx-alignment: CENTER_LEFT;
     -fx-spacing: 12;

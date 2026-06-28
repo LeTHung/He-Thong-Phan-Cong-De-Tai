@@ -88,11 +88,16 @@ DECLARE @ma_hk2 INT = (SELECT ma_hoc_ky FROM dbo.hoc_ky WHERE ma_hoc_ky_he_thong
 DECLARE @ma_gv01 INT = (SELECT ma_giang_vien FROM dbo.giang_vien WHERE ma_so_giang_vien = N'GV001');
 DECLARE @ma_gv02 INT = (SELECT ma_giang_vien FROM dbo.giang_vien WHERE ma_so_giang_vien = N'GV002');
 
-INSERT INTO dbo.lop_hoc_phan (ma_lop, ten_lop_hoc_phan, ma_mon_hoc, ma_hoc_ky, ma_giang_vien, si_so_toi_da, ghi_chu)
+INSERT INTO dbo.lop_hoc_phan (
+    ma_lop, ten_lop_hoc_phan, ma_mon_hoc, ma_hoc_ky,
+    ma_giang_vien, si_so_toi_da, che_do_phan_cong, ghi_chu
+)
 VALUES
 (N'CNPM_D23CQCN01_N', N'Công nghệ phần mềm - D23CQCN01-N', @ma_mon_cnpm, @ma_hk2, @ma_gv01, 80,
+ N'SINH_VIEN_TU_DANG_KY',
  N'Lớp học phần chính dùng để demo đăng ký đề tài.'),
 (N'CSDL_D23CQCN01_N', N'Cơ sở dữ liệu - D23CQCN01-N', @ma_mon_csdl, @ma_hk2, @ma_gv02, 80,
+ N'GIANG_VIEN_PHAN_CONG',
  N'Lớp học phần phụ dùng để demo dữ liệu quản trị.');
 GO
 
@@ -145,13 +150,15 @@ DECLARE @ma_lop_cnpm INT = (SELECT ma_lop_hoc_phan FROM dbo.lop_hoc_phan WHERE m
 DECLARE @ma_lop_csdl INT = (SELECT ma_lop_hoc_phan FROM dbo.lop_hoc_phan WHERE ma_lop = N'CSDL_D23CQCN01_N');
 
 INSERT INTO dbo.de_tai_lop (ma_lop_hoc_phan, ma_de_tai, so_luong_toi_da, che_do_phan_cong)
-SELECT @ma_lop_cnpm, ma_de_tai, so_luong_mac_dinh, N'SINH_VIEN_TU_DANG_KY'
-FROM dbo.ngan_hang_de_tai
+SELECT @ma_lop_cnpm, ndt.ma_de_tai, ndt.so_luong_mac_dinh, lhp.che_do_phan_cong
+FROM dbo.ngan_hang_de_tai ndt
+JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = @ma_lop_cnpm
 WHERE ma_de_tai_he_thong IN (N'DT001', N'DT002', N'DT003', N'DT004', N'DT005', N'DT006');
 
 INSERT INTO dbo.de_tai_lop (ma_lop_hoc_phan, ma_de_tai, so_luong_toi_da, che_do_phan_cong)
-SELECT @ma_lop_csdl, ma_de_tai, so_luong_mac_dinh, N'SINH_VIEN_TU_DANG_KY'
-FROM dbo.ngan_hang_de_tai
+SELECT @ma_lop_csdl, ndt.ma_de_tai, ndt.so_luong_mac_dinh, lhp.che_do_phan_cong
+FROM dbo.ngan_hang_de_tai ndt
+JOIN dbo.lop_hoc_phan lhp ON lhp.ma_lop_hoc_phan = @ma_lop_csdl
 WHERE ma_de_tai_he_thong = N'CSDL01';
 
 UPDATE dtl

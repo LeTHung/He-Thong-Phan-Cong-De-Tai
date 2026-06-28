@@ -1,7 +1,7 @@
 package com.ptit.doancnpm.controller.admin;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dto.SubjectSummary;
+import com.ptit.doancnpm.model.entity.Subject;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.service.SubjectService;
@@ -26,19 +26,19 @@ public class SubjectManagementController {
     private Label lblMessage;
 
     @FXML
-    private TableView<SubjectSummary> tblSubjects;
+    private TableView<Subject> tblSubjects;
 
     @FXML
-    private TableColumn<SubjectSummary, String> colCode;
+    private TableColumn<Subject, String> colCode;
 
     @FXML
-    private TableColumn<SubjectSummary, String> colName;
+    private TableColumn<Subject, String> colName;
 
     @FXML
-    private TableColumn<SubjectSummary, String> colCredits;
+    private TableColumn<Subject, String> colCredits;
 
     @FXML
-    private TableColumn<SubjectSummary, String> colStatus;
+    private TableColumn<Subject, String> colStatus;
 
     @FXML
     private TextField txtCode;
@@ -136,7 +136,7 @@ public class SubjectManagementController {
 
     @FXML
     private void handleUpdateSubject() {
-        SubjectSummary selectedSubject = getSelectedSubject();
+        Subject selectedSubject = getSelectedSubject();
         if (selectedSubject == null) {
             showMessage("Vui lòng chọn môn học cần sửa.");
             return;
@@ -159,7 +159,7 @@ public class SubjectManagementController {
 
     @FXML
     private void handleActivateSubject() {
-        SubjectSummary selectedSubject = getSelectedSubject();
+        Subject selectedSubject = getSelectedSubject();
         if (selectedSubject == null) {
             showMessage("Vui lòng chọn môn học cần mở sử dụng.");
             return;
@@ -172,7 +172,7 @@ public class SubjectManagementController {
 
     @FXML
     private void handleDeactivateSubject() {
-        SubjectSummary selectedSubject = getSelectedSubject();
+        Subject selectedSubject = getSelectedSubject();
         if (selectedSubject == null) {
             showMessage("Vui lòng chọn môn học cần ngừng sử dụng.");
             return;
@@ -193,7 +193,8 @@ public class SubjectManagementController {
         colCode.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getMaMonHocHeThong()));
         colName.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTenMonHoc()));
         colCredits.setCellValueFactory(data -> new ReadOnlyStringWrapper(String.valueOf(data.getValue().getSoTinChi())));
-        colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getTrangThaiText()));
+        colStatus.setCellValueFactory(data -> new ReadOnlyStringWrapper(
+                formatStatus(data.getValue().getTrangThai())));
 
         tblSubjects.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -209,7 +210,7 @@ public class SubjectManagementController {
 
     private void loadSubjects() {
         try {
-            List<SubjectSummary> subjects = subjectService.getAllSubjects();
+            List<Subject> subjects = subjectService.getAllSubjects();
             tblSubjects.getItems().setAll(subjects);
         } catch (RuntimeException exception) {
             tblSubjects.getItems().clear();
@@ -217,7 +218,7 @@ public class SubjectManagementController {
         }
     }
 
-    private void fillForm(SubjectSummary subject) {
+    private void fillForm(Subject subject) {
         txtCode.setText(subject.getMaMonHocHeThong());
         txtName.setText(subject.getTenMonHoc());
         txtCredits.setText(String.valueOf(subject.getSoTinChi()));
@@ -235,8 +236,12 @@ public class SubjectManagementController {
         cboStatus.setValue(SubjectService.STATUS_ACTIVE);
     }
 
-    private SubjectSummary getSelectedSubject() {
+    private Subject getSelectedSubject() {
         return tblSubjects.getSelectionModel().getSelectedItem();
+    }
+
+    private String formatStatus(String status) {
+        return SubjectService.STATUS_ACTIVE.equals(status) ? "Đang sử dụng" : "Ngừng sử dụng";
     }
 
     private void showMessage(String message) {

@@ -1,6 +1,7 @@
 package com.ptit.doancnpm.model.dao;
 
 import com.ptit.doancnpm.model.dto.AccountSummary;
+import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.model.entity.UserStatus;
 import com.ptit.doancnpm.util.DatabaseConnection;
@@ -76,7 +77,7 @@ public class AccountManagementDAO {
         }
     }
 
-    public void create(String username, String password, UserRole role, UserStatus status, String email, String phone) {
+    public void create(User user) {
         String sql = """
                 INSERT INTO dbo.tai_khoan (
                     ten_dang_nhap,
@@ -92,12 +93,12 @@ public class AccountManagementDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, username);
-            statement.setString(2, password);
-            statement.setString(3, role.name());
-            statement.setString(4, status.name());
-            statement.setString(5, email);
-            statement.setString(6, phone);
+            statement.setString(1, user.getTenDangNhap());
+            statement.setString(2, user.getMatKhauMaHoa());
+            statement.setString(3, user.getVaiTro().name());
+            statement.setString(4, user.getTrangThai().name());
+            statement.setString(5, user.getEmail());
+            statement.setString(6, user.getSoDienThoai());
             statement.executeUpdate();
 
         } catch (SQLException e) {
@@ -105,7 +106,7 @@ public class AccountManagementDAO {
         }
     }
 
-    public void update(int accountId, String username, UserRole role, UserStatus status, String email, String phone) {
+    public void update(User user) {
         String sql = """
                 UPDATE dbo.tai_khoan
                 SET ten_dang_nhap = ?,
@@ -120,12 +121,12 @@ public class AccountManagementDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, username);
-            statement.setString(2, role.name());
-            statement.setString(3, status.name());
-            statement.setString(4, email);
-            statement.setString(5, phone);
-            statement.setInt(6, accountId);
+            statement.setString(1, user.getTenDangNhap());
+            statement.setString(2, user.getVaiTro().name());
+            statement.setString(3, user.getTrangThai().name());
+            statement.setString(4, user.getEmail());
+            statement.setString(5, user.getSoDienThoai());
+            statement.setInt(6, user.getMaTaiKhoan());
             statement.executeUpdate();
 
         } catch (SQLException e) {

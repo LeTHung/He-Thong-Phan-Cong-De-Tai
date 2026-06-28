@@ -1,13 +1,13 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dao.FinalReportDAO;
-import com.ptit.doancnpm.model.dao.LecturerDashboardDAO;
-import com.ptit.doancnpm.model.dao.TopicBankDAO;
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
 import com.ptit.doancnpm.model.dto.RegistrationResultRow;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.FinalReportService;
+import com.ptit.doancnpm.service.LecturerDashboardService;
+import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -35,9 +35,9 @@ public class FinalReportController {
     @FXML private TableColumn<RegistrationResultRow, String> colTenDeTai;
     @FXML private TableColumn<RegistrationResultRow, String> colHinhThuc;
 
-    private final LecturerDashboardDAO dashboardDAO = new LecturerDashboardDAO();
-    private final FinalReportDAO finalReportDAO = new FinalReportDAO();
-    private final TopicBankDAO topicBankDAO = new TopicBankDAO();
+    private final LecturerDashboardService dashboardService = new LecturerDashboardService();
+    private final FinalReportService finalReportService = new FinalReportService();
+    private final TopicBankService topicBankService = new TopicBankService();
     private int maGiangVien;
 
     @FXML
@@ -49,7 +49,7 @@ public class FinalReportController {
         }
 
         try {
-            maGiangVien = topicBankDAO.findMaGiangVienByTaiKhoan(user.getMaTaiKhoan());
+            maGiangVien = topicBankService.findMaGiangVienByTaiKhoan(user.getMaTaiKhoan());
         } catch (Exception e) {
             MainApp.showError("Lỗi xác định giảng viên: " + e.getMessage());
             return;
@@ -72,7 +72,7 @@ public class FinalReportController {
 
     private void loadSections(int maTaiKhoan) {
         try {
-            List<LecturerCourseSectionSummary> sections = dashboardDAO.findCourseSectionsByAccountId(maTaiKhoan);
+            List<LecturerCourseSectionSummary> sections = dashboardService.getCourseSections(maTaiKhoan);
             cbSection.setItems(FXCollections.observableArrayList(sections));
             cbSection.setConverter(new javafx.util.StringConverter<>() {
                 @Override public String toString(LecturerCourseSectionSummary s) {
@@ -90,13 +90,13 @@ public class FinalReportController {
         if (section == null) return;
 
         try {
-            int[] stats = finalReportDAO.getStats(section.maLopHocPhan());
+            int[] stats = finalReportService.getStats(section.maLopHocPhan());
             lblTotalStudents.setText(String.valueOf(stats[0]));
             lblWithTopic.setText(String.valueOf(stats[1]));
             lblWithoutTopic.setText(String.valueOf(stats[0] - stats[1]));
             lblTotalTopics.setText(String.valueOf(stats[2]));
 
-            boolean finalized = finalReportDAO.isFinalized(section.maLopHocPhan());
+            boolean finalized = finalReportService.isFinalized(section.maLopHocPhan());
             if (finalized) {
                 lblStatusLabel.setText("Đã chốt danh sách");
                 btnFinalize.setDisable(true);
@@ -117,16 +117,16 @@ public class FinalReportController {
         if (section == null) { MainApp.showError("Vui lòng chọn lớp học phần."); return; }
 
         try {
-            if (!finalReportDAO.hasPeriodForLop(section.maLopHocPhan())) {
+            if (!finalReportService.hasPeriodForLop(section.maLopHocPhan())) {
                 MainApp.showError("Không thể chốt vì lớp chưa có đợt đăng ký.\n"
                         + "Vui lòng mở cổng đăng ký trước.");
                 return;
             }
-            if (!finalReportDAO.hasRegistrationStarted(section.maLopHocPhan())) {
+            if (!finalReportService.hasRegistrationStarted(section.maLopHocPhan())) {
                 MainApp.showError("Không thể chốt vì đợt đăng ký chưa đến giờ bắt đầu.");
                 return;
             }
-            if (finalReportDAO.isRegistrationOpen(section.maLopHocPhan())) {
+            if (finalReportService.isRegistrationOpen(section.maLopHocPhan())) {
                 MainApp.showError("Không thể chốt danh sách khi cổng đăng ký vẫn đang mở.\n"
                         + "Vui lòng đóng cổng hoặc đợi đến khi hết thời gian đăng ký.");
                 return;
@@ -139,7 +139,7 @@ public class FinalReportController {
         // Kiểm tra sinh viên chưa có đề tài
         int[] stats;
         try {
-            stats = finalReportDAO.getStats(section.maLopHocPhan());
+            stats = finalReportService.getStats(section.maLopHocPhan());
         } catch (Exception e) {
             MainApp.showError("Lỗi tải thống kê: " + e.getMessage());
             return;
@@ -157,7 +157,7 @@ public class FinalReportController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                finalReportDAO.finalizeRegistration(maGiangVien, section.maLopHocPhan());
+                finalReportService.finalizeRegistration(maGiangVien, section.maLopHocPhan());
                 lblStatusLabel.setText("Đã chốt danh sách");
                 btnFinalize.setDisable(true);
                 loadReport(section.maLopHocPhan());
@@ -170,7 +170,7 @@ public class FinalReportController {
 
     private void loadReport(int maLopHocPhan) {
         try {
-            List<RegistrationResultRow> rows = finalReportDAO.getFinalReport(maLopHocPhan);
+            List<RegistrationResultRow> rows = finalReportService.getFinalReport(maLopHocPhan);
             tableReport.setItems(FXCollections.observableArrayList(rows));
         } catch (Exception e) {
             MainApp.showError("Lỗi tải báo cáo: " + e.getMessage());

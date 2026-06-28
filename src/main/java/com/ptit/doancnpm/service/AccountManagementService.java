@@ -2,6 +2,7 @@ package com.ptit.doancnpm.service;
 
 import com.ptit.doancnpm.model.dao.AccountManagementDAO;
 import com.ptit.doancnpm.model.dto.AccountSummary;
+import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
 import com.ptit.doancnpm.model.entity.UserStatus;
 
@@ -33,13 +34,9 @@ public class AccountManagementService {
             throw new IllegalArgumentException("Tên đăng nhập đã tồn tại.");
         }
 
-        accountManagementDAO.create(
-                cleanUsername,
-                cleanPassword,
-                cleanRole,
-                cleanStatus,
-                cleanOptional(email),
-                cleanOptional(phone));
+        accountManagementDAO.create(new User(
+                0, cleanUsername, cleanPassword, cleanRole, cleanStatus,
+                cleanOptional(email), cleanOptional(phone)));
     }
 
     public void updateAccount(
@@ -57,13 +54,9 @@ public class AccountManagementService {
             throw new IllegalArgumentException("Tên đăng nhập đã tồn tại.");
         }
 
-        accountManagementDAO.update(
-                accountId,
-                cleanUsername,
-                cleanRole,
-                cleanStatus,
-                cleanOptional(email),
-                cleanOptional(phone));
+        accountManagementDAO.update(new User(
+                accountId, cleanUsername, null, cleanRole, cleanStatus,
+                cleanOptional(email), cleanOptional(phone)));
     }
 
     public void lockAccount(int accountId) {

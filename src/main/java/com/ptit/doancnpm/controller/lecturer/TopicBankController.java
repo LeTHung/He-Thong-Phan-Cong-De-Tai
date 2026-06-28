@@ -1,10 +1,10 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dao.TopicBankDAO;
-import com.ptit.doancnpm.model.dto.TopicBankItem;
+import com.ptit.doancnpm.model.entity.Topic;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,15 +20,15 @@ import java.util.Optional;
 public class TopicBankController {
 
     @FXML private TextField txtSearch;
-    @FXML private TableView<TopicBankItem> tableView;
-    @FXML private TableColumn<TopicBankItem, Integer> colStt;
-    @FXML private TableColumn<TopicBankItem, String> colMaDeTai;
-    @FXML private TableColumn<TopicBankItem, String> colTenDeTai;
-    @FXML private TableColumn<TopicBankItem, String> colMoTa;
-    @FXML private TableColumn<TopicBankItem, String> colNgayTao;
+    @FXML private TableView<Topic> tableView;
+    @FXML private TableColumn<Topic, Integer> colStt;
+    @FXML private TableColumn<Topic, String> colMaDeTai;
+    @FXML private TableColumn<Topic, String> colTenDeTai;
+    @FXML private TableColumn<Topic, String> colMoTa;
+    @FXML private TableColumn<Topic, String> colNgayTao;
     @FXML private Label lblTotal;
 
-    private final TopicBankDAO dao = new TopicBankDAO();
+    private final TopicBankService topicBankService = new TopicBankService();
     private int maGiangVien;
     private int maTaiKhoan;
 
@@ -42,7 +42,7 @@ public class TopicBankController {
         maTaiKhoan = user.getMaTaiKhoan();
 
         try {
-            maGiangVien = dao.findMaGiangVienByTaiKhoan(maTaiKhoan);
+            maGiangVien = topicBankService.findMaGiangVienByTaiKhoan(maTaiKhoan);
         } catch (Exception e) {
             MainApp.showError("Lỗi xác định giảng viên: " + e.getMessage());
             return;
@@ -62,12 +62,16 @@ public class TopicBankController {
             String moTa = cd.getValue().getMoTa();
             return new SimpleStringProperty(moTa == null ? "" : (moTa.length() > 60 ? moTa.substring(0, 60) + "…" : moTa));
         });
-        colNgayTao.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getThoiDiemTaoText()));
+        colNgayTao.setCellValueFactory(cd -> new SimpleStringProperty(
+                cd.getValue().getThoiDiemTao() == null
+                        ? ""
+                        : java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                .format(cd.getValue().getThoiDiemTao())));
     }
 
     private void loadData() {
         try {
-            List<TopicBankItem> items = dao.findByGiangVien(maGiangVien);
+            List<Topic> items = topicBankService.findByGiangVien(maGiangVien);
             tableView.setItems(FXCollections.observableArrayList(items));
             lblTotal.setText("Tổng: " + items.size() + " đề tài");
         } catch (Exception e) {
@@ -83,7 +87,7 @@ public class TopicBankController {
             return;
         }
         try {
-            List<TopicBankItem> items = dao.searchByName(maGiangVien, kw);
+            List<Topic> items = topicBankService.searchByName(maGiangVien, kw);
             tableView.setItems(FXCollections.observableArrayList(items));
             lblTotal.setText("Kết quả: " + items.size() + " đề tài");
         } catch (Exception e) {
@@ -98,7 +102,7 @@ public class TopicBankController {
 
     @FXML
     private void handleEdit() {
-        TopicBankItem selected = tableView.getSelectionModel().getSelectedItem();
+        Topic selected = tableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             MainApp.showInfo("Vui lòng chọn một đề tài để sửa.");
             return;
@@ -108,14 +112,14 @@ public class TopicBankController {
 
     @FXML
     private void handleDelete() {
-        TopicBankItem selected = tableView.getSelectionModel().getSelectedItem();
+        Topic selected = tableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             MainApp.showInfo("Vui lòng chọn một đề tài để xóa.");
             return;
         }
 
         try {
-            if (dao.isAssignedToClass(selected.getMaDeTai())) {
+            if (topicBankService.isAssignedToClass(selected.getMaDeTai())) {
                 MainApp.showError("Không thể xóa đề tài \"" + selected.getTenDeTai()
                         + "\" vì đang được gán vào một hoặc nhiều lớp học phần.");
                 return;
@@ -132,7 +136,7 @@ public class TopicBankController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                dao.softDelete(selected.getMaDeTai(), maGiangVien);
+                topicBankService.softDelete(selected.getMaDeTai(), maGiangVien);
                 loadData();
                 MainApp.showInfo("Đã xóa đề tài \"" + selected.getTenDeTai() + "\".");
             } catch (Exception e) {
@@ -141,7 +145,7 @@ public class TopicBankController {
         }
     }
 
-    private void showTopicDialog(TopicBankItem existing) {
+    private void showTopicDialog(Topic existing) {
         boolean isEdit = existing != null;
 
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -210,16 +214,16 @@ public class TopicBankController {
 
             try {
                 Integer excludeId = isEdit ? existing.getMaDeTai() : null;
-                if (dao.existsByCode(ma, excludeId)) {
+                if (topicBankService.existsByCode(ma, excludeId)) {
                     MainApp.showError("Mã đề tài \"" + ma + "\" đã tồn tại. Vui lòng dùng mã khác.");
                     return;
                 }
                 if (isEdit) {
-                    dao.update(existing.getMaDeTai(), maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
+                    topicBankService.update(existing.getMaDeTai(), maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
                             yeuCau.isEmpty() ? null : yeuCau, soLuong);
                     MainApp.showInfo("Đã cập nhật đề tài thành công.");
                 } else {
-                    dao.insert(maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
+                    topicBankService.insert(maGiangVien, ma, ten, moTa.isEmpty() ? null : moTa,
                             yeuCau.isEmpty() ? null : yeuCau, soLuong);
                     MainApp.showInfo("Đã thêm đề tài mới thành công.");
                 }

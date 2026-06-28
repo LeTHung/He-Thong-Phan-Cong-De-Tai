@@ -1,13 +1,13 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dao.LecturerDashboardDAO;
-import com.ptit.doancnpm.model.dao.RegistrationPeriodDAO;
-import com.ptit.doancnpm.model.dao.TopicBankDAO;
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.LecturerDashboardService;
+import com.ptit.doancnpm.service.RegistrationPeriodService;
+import com.ptit.doancnpm.service.TopicBankService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -34,9 +34,9 @@ public class RegistrationPeriodController {
     @FXML private Button btnOpen;
     @FXML private Button btnClose;
 
-    private final LecturerDashboardDAO dashboardDAO = new LecturerDashboardDAO();
-    private final RegistrationPeriodDAO periodDAO = new RegistrationPeriodDAO();
-    private final TopicBankDAO topicBankDAO = new TopicBankDAO();
+    private final LecturerDashboardService dashboardService = new LecturerDashboardService();
+    private final RegistrationPeriodService periodService = new RegistrationPeriodService();
+    private final TopicBankService topicBankService = new TopicBankService();
     private int maGiangVien;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
@@ -51,7 +51,7 @@ public class RegistrationPeriodController {
         }
 
         try {
-            maGiangVien = topicBankDAO.findMaGiangVienByTaiKhoan(user.getMaTaiKhoan());
+            maGiangVien = topicBankService.findMaGiangVienByTaiKhoan(user.getMaTaiKhoan());
         } catch (Exception e) {
             MainApp.showError("Lỗi xác định giảng viên: " + e.getMessage());
             return;
@@ -66,7 +66,7 @@ public class RegistrationPeriodController {
 
     private void loadSections(int maTaiKhoan) {
         try {
-            List<LecturerCourseSectionSummary> sections = dashboardDAO.findCourseSectionsByAccountId(maTaiKhoan);
+            List<LecturerCourseSectionSummary> sections = dashboardService.getCourseSections(maTaiKhoan);
             cbSection.setItems(FXCollections.observableArrayList(sections));
             cbSection.setConverter(new javafx.util.StringConverter<>() {
                 @Override public String toString(LecturerCourseSectionSummary s) {
@@ -87,7 +87,7 @@ public class RegistrationPeriodController {
 
     private void refreshStatus(int maLopHocPhan) {
         try {
-            Optional<RegistrationPeriod> opt = periodDAO.findCurrentByLop(maLopHocPhan);
+            Optional<RegistrationPeriodInfo> opt = periodService.findCurrentByLop(maLopHocPhan);
             if (opt.isEmpty()) {
                 lblStatus.setText("Chưa có đợt đăng ký");
                 lblStatus.setTextFill(Color.GRAY);
@@ -95,7 +95,7 @@ public class RegistrationPeriodController {
                 btnOpen.setDisable(false);
                 btnClose.setDisable(true);
             } else {
-                RegistrationPeriod p = opt.get();
+                RegistrationPeriodInfo p = opt.get();
                 LocalDateTime now = LocalDateTime.now();
                 if (p.dangMo()) {
                     lblStatus.setText("Đang mở");
@@ -184,7 +184,7 @@ public class RegistrationPeriodController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                periodDAO.openPeriod(section.maLopHocPhan(), maGiangVien, batDau, ketThuc, null);
+                periodService.openPeriod(section.maLopHocPhan(), maGiangVien, batDau, ketThuc, null);
                 refreshStatus(section.maLopHocPhan());
                 MainApp.showInfo("Cổng đăng ký đã được mở thành công.");
             } catch (Exception e) {
@@ -206,7 +206,7 @@ public class RegistrationPeriodController {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                periodDAO.closePeriod(section.maLopHocPhan(), maGiangVien);
+                periodService.closePeriod(section.maLopHocPhan(), maGiangVien);
                 refreshStatus(section.maLopHocPhan());
                 MainApp.showInfo("Đã đóng cổng đăng ký cho lớp \"" + section.maLop() + "\".");
             } catch (Exception e) {

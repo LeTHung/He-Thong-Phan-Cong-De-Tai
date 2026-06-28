@@ -1,6 +1,6 @@
 package com.ptit.doancnpm.util;
 
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -27,7 +27,7 @@ public final class RegistrationCountdown {
      * Bắt đầu đếm ngược cho một badge. Trả về Timeline đang chạy (để gọi nơi khác
      * có thể dừng thủ công), hoặc null nếu đợt đăng ký không mở / không có hạn chót.
      */
-    public static Timeline start(Label badge, RegistrationPeriod period, Runnable onExpire) {
+    public static Timeline start(Label badge, RegistrationPeriodInfo period, Runnable onExpire) {
         if (badge == null || period == null || !period.dangMo() || period.thoiGianKetThuc() == null) {
             return null;
         }

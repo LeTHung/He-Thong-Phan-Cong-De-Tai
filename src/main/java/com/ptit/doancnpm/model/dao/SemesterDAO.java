@@ -1,6 +1,6 @@
 package com.ptit.doancnpm.model.dao;
 
-import com.ptit.doancnpm.model.dto.SemesterSummary;
+import com.ptit.doancnpm.model.entity.Semester;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.Connection;
@@ -14,14 +14,15 @@ import java.util.List;
 
 public class SemesterDAO {
 
-    public List<SemesterSummary> findAll() {
+    public List<Semester> findAll() {
         String sql = """
-                SELECT ma_hoc_ky, ma_hoc_ky_he_thong, ten_hoc_ky, nam_hoc, ngay_bat_dau, ngay_ket_thuc, trang_thai
+                SELECT ma_hoc_ky, ma_hoc_ky_he_thong, ten_hoc_ky, nam_hoc,
+                       ngay_bat_dau, ngay_ket_thuc, trang_thai, thoi_diem_tao
                 FROM dbo.hoc_ky
                 ORDER BY nam_hoc DESC, ma_hoc_ky_he_thong
                 """;
 
-        List<SemesterSummary> semesters = new ArrayList<>();
+        List<Semester> semesters = new ArrayList<>();
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);
@@ -63,7 +64,7 @@ public class SemesterDAO {
         }
     }
 
-    public void create(String code, String name, String schoolYear, LocalDate startDate, LocalDate endDate, String status) {
+    public void create(Semester semester) {
         String sql = """
                 INSERT INTO dbo.hoc_ky (
                     ma_hoc_ky_he_thong, ten_hoc_ky, nam_hoc,
@@ -75,14 +76,14 @@ public class SemesterDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            fillStatement(statement, code, name, schoolYear, startDate, endDate, status);
+            fillStatement(statement, semester);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi thêm học kỳ: " + e.getMessage(), e);
         }
     }
 
-    public void update(int id, String code, String name, String schoolYear, LocalDate startDate, LocalDate endDate, String status) {
+    public void update(Semester semester) {
         String sql = """
                 UPDATE dbo.hoc_ky
                 SET ma_hoc_ky_he_thong = ?,
@@ -97,8 +98,8 @@ public class SemesterDAO {
         try (
                 Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
-            fillStatement(statement, code, name, schoolYear, startDate, endDate, status);
-            statement.setInt(7, id);
+            fillStatement(statement, semester);
+            statement.setInt(7, semester.getMaHocKy());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi cập nhật học kỳ: " + e.getMessage(), e);
@@ -121,31 +122,28 @@ public class SemesterDAO {
 
     private void fillStatement(
             PreparedStatement statement,
-            String code,
-            String name,
-            String schoolYear,
-            LocalDate startDate,
-            LocalDate endDate,
-            String status) throws SQLException {
-        statement.setString(1, code);
-        statement.setString(2, name);
-        statement.setString(3, schoolYear);
-        statement.setDate(4, startDate == null ? null : Date.valueOf(startDate));
-        statement.setDate(5, endDate == null ? null : Date.valueOf(endDate));
-        statement.setString(6, status);
+            Semester semester) throws SQLException {
+        statement.setString(1, semester.getMaHocKyHeThong());
+        statement.setString(2, semester.getTenHocKy());
+        statement.setString(3, semester.getNamHoc());
+        statement.setDate(4, semester.getNgayBatDau() == null ? null : Date.valueOf(semester.getNgayBatDau()));
+        statement.setDate(5, semester.getNgayKetThuc() == null ? null : Date.valueOf(semester.getNgayKetThuc()));
+        statement.setString(6, semester.getTrangThai());
     }
 
-    private SemesterSummary mapSemester(ResultSet resultSet) throws SQLException {
+    private Semester mapSemester(ResultSet resultSet) throws SQLException {
         Date startDate = resultSet.getDate("ngay_bat_dau");
         Date endDate = resultSet.getDate("ngay_ket_thuc");
 
-        return new SemesterSummary(
+        var createdAt = resultSet.getTimestamp("thoi_diem_tao");
+        return new Semester(
                 resultSet.getInt("ma_hoc_ky"),
                 resultSet.getString("ma_hoc_ky_he_thong"),
                 resultSet.getString("ten_hoc_ky"),
                 resultSet.getString("nam_hoc"),
                 startDate == null ? null : startDate.toLocalDate(),
                 endDate == null ? null : endDate.toLocalDate(),
-                resultSet.getString("trang_thai"));
+                resultSet.getString("trang_thai"),
+                createdAt == null ? null : createdAt.toLocalDateTime());
     }
 }

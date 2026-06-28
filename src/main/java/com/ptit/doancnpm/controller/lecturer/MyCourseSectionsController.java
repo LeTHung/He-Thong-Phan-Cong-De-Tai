@@ -1,10 +1,10 @@
 package com.ptit.doancnpm.controller.lecturer;
 
 import com.ptit.doancnpm.app.MainApp;
-import com.ptit.doancnpm.model.dao.LecturerDashboardDAO;
 import com.ptit.doancnpm.model.dto.LecturerCourseSectionSummary;
 import com.ptit.doancnpm.model.entity.User;
 import com.ptit.doancnpm.model.entity.UserRole;
+import com.ptit.doancnpm.service.LecturerDashboardService;
 import com.ptit.doancnpm.util.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -24,7 +24,7 @@ public class MyCourseSectionsController {
     @FXML private TableColumn<LecturerCourseSectionSummary, Integer> colSoSV;
     @FXML private Label lblTotalSections;
 
-    private final LecturerDashboardDAO dao = new LecturerDashboardDAO();
+    private final LecturerDashboardService dashboardService = new LecturerDashboardService();
 
     @FXML
     private void initialize() {
@@ -51,7 +51,7 @@ public class MyCourseSectionsController {
 
     private void loadData(int maTaiKhoan) {
         try {
-            List<LecturerCourseSectionSummary> sections = dao.findCourseSectionsByAccountId(maTaiKhoan);
+            List<LecturerCourseSectionSummary> sections = dashboardService.getCourseSections(maTaiKhoan);
             tableView.setItems(FXCollections.observableArrayList(sections));
             lblTotalSections.setText("Tổng: " + sections.size() + " lớp học phần");
         } catch (Exception e) {

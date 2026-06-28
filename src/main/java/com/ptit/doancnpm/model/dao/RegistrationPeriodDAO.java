@@ -1,6 +1,6 @@
 package com.ptit.doancnpm.model.dao;
 
-import com.ptit.doancnpm.model.dto.RegistrationPeriod;
+import com.ptit.doancnpm.model.dto.RegistrationPeriodInfo;
 import com.ptit.doancnpm.util.DatabaseConnection;
 
 import java.sql.*;
@@ -58,7 +58,7 @@ public class RegistrationPeriodDAO {
     }
 
     /** Lấy thông tin đợt đăng ký hiện tại của lớp học phần */
-    public Optional<RegistrationPeriod> findCurrentByLop(int maLopHocPhan) {
+    public Optional<RegistrationPeriodInfo> findCurrentByLop(int maLopHocPhan) {
         String sql = """
                 SELECT thoi_gian_bat_dau, thoi_gian_ket_thuc, trang_thai,
                        CASE
@@ -77,7 +77,7 @@ public class RegistrationPeriodDAO {
                 if (!rs.next()) return Optional.empty();
                 Timestamp batDau = rs.getTimestamp("thoi_gian_bat_dau");
                 Timestamp ketThuc = rs.getTimestamp("thoi_gian_ket_thuc");
-                return Optional.of(new RegistrationPeriod(
+                return Optional.of(new RegistrationPeriodInfo(
                         batDau == null ? null : batDau.toLocalDateTime(),
                         ketThuc == null ? null : ketThuc.toLocalDateTime(),
                         rs.getString("trang_thai"),
@@ -91,7 +91,7 @@ public class RegistrationPeriodDAO {
     /** Kiểm tra đợt đăng ký đang mở */
     public boolean isCurrentlyOpen(int maLopHocPhan) {
         return findCurrentByLop(maLopHocPhan)
-                .map(RegistrationPeriod::dangMo)
+                .map(RegistrationPeriodInfo::dangMo)
                 .orElse(false);
     }
 }

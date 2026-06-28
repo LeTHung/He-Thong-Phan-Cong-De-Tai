@@ -10,7 +10,7 @@ import java.util.List;
 public record StudentDashboardData(
         StudentInfo studentInfo,
         List<StudentTopicSummary> topics,
-        RegistrationPeriod registrationPeriod,
+        RegistrationPeriodInfo registrationPeriod,
         List<RegisteredTopic> registeredTopics) {
 
     /** Tổng số đề tài trong lớp học phần của sinh viên. */
