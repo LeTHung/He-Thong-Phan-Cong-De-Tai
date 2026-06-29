@@ -13,6 +13,8 @@ public class AccountSummary {
     private String email;
     private String soDienThoai;
     private LocalDateTime lanDangNhapCuoi;
+    private String hoTen;
+    private String lop;
 
     public AccountSummary(
             int maTaiKhoan,
@@ -21,7 +23,9 @@ public class AccountSummary {
             UserStatus trangThai,
             String email,
             String soDienThoai,
-            LocalDateTime lanDangNhapCuoi) {
+            LocalDateTime lanDangNhapCuoi,
+            String hoTen,
+            String lop) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.vaiTro = vaiTro;
@@ -29,6 +33,8 @@ public class AccountSummary {
         this.email = email;
         this.soDienThoai = soDienThoai;
         this.lanDangNhapCuoi = lanDangNhapCuoi;
+        this.hoTen = hoTen;
+        this.lop = lop;
     }
 
     public int getMaTaiKhoan() {
@@ -65,5 +71,13 @@ public class AccountSummary {
 
     public LocalDateTime getLanDangNhapCuoi() {
         return lanDangNhapCuoi;
+    }
+
+    public String getHoTen() {
+        return hoTen;
+    }
+
+    public String getLop() {
+        return lop;
     }
 }

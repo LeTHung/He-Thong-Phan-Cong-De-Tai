@@ -25,7 +25,9 @@ public class AccountManagementService {
             UserRole role,
             UserStatus status,
             String email,
-            String phone) {
+            String phone,
+            String hoTen,
+            String lop) {
         String cleanUsername = cleanRequired(username, "Tên đăng nhập không được để trống.");
         String cleanPassword = cleanRequired(password, "Mật khẩu không được để trống.");
         UserRole cleanRole = requireRole(role);
@@ -35,10 +37,15 @@ public class AccountManagementService {
         if (accountManagementDAO.existsByUsername(cleanUsername, null)) {
             throw new IllegalArgumentException("Tên đăng nhập đã tồn tại.");
         }
+        if (accountManagementDAO.existsProfileCode(cleanUsername, cleanRole)) {
+            throw new IllegalArgumentException("Mã số \"" + cleanUsername + "\" đã tồn tại trong hồ sơ "
+                    + cleanRole.getDisplayName().toLowerCase() + ". Hãy dùng tên đăng nhập khác.");
+        }
 
         accountManagementDAO.create(new User(
                 0, cleanUsername, PasswordUtil.hash(cleanPassword), cleanRole, cleanStatus,
-                cleanOptional(email), cleanOptional(phone)));
+                cleanOptional(email), cleanOptional(phone)),
+                cleanOptional(hoTen), profileClass(cleanRole, lop));
     }
 
     public void updateAccount(
@@ -47,7 +54,9 @@ public class AccountManagementService {
             UserRole role,
             UserStatus status,
             String email,
-            String phone) {
+            String phone,
+            String hoTen,
+            String lop) {
         String cleanUsername = cleanRequired(username, "Tên đăng nhập không được để trống.");
         UserRole cleanRole = requireRole(role);
         UserStatus cleanStatus = requireStatus(status);
@@ -65,7 +74,13 @@ public class AccountManagementService {
 
         accountManagementDAO.update(new User(
                 accountId, cleanUsername, null, cleanRole, cleanStatus,
-                cleanOptional(email), cleanOptional(phone)));
+                cleanOptional(email), cleanOptional(phone)),
+                cleanOptional(hoTen), profileClass(cleanRole, lop));
+    }
+
+    /** Lớp chỉ áp dụng cho sinh viên; vai trò khác bỏ qua giá trị nhập. */
+    private String profileClass(UserRole role, String lop) {
+        return role == UserRole.SINH_VIEN ? cleanOptional(lop) : null;
     }
 
     public void lockAccount(int accountId) {

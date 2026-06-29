@@ -339,6 +339,22 @@ public class AccountManagementController {
         TextField phoneField = new TextField(isEdit ? TextFormat.emptyIfNull(account.getSoDienThoai()) : "");
         phoneField.setPromptText("VD: 0900000000");
 
+        TextField nameField = new TextField(isEdit ? TextFormat.emptyIfNull(account.getHoTen()) : "");
+        nameField.setPromptText("VD: Nguyễn Văn A");
+
+        TextField classField = new TextField(isEdit ? TextFormat.emptyIfNull(account.getLop()) : "");
+        classField.setPromptText("VD: D23CQCN01-N");
+
+        // Họ tên áp dụng cho sinh viên & giảng viên; Lớp chỉ áp dụng cho sinh viên.
+        Runnable refreshProfileFields = () -> {
+            UserRole selectedRole = roleBox.getValue();
+            boolean hasProfile = selectedRole == UserRole.SINH_VIEN || selectedRole == UserRole.GIANG_VIEN;
+            nameField.setDisable(!hasProfile);
+            classField.setDisable(selectedRole != UserRole.SINH_VIEN);
+        };
+        roleBox.valueProperty().addListener((observable, oldValue, newValue) -> refreshProfileFields.run());
+        refreshProfileFields.run();
+
         Label errorLabel = new Label();
         errorLabel.setWrapText(true);
         errorLabel.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: 700;");
@@ -352,7 +368,9 @@ public class AccountManagementController {
         if (!isEdit) {
             addFormRow(form, row++, "Mật khẩu", passwordField);
         }
+        addFormRow(form, row++, "Họ tên", nameField);
         addFormRow(form, row++, "Vai trò", roleBox);
+        addFormRow(form, row++, "Lớp", classField);
         addFormRow(form, row++, "Trạng thái", statusBox);
         addFormRow(form, row++, "Email", emailField);
         addFormRow(form, row++, "Số điện thoại", phoneField);
@@ -380,7 +398,9 @@ public class AccountManagementController {
                             roleBox.getValue(),
                             statusBox.getValue(),
                             emailField.getText(),
-                            phoneField.getText());
+                            phoneField.getText(),
+                            nameField.getText(),
+                            classField.getText());
                 } else {
                     accountManagementService.createAccount(
                             usernameField.getText(),
@@ -388,7 +408,9 @@ public class AccountManagementController {
                             roleBox.getValue(),
                             statusBox.getValue(),
                             emailField.getText(),
-                            phoneField.getText());
+                            phoneField.getText(),
+                            nameField.getText(),
+                            classField.getText());
                 }
                 saved[0] = true;
             } catch (RuntimeException exception) {
