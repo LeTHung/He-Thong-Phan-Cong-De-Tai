@@ -20,15 +20,19 @@ public class AccountManagementDAO {
     public List<AccountSummary> findAll() {
         String sql = """
                 SELECT
-                    ma_tai_khoan,
-                    ten_dang_nhap,
-                    vai_tro,
-                    trang_thai,
-                    email,
-                    so_dien_thoai,
-                    lan_dang_nhap_cuoi
-                FROM dbo.tai_khoan
-                ORDER BY ma_tai_khoan
+                    tk.ma_tai_khoan,
+                    tk.ten_dang_nhap,
+                    tk.vai_tro,
+                    tk.trang_thai,
+                    tk.email,
+                    tk.so_dien_thoai,
+                    tk.lan_dang_nhap_cuoi,
+                    COALESCE(sv.ho_ten, gv.ho_ten) AS ho_ten,
+                    sv.lop_sinh_hoat AS lop
+                FROM dbo.tai_khoan tk
+                LEFT JOIN dbo.sinh_vien sv ON sv.ma_tai_khoan = tk.ma_tai_khoan
+                LEFT JOIN dbo.giang_vien gv ON gv.ma_tai_khoan = tk.ma_tai_khoan
+                ORDER BY tk.ma_tai_khoan
                 """;
 
         List<AccountSummary> accounts = new ArrayList<>();
@@ -78,7 +82,34 @@ public class AccountManagementDAO {
         }
     }
 
-    public void create(User user) {
+    /**
+     * Kiểm tra mã số hồ sơ (ma_so_sinh_vien / ma_so_giang_vien) đã tồn tại chưa.
+     * Vì hệ thống dùng tên đăng nhập làm mã số hồ sơ, cần chặn trước khi insert
+     * để báo lỗi rõ ràng thay vì lỗi UNIQUE KEY của SQL Server.
+     */
+    public boolean existsProfileCode(String code, UserRole role) {
+        String sql;
+        if (role == UserRole.SINH_VIEN) {
+            sql = "SELECT COUNT(1) FROM dbo.sinh_vien WHERE ma_so_sinh_vien = ?";
+        } else if (role == UserRole.GIANG_VIEN) {
+            sql = "SELECT COUNT(1) FROM dbo.giang_vien WHERE ma_so_giang_vien = ?";
+        } else {
+            return false;
+        }
+
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, code);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra mã số hồ sơ: " + e.getMessage(), e);
+        }
+    }
+
+    public void create(User user, String hoTen, String lop) {
         String sql = """
                 INSERT INTO dbo.tai_khoan (
                     ten_dang_nhap,
@@ -106,7 +137,7 @@ public class AccountManagementDAO {
                     if (!keys.next()) {
                         throw new SQLException("Không lấy được mã tài khoản vừa tạo.");
                     }
-                    createRoleProfile(connection, keys.getInt(1), user);
+                    createRoleProfile(connection, keys.getInt(1), user, hoTen, lop);
                 }
                 connection.commit();
             } catch (SQLException | RuntimeException exception) {
@@ -118,7 +149,7 @@ public class AccountManagementDAO {
         }
     }
 
-    public void update(User user) {
+    public void update(User user, String hoTen, String lop) {
         String sql = """
                 UPDATE dbo.tai_khoan
                 SET ten_dang_nhap = ?,
@@ -142,7 +173,7 @@ public class AccountManagementDAO {
                 if (statement.executeUpdate() == 0) {
                     throw new SQLException("Không tìm thấy tài khoản cần cập nhật.");
                 }
-                updateRoleProfile(connection, user);
+                updateRoleProfile(connection, user, hoTen, lop);
                 connection.commit();
             } catch (SQLException | RuntimeException exception) {
                 DatabaseConnection.rollbackQuietly(connection);
@@ -209,60 +240,88 @@ public class AccountManagementDAO {
         }
     }
 
-    private void createRoleProfile(Connection connection, int accountId, User user) throws SQLException {
-        String sql;
+    private void createRoleProfile(Connection connection, int accountId, User user, String hoTen, String lop)
+            throws SQLException {
+        String hoTenValue = isBlank(hoTen) ? user.getTenDangNhap() : hoTen.trim();
         if (user.getVaiTro() == UserRole.SINH_VIEN) {
-            sql = """
+            String sql = """
                     INSERT INTO dbo.sinh_vien
-                        (ma_tai_khoan, ma_so_sinh_vien, ho_ten, email, so_dien_thoai)
-                    VALUES (?, ?, ?, ?, ?)
+                        (ma_tai_khoan, ma_so_sinh_vien, ho_ten, email, so_dien_thoai, lop_sinh_hoat)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     """;
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, accountId);
+                statement.setString(2, user.getTenDangNhap());
+                statement.setString(3, hoTenValue);
+                statement.setString(4, user.getEmail());
+                statement.setString(5, user.getSoDienThoai());
+                setNullableString(statement, 6, lop);
+                statement.executeUpdate();
+            }
         } else if (user.getVaiTro() == UserRole.GIANG_VIEN) {
-            sql = """
+            String sql = """
                     INSERT INTO dbo.giang_vien
                         (ma_tai_khoan, ma_so_giang_vien, ho_ten, email, so_dien_thoai)
                     VALUES (?, ?, ?, ?, ?)
                     """;
-        } else {
-            return;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, accountId);
-            statement.setString(2, user.getTenDangNhap());
-            statement.setString(3, user.getTenDangNhap());
-            statement.setString(4, user.getEmail());
-            statement.setString(5, user.getSoDienThoai());
-            statement.executeUpdate();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, accountId);
+                statement.setString(2, user.getTenDangNhap());
+                statement.setString(3, hoTenValue);
+                statement.setString(4, user.getEmail());
+                statement.setString(5, user.getSoDienThoai());
+                statement.executeUpdate();
+            }
         }
     }
 
-    private void updateRoleProfile(Connection connection, User user) throws SQLException {
-        String sql;
+    private void updateRoleProfile(Connection connection, User user, String hoTen, String lop) throws SQLException {
+        String hoTenValue = isBlank(hoTen) ? user.getTenDangNhap() : hoTen.trim();
         if (user.getVaiTro() == UserRole.SINH_VIEN) {
-            sql = """
+            String sql = """
                     UPDATE dbo.sinh_vien
-                    SET ma_so_sinh_vien = ?, email = ?, so_dien_thoai = ?
+                    SET ma_so_sinh_vien = ?, ho_ten = ?, lop_sinh_hoat = ?, email = ?, so_dien_thoai = ?
                     WHERE ma_tai_khoan = ?
                     """;
-        } else if (user.getVaiTro() == UserRole.GIANG_VIEN) {
-            sql = """
-                    UPDATE dbo.giang_vien
-                    SET ma_so_giang_vien = ?, email = ?, so_dien_thoai = ?
-                    WHERE ma_tai_khoan = ?
-                    """;
-        } else {
-            return;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getTenDangNhap());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getSoDienThoai());
-            statement.setInt(4, user.getMaTaiKhoan());
-            if (statement.executeUpdate() == 0) {
-                throw new SQLException("Tài khoản chưa có hồ sơ " + user.getVaiTro().getDisplayName() + ".");
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, user.getTenDangNhap());
+                statement.setString(2, hoTenValue);
+                setNullableString(statement, 3, lop);
+                statement.setString(4, user.getEmail());
+                statement.setString(5, user.getSoDienThoai());
+                statement.setInt(6, user.getMaTaiKhoan());
+                if (statement.executeUpdate() == 0) {
+                    throw new SQLException("Tài khoản chưa có hồ sơ " + user.getVaiTro().getDisplayName() + ".");
+                }
             }
+        } else if (user.getVaiTro() == UserRole.GIANG_VIEN) {
+            String sql = """
+                    UPDATE dbo.giang_vien
+                    SET ma_so_giang_vien = ?, ho_ten = ?, email = ?, so_dien_thoai = ?
+                    WHERE ma_tai_khoan = ?
+                    """;
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, user.getTenDangNhap());
+                statement.setString(2, hoTenValue);
+                statement.setString(3, user.getEmail());
+                statement.setString(4, user.getSoDienThoai());
+                statement.setInt(5, user.getMaTaiKhoan());
+                if (statement.executeUpdate() == 0) {
+                    throw new SQLException("Tài khoản chưa có hồ sơ " + user.getVaiTro().getDisplayName() + ".");
+                }
+            }
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private void setNullableString(PreparedStatement statement, int index, String value) throws SQLException {
+        if (isBlank(value)) {
+            statement.setNull(index, java.sql.Types.NVARCHAR);
+        } else {
+            statement.setString(index, value.trim());
         }
     }
 
@@ -277,6 +336,8 @@ public class AccountManagementDAO {
                 UserStatus.fromDatabaseValue(resultSet.getString("trang_thai")),
                 resultSet.getString("email"),
                 resultSet.getString("so_dien_thoai"),
-                lastLogin == null ? null : lastLogin.toLocalDateTime());
+                lastLogin == null ? null : lastLogin.toLocalDateTime(),
+                resultSet.getString("ho_ten"),
+                resultSet.getString("lop"));
     }
 }
