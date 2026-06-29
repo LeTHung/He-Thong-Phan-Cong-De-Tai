@@ -144,8 +144,8 @@ public class RegistrationPeriodController {
                     lblStatus.setText("Đang mở");
                     lblStatus.setTextFill(Color.GREEN);
                 } else if ("DA_DONG".equals(p.trangThai())) {
-                    lblStatus.setText("Đã đóng");
-                    lblStatus.setTextFill(Color.RED);
+                    lblStatus.setText("Đã đóng — có thể mở lại");
+                    lblStatus.setTextFill(Color.DARKORANGE);
                 } else if (p.thoiGianBatDau() != null && now.isBefore(p.thoiGianBatDau())) {
                     lblStatus.setText("Chờ giờ mở");
                     lblStatus.setTextFill(Color.DARKGOLDENROD);
@@ -160,7 +160,7 @@ public class RegistrationPeriodController {
                 if (p.thoiGianBatDau() != null) info += "Từ: " + DISPLAY_FMT.format(p.thoiGianBatDau());
                 if (p.thoiGianKetThuc() != null) info += "  →  Đến: " + DISPLAY_FMT.format(p.thoiGianKetThuc());
                 lblCurrentPeriodInfo.setText(info.isBlank() ? "—" : info);
-                btnOpen.setDisable(p.dangMo() || "DA_DONG".equals(p.trangThai()));
+                btnOpen.setDisable(p.dangMo());
                 btnClose.setDisable(!p.dangMo());
             }
 
@@ -230,6 +230,8 @@ public class RegistrationPeriodController {
             return;
         }
 
+        // Kiểm tra đợt đăng ký hiện tại và xác định đây là mở mới hay mở lại
+        boolean isReopen;
         try {
             Optional<RegistrationPeriodInfo> existing =
                     periodService.findCurrentByLop(section.maLopHocPhan());
@@ -238,22 +240,34 @@ public class RegistrationPeriodController {
                         + "Vui lòng đóng đợt hiện tại trước khi tạo đợt mới.");
                 return;
             }
+            // isReopen = true nếu đã từng có đợt (đã đóng hoặc hết hạn), false nếu lần đầu
+            isReopen = existing.isPresent();
         } catch (Exception e) {
             MainApp.showError("Lỗi kiểm tra đợt đăng ký: " + e.getMessage());
             return;
         }
 
+        String titleDialog    = isReopen ? "Xác nhận mở lại cổng đăng ký" : "Xác nhận mở cổng đăng ký";
+        String actionLabel    = isReopen ? "Mở lại" : "Mở";
+        String noteReopen     = isReopen
+                ? "\n⚠ Các đăng ký cũ vẫn được giữ nguyên. Sinh viên có thể tiếp tục đăng ký hoặc hủy đề tài."
+                : "";
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Xác nhận mở cổng đăng ký");
+        confirm.setTitle(titleDialog);
         confirm.setHeaderText(null);
-        confirm.setContentText("Mở cổng đăng ký cho lớp \"" + section.maLop() + "\"\n"
-                + "Từ: " + DISPLAY_FMT.format(batDau) + "\nĐến: " + DISPLAY_FMT.format(ketThuc) + "\n\nXác nhận?");
+        confirm.setContentText(actionLabel + " cổng đăng ký cho lớp \"" + section.maLop() + "\"\n"
+                + "Từ: " + DISPLAY_FMT.format(batDau) + "\nĐến: " + DISPLAY_FMT.format(ketThuc)
+                + noteReopen + "\n\nXác nhận?");
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 periodService.openPeriod(section.maLopHocPhan(), maGiangVien, batDau, ketThuc, null);
                 refreshStatus(section.maLopHocPhan());
-                MainApp.showInfo("Cổng đăng ký đã được mở thành công.");
+                String successMsg = isReopen
+                        ? "Cổng đăng ký đã được mở lại thành công."
+                        : "Cổng đăng ký đã được mở thành công.";
+                MainApp.showInfo(successMsg);
             } catch (Exception e) {
                 MainApp.showError("Lỗi mở cổng đăng ký: " + e.getMessage());
             }
