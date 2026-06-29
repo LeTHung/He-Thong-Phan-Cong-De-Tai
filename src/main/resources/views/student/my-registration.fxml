@@ -52,7 +52,8 @@
                         <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefresh"/>
                     </HBox>
 
-                    <TableView fx:id="tblRegistrations" prefHeight="320" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="tblRegistrations" prefHeight="280" minHeight="240" maxHeight="320"
+                               VBox.vgrow="ALWAYS">
                         <columns>
                             <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
                             <TableColumn fx:id="colCode" text="Mã ĐT" prefWidth="80"/>
@@ -64,6 +65,13 @@
                             <TableColumn fx:id="colTime" text="Thời điểm" prefWidth="130"/>
                         </columns>
                     </TableView>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
+                        <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
+                    </HBox>
 
                     <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
                 </VBox>

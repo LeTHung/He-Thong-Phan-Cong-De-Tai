@@ -96,12 +96,25 @@ public class MyRegistrationController {
     @FXML
     private Button btnCancel;
 
+    @FXML
+    private Label lblPageInfo;
+
+    @FXML
+    private Button btnPrevPage;
+
+    @FXML
+    private Button btnNextPage;
+
+    private static final int PAGE_SIZE = 5;
+
     private final TopicRegistrationService topicRegistrationService = new TopicRegistrationService();
 
     private int maTaiKhoan;
     private int maSinhVien;
     private Integer maLopHocPhan;
     private boolean dangMoDangKy;
+    private List<RegisteredTopic> allRegistrations = List.of();
+    private int currentPage = 0;
     private Timeline countdown;
 
     @FXML
@@ -130,11 +143,10 @@ public class MyRegistrationController {
         }
 
         setupTable();
-        loadPeriod();
         loadRegistrations();
     }
 
-    private void loadPeriod() {
+    private void loadPeriod(Integer maLopHocPhan) {
         dangMoDangKy = false;
         stopCountdown();
         if (maLopHocPhan == null) {
@@ -193,6 +205,7 @@ public class MyRegistrationController {
 
         tblRegistrations.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue != null) {
+                loadPeriod(newValue.maLopHocPhan());
                 fillDetail(newValue);
                 updateActionButtons(newValue);
             }
@@ -201,30 +214,75 @@ public class MyRegistrationController {
 
     private void loadRegistrations() {
         try {
-            List<RegisteredTopic> registrations = topicRegistrationService.getMyRegistrations(maTaiKhoan);
-            tblRegistrations.getItems().setAll(registrations);
+            allRegistrations = topicRegistrationService.getMyRegistrations(maTaiKhoan);
+            currentPage = 0;
+            renderPage();
 
-            if (registrations.isEmpty()) {
+            if (allRegistrations.isEmpty()) {
                 clearDetail();
+                loadPeriod(maLopHocPhan);
                 btnCancel.setDisable(true);
                 btnChange.setDisable(true);
                 showMessage("Bạn chưa đăng ký đề tài nào. Vào \"Danh sách đề tài\" để đăng ký.");
             } else {
                 tblRegistrations.getSelectionModel().selectFirst();
-                updateActionButtons(tblRegistrations.getSelectionModel().getSelectedItem());
+                RegisteredTopic selected = tblRegistrations.getSelectionModel().getSelectedItem();
+                loadPeriod(selected == null ? null : selected.maLopHocPhan());
+                updateActionButtons(selected);
                 if (dangMoDangKy) {
-                    showMessage("Bạn đã đăng ký " + registrations.size() + " đề tài.");
+                    showMessage("Bạn đã đăng ký " + allRegistrations.size() + " đề tài.");
                 } else {
-                    showMessage("Bạn đã đăng ký " + registrations.size()
+                    showMessage("Bạn đã đăng ký " + allRegistrations.size()
                             + " đề tài. Cổng đăng ký đã đóng nên không thể hủy.");
                 }
             }
         } catch (RuntimeException exception) {
-            tblRegistrations.getItems().clear();
+            allRegistrations = List.of();
+            currentPage = 0;
+            renderPage();
             clearDetail();
             btnCancel.setDisable(true);
             btnChange.setDisable(true);
             showMessage(exception.getMessage());
+        }
+    }
+
+    /** Tổng số trang theo {@link #PAGE_SIZE}, tối thiểu 1 trang kể cả khi rỗng. */
+    private int totalPages() {
+        return Math.max(1, (int) Math.ceil(allRegistrations.size() / (double) PAGE_SIZE));
+    }
+
+    /** Hiển thị đúng trang hiện tại, cập nhật nhãn trang và trạng thái hai nút điều hướng. */
+    private void renderPage() {
+        int totalPages = totalPages();
+        currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, allRegistrations.size());
+        List<RegisteredTopic> pageItems = from >= to ? List.of() : allRegistrations.subList(from, to);
+        tblRegistrations.getItems().setAll(pageItems);
+
+        lblPageInfo.setText("Trang " + (currentPage + 1) + "/" + totalPages
+                + " • " + allRegistrations.size() + " đề tài");
+        btnPrevPage.setDisable(currentPage <= 0);
+        btnNextPage.setDisable(currentPage >= totalPages - 1);
+    }
+
+    @FXML
+    private void handlePrevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            renderPage();
+            tblRegistrations.getSelectionModel().selectFirst();
+        }
+    }
+
+    @FXML
+    private void handleNextPage() {
+        if (currentPage < totalPages() - 1) {
+            currentPage++;
+            renderPage();
+            tblRegistrations.getSelectionModel().selectFirst();
         }
     }
 
@@ -305,7 +363,6 @@ public class MyRegistrationController {
             topicRegistrationService.changeTopic(
                     maSinhVien, selected.maLopHocPhan(), selected.maDeTaiLop(), chosen.maDeTaiLop());
             showMessage("Đã đổi sang đề tài " + chosen.maDeTaiHeThong() + " - " + chosen.tenDeTai() + ".");
-            loadPeriod();
             loadRegistrations();
         } catch (RuntimeException exception) {
             showMessage(exception.getMessage());
