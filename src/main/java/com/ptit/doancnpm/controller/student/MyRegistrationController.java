@@ -28,6 +28,7 @@ import javafx.scene.control.TextInputDialog;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -330,7 +331,8 @@ public class MyRegistrationController {
         }
 
         List<StudentTopicSummary> options = topicRegistrationService.getRegistrableTopics(maTaiKhoan).stream()
-                .filter(topic -> topic.maDeTaiLop() != selected.maDeTaiLop()
+                .filter(topic -> Objects.equals(topic.maLop(), selected.maLop())
+                        && topic.maDeTaiLop() != selected.maDeTaiLop()
                         && "DANG_MO".equals(topic.trangThai())
                         && "SINH_VIEN_TU_DANG_KY".equals(topic.cheDoPhanCong())
                         && topic.soChoConLai() > 0

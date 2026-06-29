@@ -492,6 +492,7 @@ public class TopicRegistrationDAO {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
+                ensureTopicBelongsToCourseSection(conn, newMaDeTaiLop, maLopHocPhan);
                 try (CallableStatement cancel = conn.prepareCall(
                         "{call dbo.sp_huy_dang_ky_de_tai(?, ?, ?)}")) {
                     cancel.setInt(1, maSinhVien);
@@ -514,6 +515,26 @@ public class TopicRegistrationDAO {
             throw re;
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi kết nối khi đổi đề tài: " + e.getMessage(), e);
+        }
+    }
+
+    private void ensureTopicBelongsToCourseSection(Connection connection, int maDeTaiLop,
+                                                    int maLopHocPhan) throws SQLException {
+        String sql = """
+                SELECT 1
+                FROM dbo.de_tai_lop
+                WHERE ma_de_tai_lop = ?
+                  AND ma_lop_hoc_phan = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, maDeTaiLop);
+            statement.setInt(2, maLopHocPhan);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    throw new IllegalArgumentException(
+                            "Đề tài mới không thuộc lớp học phần của đề tài hiện tại.");
+                }
+            }
         }
     }
 
