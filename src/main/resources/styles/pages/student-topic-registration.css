@@ -38,6 +38,26 @@
   -fx-alignment: CENTER_LEFT;
 }
 
+.student-info-card.topic-table-card {
+  -fx-min-height: 600;
+  -fx-background-color: #ffffff;
+  -fx-border-color: #b8c5d6;
+  -fx-border-width: 1.5;
+  -fx-border-radius: 20;
+  -fx-background-radius: 20;
+  -fx-padding: 24;
+  -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.10), 18, 0.14, 0, 4);
+}
+
+.topic-table-card .table-view {
+  -fx-min-height: 360;
+  -fx-max-height: 440;
+}
+
+.topic-filter-bar {
+  -fx-padding: 2 0 4 0;
+}
+
 .topic-list {
   -fx-hgap: 18;
   -fx-vgap: 18;

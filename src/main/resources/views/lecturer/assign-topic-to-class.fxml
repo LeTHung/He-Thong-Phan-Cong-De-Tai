@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.lecturer.AssignTopicToClassController"
+            styleClass="lecturer-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="PT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="PTIT Topic" styleClass="side-title"/>
+                    <Label text="Lecturer Workspace" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+            <Label text="GIẢNG VIÊN" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBack"/>
+            <Button text="Lớp được phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavCourseSections"/>
+            <Button text="Ngân hàng đề tài" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavTopicBank"/>
+            <Button text="Gán đề tài vào lớp" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Mở cổng đăng ký" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationPeriod"/>
+            <Button text="Kết quả &amp; phân công" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavRegistrationResult"/>
+            <Button text="Chốt danh sách" styleClass="side-menu" maxWidth="Infinity" onAction="#handleNavFinalReport"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="18">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Gán đề tài và chọn chế độ" styleClass="screen-title"/>
+                    <Label text="Chọn nhiều đề tài và gán cùng lúc vào lớp học phần." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="← Quay lại" styleClass="btn-outline" onAction="#handleBack"/>
+            </HBox>
+
+            <!-- Form gán đề tài -->
+            <VBox styleClass="main-card" spacing="14">
+                <Label text="Thông tin gán đề tài" styleClass="card-title"/>
+                <HBox spacing="14" alignment="BOTTOM_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Lớp học phần:"/>
+                        <ComboBox fx:id="cbSection" prefWidth="280"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Số SV tối đa mỗi đề tài:"/>
+                        <TextField fx:id="txtMaxStudents" prefWidth="190" promptText="Để trống = mặc định"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Thêm đề tài" styleClass="btn-primary" onAction="#handleOpenTopicPicker"/>
+                </HBox>
+                <Label fx:id="lblSectionInfo" text="" styleClass="body-muted"/>
+                <HBox spacing="12" alignment="CENTER_LEFT" styleClass="class-mode-row">
+                    <Label text="Chế độ chung của lớp:" styleClass="form-label"/>
+                    <ComboBox fx:id="cbMode" prefWidth="240"/>
+                    <Button text="Lưu chế độ lớp" styleClass="btn-primary" onAction="#handleSaveClassMode"/>
+                    <Label fx:id="lblSavedMode" text="Chưa chọn lớp" styleClass="body-muted"/>
+                </HBox>
+            </VBox>
+
+            <Separator/>
+
+            <!-- Danh sách đề tài đã gán -->
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Đề tài đã gán vào lớp đã chọn" styleClass="card-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Gỡ đề tài đã chọn" styleClass="btn-danger" onAction="#handleRemove"/>
+                </HBox>
+                <TableView fx:id="tableAssigned" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
+                        <TableColumn fx:id="colMaDeTai" text="Mã đề tài" prefWidth="130"/>
+                        <TableColumn fx:id="colTenDeTai" text="Tên đề tài" prefWidth="300"/>
+                        <TableColumn fx:id="colToiDa" text="Tối đa SV" prefWidth="90"/>
+                        <TableColumn fx:id="colHienTai" text="Đã đăng ký" prefWidth="90"/>
+                        <TableColumn fx:id="colCheDoText" text="Chế độ" prefWidth="180"/>
+                        <TableColumn fx:id="colTrangThai" text="Trạng thái" prefWidth="110"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

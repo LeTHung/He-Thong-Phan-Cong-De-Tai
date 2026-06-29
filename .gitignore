@@ -9,4 +9,4 @@ target/
 *.jar
 *.war
 *.ear
-db.properties.local
+db.properties

@@ -1,0 +1,151 @@
+/* Lecturer dashboard uses the same blue brand palette as the admin workspace. */
+
+.lecturer-root {
+  -fx-background-color: -ut-bg;
+}
+
+.lecturer-root .side-logo {
+  -fx-background-color: #2563EB;
+}
+
+.lecturer-root .side-menu-active {
+  -fx-background-color: #2563EB;
+  -fx-text-fill: white;
+}
+
+.lecturer-root .side-menu {
+  -fx-text-fill: #CBD5E1;
+}
+
+.lecturer-root .side-menu:hover {
+  -fx-background-color: rgba(255, 255, 255, 0.08);
+  -fx-text-fill: white;
+}
+
+.lecturer-root .stat-card-blue {
+  -fx-background-color: linear-gradient(to bottom right, #2563EB, #1D4ED8);
+}
+
+.lecturer-root .stat-card-blue .stat-label,
+.lecturer-root .stat-card-blue .stat-note {
+  -fx-text-fill: #DBEAFE;
+}
+
+.lecturer-root .stat-card-blue .stat-value {
+  -fx-text-fill: white;
+}
+
+.lecturer-root .btn-primary {
+  -fx-background-color: #2563EB;
+  -fx-text-fill: white;
+}
+
+.lecturer-root .btn-primary:hover {
+  -fx-background-color: #1D4ED8;
+}
+
+/* Registration result workspace */
+.result-toolbar {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 12;
+  -fx-background-radius: 12;
+  -fx-padding: 12 14 12 14;
+  -fx-effect: -ut-shadow-soft;
+}
+
+.result-toolbar .label {
+  -fx-text-fill: -ut-text;
+  -fx-font-weight: 700;
+}
+
+.result-tabs {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+  -fx-tab-min-height: 42;
+  -fx-tab-max-height: 42;
+}
+
+.result-tabs > .tab-header-area {
+  -fx-padding: 0;
+}
+
+.result-tabs > .tab-header-area > .tab-header-background {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent transparent -ut-border transparent;
+  -fx-border-width: 0 0 1 0;
+}
+
+.result-tabs > .tab-header-area > .headers-region > .tab {
+  -fx-background-color: -ut-surface-muted;
+  -fx-background-radius: 8 8 0 0;
+  -fx-border-color: -ut-border;
+  -fx-border-width: 1 1 0 1;
+  -fx-border-radius: 8 8 0 0;
+  -fx-padding: 0 18 0 18;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+
+.result-tabs > .tab-header-area > .headers-region > .tab:hover {
+  -fx-background-color: -ut-primary-soft;
+}
+
+.result-tabs > .tab-header-area > .headers-region > .tab:selected {
+  -fx-background-color: -ut-primary;
+  -fx-border-color: -ut-primary;
+}
+
+.result-tabs > .tab-header-area > .headers-region > .tab .tab-label {
+  -fx-text-fill: -ut-text-muted;
+  -fx-font-weight: 700;
+}
+
+.result-tabs > .tab-header-area > .headers-region > .tab:selected .tab-label {
+  -fx-text-fill: white;
+}
+
+.result-tabs > .tab-content-area {
+  -fx-background-color: -ut-surface;
+  -fx-border-color: -ut-border;
+  -fx-border-width: 0 1 1 1;
+  -fx-border-radius: 0 0 12 12;
+  -fx-background-radius: 0 0 12 12;
+  -fx-padding: 18;
+  -fx-effect: -ut-shadow-soft;
+}
+
+.result-tab-content {
+  -fx-background-color: transparent;
+}
+
+.result-tab-content .table-view {
+  -fx-effect: none;
+}
+
+.result-count {
+  -fx-background-color: -ut-primary-light;
+  -fx-background-radius: 8;
+  -fx-padding: 7 11 7 11;
+  -fx-text-fill: -ut-primary;
+  -fx-font-weight: 700;
+}
+
+.assignment-panel {
+  -fx-background-color: -ut-surface-muted;
+  -fx-border-color: -ut-border;
+  -fx-border-radius: 10;
+  -fx-background-radius: 10;
+  -fx-padding: 16;
+}
+
+.class-mode-row {
+  -fx-background-color: -ut-primary-light;
+  -fx-background-radius: 10;
+  -fx-padding: 10 12 10 12;
+}
+
+.class-mode-row > .label {
+  -fx-font-weight: 700;
+  -fx-text-fill: -ut-primary-dark;
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.ptit.doancnpm.controller.admin.SemesterManagementController"
+            styleClass="admin-root">
+
+    <left>
+        <VBox styleClass="side-bar" prefWidth="270" spacing="8">
+            <HBox styleClass="side-brand">
+                <Label text="PT" styleClass="side-logo"/>
+                <VBox>
+                    <Label text="PTIT Topic" styleClass="side-title"/>
+                    <Label text="Admin Console" styleClass="side-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <Label text="QUẢN TRỊ" styleClass="side-section"/>
+            <Button text="Dashboard" styleClass="side-menu" maxWidth="Infinity" onAction="#handleBackDashboard"/>
+            <Button text="Quản lý tài khoản" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowAccounts"/>
+            <Button text="Môn học" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowSubjects"/>
+            <Button text="Học kỳ" styleClass="side-menu-active" maxWidth="Infinity"/>
+            <Button text="Lớp học phần" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowCourseSections"/>
+            <Button text="Import sinh viên" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowStudentImport"/>
+            <Button text="Báo cáo" styleClass="side-menu" maxWidth="Infinity" onAction="#handleShowReports"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button text="Đổi mật khẩu" styleClass="side-password" maxWidth="Infinity" onAction="#handleShowChangePassword"/>
+            <Button text="Đăng xuất" styleClass="side-logout" maxWidth="Infinity" onAction="#handleLogout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="dashboard-content" spacing="22">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label text="Quản lý học kỳ" styleClass="screen-title"/>
+                    <Label text="Chọn học kỳ trên bảng để sửa hoặc thay đổi trạng thái." styleClass="screen-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblUserInfo" styleClass="user-pill"/>
+            </HBox>
+
+            <VBox styleClass="main-card" spacing="12" VBox.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Danh sách học kỳ" styleClass="card-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="+ Thêm" styleClass="btn-primary" onAction="#handleAddSemester"/>
+                        <Button fx:id="btnEdit" text="Sửa" styleClass="btn-secondary" onAction="#handleUpdateSemester"/>
+                        <Button text="Làm mới" styleClass="btn-outline" onAction="#handleRefreshSemesters"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <TextField fx:id="txtSearch" promptText="Tìm mã, tên học kỳ hoặc năm học..." HBox.hgrow="ALWAYS"/>
+                        <ComboBox fx:id="cboStatusFilter" prefWidth="180"/>
+                        <Button text="Xóa lọc" styleClass="btn-outline" onAction="#handleClearFilters"/>
+                    </HBox>
+                    <TableView fx:id="tblSemesters" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
+                            <TableColumn fx:id="colCode" text="Mã học kỳ" prefWidth="130"/>
+                            <TableColumn fx:id="colName" text="Tên học kỳ" prefWidth="140"/>
+                            <TableColumn fx:id="colSchoolYear" text="Năm học" prefWidth="120"/>
+                            <TableColumn fx:id="colStartDate" text="Bắt đầu" prefWidth="110"/>
+                            <TableColumn fx:id="colEndDate" text="Kết thúc" prefWidth="110"/>
+                            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Button fx:id="btnDraft" text="Chuyển về nháp" styleClass="btn-outline" onAction="#handleDraftSemester"/>
+                        <Button fx:id="btnOpen" text="Mở học kỳ" styleClass="btn-outline" onAction="#handleOpenSemester"/>
+                        <Button fx:id="btnClose" text="Đóng học kỳ" styleClass="btn-warning" onAction="#handleCloseSemester"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Mẹo: nhấp đúp một dòng để sửa" styleClass="body-muted"/>
+                    </HBox>
+                    <Label fx:id="lblMessage" text="" styleClass="body-muted" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
