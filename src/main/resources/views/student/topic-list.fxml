@@ -62,7 +62,7 @@
                                   maxWidth="200" onAction="#handleSort"/>
                     </HBox>
 
-                    <TableView fx:id="tblTopics" prefHeight="420" minHeight="360" maxHeight="440"
+                    <TableView fx:id="tblTopics" prefHeight="300" minHeight="280" maxHeight="320"
                                VBox.vgrow="ALWAYS">
                         <columns>
                             <TableColumn fx:id="colStt" text="STT" prefWidth="50"/>
@@ -75,6 +75,13 @@
                             <TableColumn fx:id="colRegistered" text="Kết quả" prefWidth="105"/>
                         </columns>
                     </TableView>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label fx:id="lblPageInfo" text="Trang 1/1" styleClass="body-muted"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnPrevPage" text="‹ Trước" styleClass="btn-outline" onAction="#handlePrevPage"/>
+                        <Button fx:id="btnNextPage" text="Sau ›" styleClass="btn-outline" onAction="#handleNextPage"/>
+                    </HBox>
 
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Button text="Xem chi tiết" styleClass="btn-outline" onAction="#handleViewDetail"/>
