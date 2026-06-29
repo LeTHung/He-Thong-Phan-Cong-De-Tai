@@ -35,6 +35,7 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -420,6 +421,17 @@ public class StudentImportController {
 
     private void setupForm() {
         try {
+            cboCourseSection.setConverter(new StringConverter<>() {
+                @Override
+                public String toString(OptionItem courseSection) {
+                    return courseSection == null ? "" : courseSection.getName();
+                }
+
+                @Override
+                public OptionItem fromString(String text) {
+                    return null;
+                }
+            });
             List<OptionItem> courseSections = studentClassService.getCourseSectionOptions();
             OptionItem selectedCourseSection = cboCourseSection.getValue();
             cboCourseSection.getItems().setAll(courseSections);

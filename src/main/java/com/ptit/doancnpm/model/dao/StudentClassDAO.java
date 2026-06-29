@@ -19,10 +19,14 @@ public class StudentClassDAO {
 
     public List<OptionItem> findCourseSectionOptions() {
         String sql = """
-                SELECT ma_lop_hoc_phan, ma_lop, ten_lop_hoc_phan
-                FROM dbo.lop_hoc_phan
-                WHERE trang_thai <> N'LUU_TRU'
-                ORDER BY ma_lop
+                SELECT
+                    lhp.ma_lop_hoc_phan,
+                    lhp.ma_lop,
+                    CONCAT(lhp.ten_lop_hoc_phan, N' — ', hk.ten_hoc_ky, N' (', hk.nam_hoc, N')')
+                FROM dbo.lop_hoc_phan lhp
+                JOIN dbo.hoc_ky hk ON hk.ma_hoc_ky = lhp.ma_hoc_ky
+                WHERE lhp.trang_thai <> N'LUU_TRU'
+                ORDER BY hk.ngay_bat_dau DESC, lhp.ten_lop_hoc_phan
                 """;
         return findOptions(sql);
     }
